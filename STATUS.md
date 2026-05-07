@@ -4,7 +4,7 @@ This file is the single source of truth for which phase is next. Read it at the 
 
 ## Next phase
 
-**Phase 2: Tap Test.** Not started. Mandatory check in protocol must run before Phase 2 work begins. Phase 2 prep includes triage of the 18 issues the Patient Advocate flagged at the end of Phase 1 (see `docs/qa/patient-advocate-reviews.md`); some of these will be folded into Phase 2's Android Engineer dispatch and some require Compliance Reviewer or Data Engineer ratification first.
+**Phase 2: Tap Test.** In progress, started 2026-05-07. Check in protocol completed (user reported 19 percent usage, 4 hours to reset, continue). Detailed plan at `docs/plans/phase-2-tap-test.md`. Phase 2 folds in the 13 Patient Advocate Phase 1 carryover issues that affect onboarding and the session shell (Issues 1, 2, 3, 4 partial, 5 partial, 7, 8, 9, 10, 11, 12, 13, 15, 16, 18); Issues 4 schema part, 5 wording part, 6 button copy, and 17 profile edit path are gated on Compliance Reviewer and Data Engineer plus DBA decisions taken as the first Phase 2 dispatches.
 
 ## Phase status table
 
@@ -12,7 +12,7 @@ This file is the single source of truth for which phase is next. Read it at the 
 |---|-------|--------|--------------|-------------|-------|
 | 0 | Bootstrap setup | completed | 2026-05-07 | ~65% (within est. 60 to 75% range) | All 12 deliverables produced. Citation Auditor exercised 5 vetoes (deferred to Phase 1 cleanup) and the PM applied 2 session corrections (Oh et al. 2024 attribution, Givon 2009 gait reference values). Compliance Reviewer recommended a finalized README re read which is pending. |
 | 1 | Foundation | completed | 2026-05-07 | under 50% (under est. 70 to 85% range) | All 12 plan tasks delivered (Tasks 2 to 11 by Android Engineer, Task 12 README delta by Documentation Engineer). 15 commits on `main` from `7499417` through `690d630`. Test suite: 23 tests, 0 failures, 0 errors, 0 skipped, verified by Code Reviewer and QA Engineer independently. DBA schema audit PASS. Patient Advocate APPROVED with 18 issues (0 high, 11 medium, 7 low) deferred to Phase 2 prep. Compliance Reviewer cleared README. Emulator walkthrough deferred to user (headless agents cannot drive AVD). |
-| 2 | Tap Test | not started |  | est. 30 to 45% | Bilateral tap test as first concrete TestModule |
+| 2 | Tap Test | in progress |  | est. 30 to 45% | Bilateral tap test as first concrete TestModule. Started 2026-05-07. Plan at `docs/plans/phase-2-tap-test.md`. |
 | 3 | Gait Signal Processing | not started |  | est. 80 to 95% | Pure DSP module: Madgwick filter, Butterworth low pass, step detection, ZUPT stride length, feature extraction. Unit tested against synthetic ground truth |
 | 4 | Gait Test Module Integration | not started |  | est. 60 to 75% | Sensor capture via SensorManager, Compose UI for the gait test, persistence wiring |
 | 5 | Gait Validation Suite | not started |  | est. 70 to 85% | Synthetic ground truth tests, real walking course experiments, ICC analysis, validation writeup in README |
