@@ -1,12 +1,18 @@
 package com.mustafan4x.msbattery.ui
 
 import android.content.Context
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -29,12 +35,28 @@ fun RootScreen() {
     val context = LocalContext.current
     val app = context.applicationContext as MSBatteryApp
     val nav = rememberNavController()
-    var disclaimerAcknowledged by remember {
-        mutableStateOf(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_DISCLAIMER, false))
-    }
+
+    var resolved by remember { mutableStateOf(false) }
+    var disclaimerAcknowledged by remember { mutableStateOf(false) }
     var hasProfile by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
+        disclaimerAcknowledged = context
+            .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_DISCLAIMER, false)
         hasProfile = app.database.userProfileDao().getFirst() != null
+        resolved = true
+    }
+
+    if (!resolved) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator()
+        }
+        return
     }
 
     val startDestination = when {
@@ -84,7 +106,10 @@ fun RootScreen() {
             })
         }
         composable("settings") {
-            SettingsScreen(userProfileDao = app.database.userProfileDao())
+            SettingsScreen(
+                userProfileDao = app.database.userProfileDao(),
+                onEditProfile = { nav.navigate("profile") }
+            )
         }
     }
 }
