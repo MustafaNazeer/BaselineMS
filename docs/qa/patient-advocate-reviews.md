@@ -370,3 +370,83 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 The Patient Advocate hands back to the Project Manager. The PM ratifies the recommended copy and labeling changes (and the schema and compliance items flagged in the uncertainties), then dispatches the Android Engineer (agent 03) to apply the changes, the Compliance Reviewer (agent 21) to ratify the disclaimer rewording, and the Data Engineer (agent 05) to weigh in on the nullable height question. The Patient Advocate's next scheduled review is Phase 2 (Tap test).
 
 (End of 2026-05-07 Phase 1 entry. Append only convention: this entry is not edited in place. Subsequent reviews append new dated sections.)
+
+## 2026-05-07, Phase 2 review, Bilateral Tap Test and Phase 1 carryover fixes
+
+### Files reviewed
+
+- `app/src/main/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTest.kt` (read in full)
+- `app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapFeatures.kt` (skimmed for quality score, miss rate, asymmetry)
+- `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafan4x/msbattery/ui/home/HomeScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt` (carryover verification)
+
+### Verdict
+
+**APPROVED WITH RECOMMENDED COPY CHANGES.** The bilateral tap module is clinically structured, the targets are large (120 dp), the overall duration is within the fatigue tolerance budget, and the quality score logic is honest. Three findings below are medium severity and should land before Phase 3 begins; none of them corrupt data or silently harm the user.
+
+### Phase 1 carryover status
+
+- Issue 1 (raw enum names): closed. `displayLabel()` resolver present in `ui/common/`, used throughout.
+- Issue 2 (EnumDropdown): closed. `ExposedDropdownMenuBox` with `OutlinedTextField` and trailing icon in place.
+- Issue 3 (prefilled defaults): closed. Both fields start empty; plausibility guards active.
+- Issue 4 (skip path): closed. "Skip for now" `TextButton` present and saves a placeholder profile with `heightCm = null`.
+- Issue 5 (centered dense disclaimer): closed. Three `TextAlign.Start` sentences, each a single statement.
+- Issue 6 ("I understand" button): closed. Button reads "Got it, continue."
+- Issue 7 (clinical button copy): closed. Button reads "Start this week's check in."
+- Issue 8 (leading space hack): closed. `Spacer(Modifier.width(8.dp))` between icon and label.
+- Issue 9 (raw timestamp): closed. `formatRelative()` produces "Today, 14:30," "Yesterday," etc.
+- Issue 10 (no persistent header): closed. `SessionRunnerScreen` now shows test name, count, estimated seconds, and a `LinearProgressIndicator` above the module content.
+- Issue 11 (immediate cancel): closed. Cancel opens an `AlertDialog` with "Keep going" as the dismiss action and "Stop and discard" as confirm.
+- Issue 12 ("Session not started" placeholder): closed. `Idle` state now shows `CircularProgressIndicator` and "Getting your check in ready."
+- Issue 13 (terse completion): closed. Completion reads "All done. Your check in has been saved." plus a path to settings.
+- Issue 15 (date of birth label): closed. Settings renders "Year of birth: YYYY" via `yearOf()`.
+- Issue 16 (bodySmall About text): closed. About text now at `bodyLarge`; `Spacer(Modifier.height(16.dp))` replaces the `Text(" ")` spacer.
+- Issue 17 (no edit profile path): closed. `SettingsScreen` accepts `onEditProfile` and shows "Edit profile" `TextButton`; `RootScreen` wires the settings route to `nav.navigate("profile")`.
+- Issue 18 (disclaimer and profile race): closed. `RootScreen` gates `NavHost` behind a `resolved` boolean; a `CircularProgressIndicator` shows until both async checks complete.
+
+All 17 tracked carryover issues are closed.
+
+### Phase 2 findings on BilateralTapTest
+
+#### Finding 1, "dominant hand" and "non dominant hand" labels assume intact hand function, severity: medium
+
+The instructions on `PreInstructions` read "Dominant hand first, then non dominant." The `instructions` string on the class uses the same framing. A patient whose dominant hand is their more severely affected hand (common in unilateral MS relapse patterns) may not know how to answer. Some patients in MS communities report that their "dominant" hand is no longer the hand they prefer for daily tasks because their original dominant hand has degraded. The labels are clinically standard but may be disorienting to a patient mid test. Recommended change: append a clarifying sentence to the instruction string and to the `PreInstructions` text: "If you are unsure, start with the hand you write or type with most of the time." This one sentence costs no screen space and covers the most common confusion case.
+
+#### Finding 2, rest period has no countdown and no duration disclosure, severity: medium
+
+The `Rest` phase shows "Take a short break. The next round starts soon." with no countdown. `REST_SECONDS` is 5 seconds, which is very short for a fatigued patient who may not be holding the phone or may have set it down. When the countdown to the non dominant round begins immediately after, the user may miss the first second or two of the `Countdown` display. Recommended change: display the rest timer ("Rest: 5... 4... 3...") in the same large `displayMedium` style used for the active countdown, so the user knows exactly when to pick the phone up again. The logic to drive a rest countdown already exists as a pattern in the `Active` phase; it is a small addition to the `Rest` arm of `LaunchedEffect`.
+
+#### Finding 3, quality score threshold of fewer than 10 valid taps produces a score of 0.0 with no user feedback, severity: medium
+
+`TapFeatures.computeSession` returns `qualityScore = 0.0` when either round has fewer than 10 valid taps. The session is still recorded via `onComplete`, which is correct per the "bad MS day" standing concern: the data should not be discarded. However, the current `Done` phase shows only "Tap test recorded. Returning to the session." with no indication that the quality score was low. A patient who produced fewer than 10 taps per round (plausible on a severe fatigue day or for a patient with significant hand weakness) will see the same completion message as a patient who produced 60. The application will save a `qualityScore` of 0.0 with no contextual note. Recommended change: when `qualityScore == 0.0`, change the `Done` text to "Tap test recorded. This round was short but your data has been kept." This is the register the Phase 0 framing specifies for low quality sessions: descriptive, not judgmental, confirms the data was kept.
+
+#### Finding 4, the off target tap capture area is the full `Row` behind both targets, severity: low
+
+The `TwoTargets` composable applies `detectTapGestures` to the entire `Row`, then each `Target` uses `clickable` which intercepts before the row gesture. This is the correct layering in Compose. The patient concern is that the gap between the two 120 dp circles is 16 dp wide (the `Spacer`). A patient with action tremor who is alternating quickly across the gap will accumulate off target taps counted against their miss rate. The `missRate` contributes to the quality score and to `asymmetryIndex` comparisons. This is not a show stopper (the Bays et al. 2015 scoring the Phase 0 framing mentioned does account for off target events), but the 16 dp gap is narrow for a tremor population. Recommended change (low priority): widen the spacer to 32 dp to reduce incidental gap misses during fast alternation. Flag for the Clinical Validator to confirm this gap width does not alter the normative interpretation of off target count.
+
+#### Finding 5, the `Done` state transitions automatically rather than with user confirmation, severity: low
+
+After the non dominant round completes, `onComplete` is called and `phase = TapPhase.Done` in the same `LaunchedEffect` block. The `Done` state text appears briefly and then the orchestrator calls `recordResult` which moves the session forward. The user has no moment to orient. For a fatigued patient who was tapping hard for 30 seconds, the transition to the next test (or to the session complete screen) may feel abrupt. Recommended change: gate the `Done` state on a brief `Button` labeled "Continue" rather than auto advancing. This aligns with the session runner's own `LinearProgressIndicator` pacing and gives the user a deliberate breath between tests.
+
+### Three Phase 2 brief questions
+
+**Duration sustainability:** 30 seconds of active tapping per round is within the tolerance budget. The total active tapping time is 60 seconds, not 70: `estimatedDurationSeconds = 70` correctly accounts for the two 5 second countdowns and one 5 second rest on top of the 60 active seconds. For almost all patients in the MS Battery target population this duration is achievable even on a moderate fatigue day. The concern is the rest period being too short to recover (5 seconds) rather than the tapping duration itself. This is captured in Finding 2.
+
+**Bilateral structure clarity:** the alternating left and right structure is clearly conveyed. The "L" and "R" labels on the 120 dp circles are large and legible at `displaySmall`. The persistent instruction line at the top of the `Column` ("Tap the left and right circles, alternating, as fast as you can manage") remains visible throughout the `Active` phase, satisfying the Phase 0 framing concern that instructions must be visible while the test runs. The `NON_ALTERNATING` tap kind is silently recorded but never shown to the user during the test, which is correct: showing a real time error indicator would disrupt the task and is not standard in the 9HPT or 25FW administration.
+
+**Dominant vs non dominant hand framing:** the framing is standard clinical terminology and is acceptable as a default. It becomes ambiguous for patients whose MS has shifted their effective dominant hand over time, which is a real phenotype in relapsing remitting disease. Finding 1 above addresses this with a one sentence clarification that costs nothing. The Patient Advocate does not recommend removing the dominant and non dominant distinction, because the asymmetry index between rounds is a clinically meaningful feature (the signal the Clinical Outcomes Reviewer will want for lateralized deficit tracking). The fix is better framing, not removal.
+
+### Uncertainties
+
+1. The Patient Advocate did not run the application on a physical device. The 120 dp target size and 16 dp gap assessment is from reading the source. On a small phone (for example a 5.0 inch screen at 420 dp wide), the two circles plus 16 dp spacer consume the full width, which may leave no room for the tremor margin the Phase 0 framing names. Flag for the Accessibility Specialist to measure on a real device.
+2. The quality score formula uses `minOf(1.0, totalValid / 60.0)` as the count factor, implying 60 valid taps across both rounds is the target. The Patient Advocate does not know whether 60 is grounded in the normative Bays et al. 2015 literature or is an engineering estimate. Flag for the Clinical Validator to confirm.
+
+### Handoff
+
+Patient Advocate hands back to the Project Manager. Findings 1, 2, and 3 are recommended for the Android Engineer before Phase 3 begins. Findings 4 and 5 can be deferred to Phase 11 polish if the PM prefers. Finding 4 gap width question should be routed to the Clinical Validator for normative guidance.
+
+(End of 2026-05-07 Phase 2 entry. Append only convention: this entry is not edited in place.)
