@@ -19,7 +19,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.mustafan4x.msbattery.MSBatteryApp
 import com.mustafan4x.msbattery.battery.BatteryOrchestrator
-import com.mustafan4x.msbattery.battery.MockTestModule
+import com.mustafan4x.msbattery.battery.tap.BilateralTapTest
 import com.mustafan4x.msbattery.ui.home.HomeScreen
 import com.mustafan4x.msbattery.ui.home.SessionRunnerScreen
 import com.mustafan4x.msbattery.ui.onboarding.DisclaimerScreen
@@ -95,7 +95,7 @@ fun RootScreen() {
         composable("session") {
             val orchestrator = remember {
                 BatteryOrchestrator(
-                    modules = listOf(MockTestModule()),
+                    modules = listOf(BilateralTapTest()),
                     sessionDao = app.database.sessionDao(),
                     testResultDao = app.database.testResultDao(),
                     deviceInfo = DeviceInfo.summary
