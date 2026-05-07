@@ -18,7 +18,7 @@ This application is not a medical device. It does not diagnose or treat any cond
 
 ## Status
 
-Phase 0 (bootstrap setup) is complete; Phase 1 (Foundation) is the next phase. See `STATUS.md` for the current state and `docs/plan.md` for the full multi phase plan.
+Phase 0 (bootstrap setup) is complete; Phase 1 (Foundation) is complete as of 2026-05-07. The application runs end to end against a mock test module on the Compose UI shell, with the Room data layer, the `TestModule` protocol, and the `BatteryOrchestrator` wired together. Real test modules are added in subsequent phases (Phase 2 is the bilateral tap test). See `STATUS.md` for the current state and `docs/plan.md` for the full multi phase plan.
 
 ## How it is built
 
@@ -29,6 +29,25 @@ The application is a native Android codebase in Kotlin and Jetpack Compose, orga
 - `docs/plan.md` for the multi phase implementation plan.
 - `STATUS.md` for the single source of truth on which phase is next.
 - `docs/plans/phase-1-foundation.md` for the detailed Phase 1 plan.
+
+### Running
+
+Open `~/src/MS-Battery` in Android Studio Iguana or later, select an Android 12 or later emulator (or attach a physical device with USB debugging enabled), and press Run.
+
+From the command line:
+
+```
+./gradlew :app:installDebug
+adb shell am start -n com.mustafan4x.msbattery/.MainActivity
+```
+
+### Testing
+
+```
+./gradlew :app:testDebugUnitTest
+```
+
+This runs every JVM unit test, including the Robolectric Room repository tests and the orchestrator tests.
 
 ## Privacy
 
