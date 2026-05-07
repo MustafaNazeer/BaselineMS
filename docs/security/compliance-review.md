@@ -466,3 +466,188 @@ The following items from Entry 1 remain open and are tracked for later phases. T
 ---
 
 End of Entry 2.
+
+## Entry 3, Phase 2 disclaimer copy review, 2026-05-07
+
+**Date:** 2026-05-07
+**Reviewer:** Compliance Reviewer (agent 21)
+**Phase:** Phase 2 (Tap Test); reviewing a Patient Advocate Phase 1 carryover wording proposal that requires Compliance ratification before it ships.
+
+**Artifact reviewed:**
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt`, lines 30 to 41 (the disclaimer body Text composable and the acknowledgment Button label).
+- The Patient Advocate's proposed replacement copy from `/home/mustafa/src/MS-Battery/docs/qa/patient-advocate-reviews.md` Issues 5 and 6 in the 2026-05-07 Phase 1 entry. The on disk Patient Advocate text was verified verbatim against the dispatch text; no discrepancy.
+
+**Scope of this review:**
+
+The PM has separately accepted the structural change in Issue 5 (chunk one centered paragraph into three left aligned `Text` lines with `TextAlign.Start`). The structural change is independent of regulatory framing. This review covers only:
+
+1. The wording change in the third sentence: replacing "Share with your neurologist for clinical decisions" (current `DisclaimerScreen.kt`, copied verbatim from `SPEC.md` Section 10) with "When you visit your neurologist, you can share these results to help the conversation."
+2. The button copy change in Issue 6: replacing "I understand" with "Got it, continue".
+
+**Specific wording reviewed:**
+
+Current `DisclaimerScreen.kt` body (lines 31 to 33):
+
+> "This app is not a medical device. It does not diagnose or treat any condition. Do not change your treatment based on these results. Share with your neurologist for clinical decisions."
+
+Current `DisclaimerScreen.kt` button (line 40):
+
+> "I understand"
+
+Patient Advocate proposed body (Issue 5, third sentence is the load bearing change):
+
+> This app is not a medical device. It does not diagnose or treat any condition.
+>
+> Please do not change your treatment based on what you see here.
+>
+> When you visit your neurologist, you can share these results to help the conversation.
+
+Patient Advocate proposed button (Issue 6):
+
+> "Got it, continue"
+
+**Authoritative sources consulted in this session:**
+
+- FDA, "General Wellness: Policy for Low Risk Devices," final guidance, reissued 2026-01-06. The FDA's own landing page at https://www.fda.gov/regulatory-information/search-fda-guidance-documents/general-wellness-policy-low-risk-devices and the guidance PDF at https://www.fda.gov/media/90652/download both returned 404 to WebFetch on this date, the same transient state Entry 1 Section 7 item 1 of this document recorded on Phase 0. The 2026 reissue text was therefore triangulated from three independent industry summaries that quote the guidance verbatim:
+  - Faegre Drinker Biddle and Reath LLP, "Key Updates in FDA's 2026 General Wellness and Clinical Decision Support Software Guidance," https://www.faegredrinker.com/en/insights/publications/2026/1/key-updates-in-fdas-2026-general-wellness-and-clinical-decision-support-software-guidance, accessed 2026-05-07.
+  - King and Spalding, "FDA Updates General Wellness and Clinical Decision Support Guidance Documents," https://www.kslaw.com/news-and-insights/fda-updates-general-wellness-and-clinical-decision-support-guidance-documents, accessed 2026-05-07.
+  - Covington and Burling LLP, "FDA Issues Revised Guidance on General Wellness Products," https://www.cov.com/en/news-and-insights/insights/2026/01/fda-issues-revised-guidance-on-general-wellness-products, accessed 2026-05-07.
+- Google Play, "Health Content and Services" policy, https://support.google.com/googleplay/android-developer/answer/16679511, accessed 2026-05-07. (The Entry 1 fetch was on 2026-04-15 effective date; today's fetch returns the same disclaimer language quoted in Entry 1 Section 1.4.)
+- Google Play, "Health app categories and additional information," https://support.google.com/googleplay/android-developer/answer/13996367, accessed 2026-05-07.
+- 45 CFR 160.103 (HIPAA definitions). Not re fetched in this session; the Entry 1 Section 1.2 analysis still applies and is unchanged by a wording tweak that does not affect data flow.
+
+**Re fetch note:** Entry 1 Section 7 item 1 already flagged the FDA URL as transiently 404 and recommended re fetch ahead of Phase 5 and Phase 11 sign offs. The 2026-01-06 reissue's text on healthcare provider notifications (quoted below) is consistent across all three industry summaries consulted today, which is sufficient to ground a Phase 2 wording verdict. A direct fetch from FDA is still required before Phase 5 sign off.
+
+## 1. Regulatory regime considered
+
+The wording change is evaluated against:
+
+- **FDA General Wellness: Policy for Low Risk Devices, 2026-01-06 reissue.** This is the controlling federal regime for whether the application crosses the line from non device wellness into Software as a Medical Device.
+- **Google Play Health Content and Services policy.** This is the controlling distribution regime for whether the application clears Play review.
+- **HIPAA scope.** Considered for completeness; not affected by a wording tweak that does not move data off device. No new analysis is needed; Entry 1 Section 1.2 conclusion stands.
+
+GDPR is not implicated by an in app disclaimer wording change; the disclaimer is presented to the user, no personal data leaves the device, no controller relationship arises from rendering the text. Entry 1 Section 1.3 conclusion stands.
+
+## 2. Relevant regulatory text with citation
+
+### 2.1 FDA two factor test for general wellness products
+
+Quoted in Entry 1 Section 1.1 from the 2016 and 2019 versions of the guidance, and confirmed unchanged in the 2026-01-06 reissue per the King and Spalding 2026 summary:
+
+> "(i) the device is intended only for general wellness use, and (ii) the device presents a low risk to the safety of users."
+
+(Source: King and Spalding, "FDA Updates General Wellness and Clinical Decision Support Guidance Documents," accessed 2026-05-07.)
+
+### 2.2 FDA 2026 reissue, healthcare professional notification clause
+
+This is the load bearing new clause for the Phase 2 question. Quoted from the King and Spalding 2026 summary, which quotes the guidance directly:
+
+> "may notify a user that evaluation by a healthcare professional may be appropriate"
+
+Such a notification must not:
+> "identify a specific disease or condition; characterize output as abnormal or diagnostic; include clinical thresholds or treatment recommendations; provide ongoing alerts intended to manage disease."
+
+(Source: King and Spalding, accessed 2026-05-07. The Faegre Drinker 2026 summary phrases the same constraint as: "limited notifications suggesting professional evaluation allowed only if they do not reference specific diseases or diagnostic thresholds." The Covington 2026 summary phrases it as: "a notification informing a user that evaluation by a healthcare professional may be helpful when outputs fall outside ranges appropriate for general wellness use" with the same four constraints. All three independent summaries agree on the substance.)
+
+### 2.3 FDA 2026 reissue, scope of enforcement discretion
+
+> "Enforcement discretion does not apply if the device is intended for the management of a disease or condition."
+
+(Source: King and Spalding, accessed 2026-05-07.)
+
+### 2.4 21st Century Cures Act, section 520(o)(1)(B) of the FD&C Act
+
+Quoted in Entry 1 Section 1.1 and unchanged:
+
+> "intended for maintaining or encouraging a healthy lifestyle and is unrelated to the diagnosis, cure, mitigation, prevention, or treatment of a disease or condition."
+
+### 2.5 Google Play Health Content and Services policy
+
+Quoted in Entry 1 Section 1.4 and reconfirmed via fetch on 2026-05-07:
+
+> Apps offering medical features must include "a clear disclaimer in their app description indicating that the app is 'not a medical device and does not diagnose, treat, cure, or prevent any medical condition.'"
+
+> Developers must "remind users to consult a healthcare professional for medical advice, diagnosis, or treatment."
+
+(Source: Google Play, "Health Content and Services," accessed 2026-05-07.)
+
+### 2.6 Google Play Health App Categories
+
+Quoted in Entry 1 Section 1.4 and reconfirmed via fetch on 2026-05-07:
+
+> Health and Fitness Apps: "Apps that help users manage their health and fitness. These apps usually inform or let users track or sync information about their personal health and fitness."
+
+(Source: Google Play, "Health app categories and additional information," accessed 2026-05-07.)
+
+## 3. Analysis of the proposed sentence 3 wording
+
+The original sentence: "Share with your neurologist for clinical decisions."
+
+The proposed sentence: "When you visit your neurologist, you can share these results to help the conversation."
+
+**Direction of drift, FDA framing.** The proposed sentence is regulatorily *safer* than the original, not riskier. The phrase "for clinical decisions" in the original explicitly couples the application's outputs to clinical decision making. The 2026 FDA reissue's enforcement discretion clause (Section 2.3 above) is forfeited if the application is "intended for the management of a disease or condition," and "for clinical decisions" is a phrase that argues, on the face of the app, that the outputs are intended as inputs to clinical decisions. The Phase 0 review (Entry 1 Section 1.1) accepted the original wording as compliant because it sat in a screen full of explicit non device disclaimers and the cumulative posture clearly framed the application as wellness, but the phrase itself pulls in the medical device direction.
+
+The proposed sentence does the opposite: it reframes the role of the export from "input to a clinical decision" to "input to a conversation." A conversation is not a medical decision. Neither the 2016, 2019, nor 2026 versions of the FDA General Wellness guidance treat conversational support between a patient and a clinician as a regulated function. The 2026 reissue's specific list of forbidden notification properties (Section 2.2 above) does not apply at all to a static disclaimer line, because a disclaimer line is not a sensor output notification; but even read as if it did, the proposed sentence does not identify a disease or condition, does not characterize an output as abnormal or diagnostic, does not include clinical thresholds, and does not provide ongoing alerts. It is, by every test in the 2026 reissue, further from the medical device boundary than the original.
+
+The proposed sentence also fits comfortably inside the 21st Century Cures Act exclusion (Section 2.4 above) for software functions that maintain or encourage a healthy lifestyle and are unrelated to diagnosis, cure, mitigation, prevention, or treatment. Helping a patient bring a record to a neurology visit and discuss it is a healthy lifestyle activity (clinical follow through). It is not diagnosis, cure, mitigation, prevention, or treatment.
+
+**Direction of drift, Google Play framing.** Play's Health Content and Services policy requires (Section 2.5 above) that the app "remind users to consult a healthcare professional for medical advice, diagnosis, or treatment." The proposed sentence directs the user to share results when they visit their neurologist. Visiting a neurologist is consulting a healthcare professional. The proposed wording satisfies the Play "remind to consult" requirement; it is arguably softer in tone than the original, but Play's policy does not specify a mandatory phrase or prescribed strength of language (verified via re fetch of the policy page on 2026-05-07; only the "not a medical device" disclaimer phrase is quoted as required wording in the policy text). The "consult a healthcare professional" requirement is satisfied by direction, not by any specific verb. "When you visit your neurologist, you can share these results" is a direction.
+
+**Categorization stability under Play.** The application remains in the Health and Fitness category (Section 2.6 above) under the proposed wording. The proposed sentence does not introduce medical information, does not facilitate diagnosis, and does not facilitate treatment. The "help the conversation" framing actually reinforces Health and Fitness positioning by characterizing the artifact as supporting the user's personal health management, not as a clinical instrument.
+
+**HIPAA framing.** No data flow change. Entry 1 Section 1.2 conclusion is unaffected.
+
+**One drafting concern, minor.** The proposed sentence loses the explicit cue that clinical decisions are the neurologist's province, not the application's. The original sentence "Share with your neurologist for clinical decisions" implicitly says clinical decisions belong to the neurologist; the proposed sentence drops that pointer. The rest of the disclaimer (sentence 1: "not a medical device. It does not diagnose or treat any condition." Sentence 2: "Please do not change your treatment based on what you see here.") still establishes the boundary, so this is not a regulatory failure; it is a defense in depth observation. The Compliance Reviewer is satisfied that sentences 1 and 2 carry the regulatory weight; sentence 3 is permitted to be conversational.
+
+**Recommendation if the PM wants belt and suspenders.** Two acceptable alternatives that retain the warmth of the proposed wording while preserving the explicit pointer:
+
+- (a) "When you visit your neurologist, you can share these results to help the conversation. Clinical decisions belong with your neurologist."
+- (b) "When you visit your neurologist, you can share these results to help the conversation about your care."
+
+Both are compliant. The proposed Patient Advocate wording is also compliant on its own. The choice between the bare proposed wording and an augmented variant is editorial, not regulatory; the Compliance Reviewer does not assert a preference, only that any of the three options is regulatorily acceptable.
+
+## 4. Analysis of the proposed button copy change
+
+Original button label: "I understand."
+
+Proposed button label: "Got it, continue."
+
+Neither phrase is a regulated artifact. There is no FDA, HIPAA, GDPR, or Google Play requirement that the acknowledgment button on a wellness app's first launch disclaimer use any specific verb. Both phrases acknowledge the user has read the disclaimer and is proceeding. Both are equally acceptable to a Play reviewer. The choice is purely editorial.
+
+The Compliance Reviewer notes one trivial observation: "Got it, continue" reads a fraction more cheerful than "I understand," which slightly reduces the felt seriousness of the screen. This is not a regulatory concern. The screen's gravity is established by the disclaimer body, not by the button label. The Patient Advocate's stated rationale (that "Got it, continue" acknowledges reading and confirms forward motion in one phrase, and is warmer for fatigued users) is a usability call, which is the Patient Advocate's domain. The Compliance Reviewer defers to that judgment.
+
+## 5. Verdict
+
+**Sentence 3 wording change ("for clinical decisions" replaced with "to help the conversation"): COMPLIANT.**
+
+The proposed wording sits cleanly inside the FDA General Wellness 2026 reissue framework, satisfies the Google Play Health Content and Services policy's "remind to consult a healthcare professional" requirement, leaves the application in the Health and Fitness Play category, and does not touch HIPAA scope. The proposed wording is regulatorily *softer* (further from the medical device boundary) than the original, not stricter. The Compliance Reviewer signs off on the proposed sentence 3.
+
+**Button copy change ("I understand" replaced with "Got it, continue"): COMPLIANT.**
+
+No regulatory regime governs the verb used on an acknowledgment button. The choice is editorial. The Compliance Reviewer signs off on either phrase; the Patient Advocate's rationale for "Got it, continue" is reasonable and unobjectionable.
+
+**Phase 2 sign off scope.** This sign off covers only the two wording items above. The Compliance Reviewer has not in this entry reviewed the Phase 2 tap test post test feedback copy or any other Phase 2 user facing surface; those will be reviewed under the per phase post test feedback wording task in `agents/21-compliance-reviewer.md` when they are produced.
+
+## 6. Decisions for PM review
+
+1. **Which sentence 3 wording to ship.** Three options are compliant: the bare Patient Advocate proposal ("When you visit your neurologist, you can share these results to help the conversation."), augmented variant (a) ("...to help the conversation. Clinical decisions belong with your neurologist."), or augmented variant (b) ("...to help the conversation about your care."). The Compliance Reviewer does not prefer any of the three; the choice is editorial.
+
+2. **Which button copy to ship.** Both "I understand" and "Got it, continue" are compliant. The Patient Advocate prefers "Got it, continue." The Compliance Reviewer defers to that preference.
+
+The Android Engineer, when implementing in Phase 2B, can ship the bare Patient Advocate proposal for sentence 3 plus "Got it, continue" for the button without further Compliance Reviewer review, or, if the PM elects an augmented sentence 3 variant, the variant text in Section 3 of this entry is pre approved as written.
+
+## 7. Open items and uncertainty
+
+1. **FDA URL state.** As in Phase 0, the FDA General Wellness landing page and the guidance PDF returned 404 today. The 2026-01-06 reissue text was triangulated from three independent law firm summaries that quote the guidance directly, and all three summaries agree on the substance of the healthcare professional notification clause. This is sufficient for a Phase 2 wording sign off because the wording in question is a static disclaimer line, not a sensor output notification, and the analysis does not turn on the new 2026 reissue's specific notification rules. A direct FDA fetch is still required before Phase 5 and Phase 11 sign offs per Entry 1 Section 7 item 1.
+
+2. **No new state law uncertainty introduced.** The wording change does not affect data flow, does not collect new categories of data, and does not create any new relationship between the developer and the user beyond what Entry 1 already analyzed. Entry 1 Section 7 item 3 (US state law overlay) is unchanged.
+
+3. **Beta cohort consent text.** The Phase 11 beta cohort consent text remains scoped to Entry 1 Section 3. No new consent text obligations arise from this disclaimer wording change.
+
+## 8. Confirmation of append only protocol
+
+This entry is a new Entry 3 appended after Entry 2's "End of Entry 2." marker. Entries 1 and 2 were not edited in this session. The compliance review log preserves the full history of regulatory decisions per the agent brief.
+
+---
+
+End of Entry 3.
