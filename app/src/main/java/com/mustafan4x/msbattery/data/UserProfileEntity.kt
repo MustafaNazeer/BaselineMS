@@ -11,6 +11,6 @@ data class UserProfileEntity(
     val biologicalSex: Sex,
     val dominantHand: Hand,
     val msTypeDisclosed: MSType = MSType.UNDISCLOSED,
-    val heightCm: Double,
+    val heightCm: Double? = null,
     val createdAtEpochMs: Long = System.currentTimeMillis()
 )
