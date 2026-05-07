@@ -4,14 +4,14 @@ This file is the single source of truth for which phase is next. Read it at the 
 
 ## Next phase
 
-**Phase 1: Foundation.** Not started. Begin with the mandatory check in protocol before dispatching agents. Five Citation Auditor vetoes from Phase 0 should be resolved during Phase 1 prep (see `docs/source/citation-audit-log.md`); two PM decisions are also pending user ratification (see Resume notes below).
+**Phase 1: Foundation.** In progress (started 2026-05-07). Mandatory check in protocol completed; user answered fresh window, more than 4 hours to reset, continue full phase. Phase 0 Resume notes 1, 2, and 4 (Citation Auditor vetoes, PM decisions, plan path corrections) were closed by commit c49847e. Resume note 3 (Compliance Reviewer README re read) is the only Phase 0 carryover and is dispatched as the first Phase 1 prep task.
 
 ## Phase status table
 
 | # | Phase | Status | Completed on | Window cost | Notes |
 |---|-------|--------|--------------|-------------|-------|
 | 0 | Bootstrap setup | completed | 2026-05-07 | ~65% (within est. 60 to 75% range) | All 12 deliverables produced. Citation Auditor exercised 5 vetoes (deferred to Phase 1 cleanup) and the PM applied 2 session corrections (Oh et al. 2024 attribution, Givon 2009 gait reference values). Compliance Reviewer recommended a finalized README re read which is pending. |
-| 1 | Foundation | not started |  | est. 70 to 85% | Data layer, TestModule protocol, BatteryOrchestrator, UI shell, mock test integration. Detailed plan in `docs/plans/phase-1-foundation.md` |
+| 1 | Foundation | in progress |  | est. 70 to 85% | Data layer, TestModule protocol, BatteryOrchestrator, UI shell, mock test integration. Detailed plan in `docs/plans/phase-1-foundation.md`. Started 2026-05-07. |
 | 2 | Tap Test | not started |  | est. 30 to 45% | Bilateral tap test as first concrete TestModule |
 | 3 | Gait Signal Processing | not started |  | est. 80 to 95% | Pure DSP module: Madgwick filter, Butterworth low pass, step detection, ZUPT stride length, feature extraction. Unit tested against synthetic ground truth |
 | 4 | Gait Test Module Integration | not started |  | est. 60 to 75% | Sensor capture via SensorManager, Compose UI for the gait test, persistence wiring |
@@ -27,19 +27,17 @@ Status values: `not started`, `in progress`, `completed`, `bundled with phase N`
 
 ## Resume notes
 
-**Phase 0 closed 2026-05-07. Open items for Phase 1 prep:**
+**Phase 1 in progress, started 2026-05-07.** Dispatch sequence:
 
-1. **Citation Auditor vetoes (5 items, see `docs/source/citation-audit-log.md`)** to resolve before the relevant phase consumes them:
-   - Bays 2015 tap test reference not located (blocks Phase 2 tap test design rationale).
-   - Buckley 2020 *Sensors* gait review not located (blocks Phase 5 validation target rationale).
-   - Mathiowetz 1985 journal name needs correction (the original 9HPT paper).
-   - Sosnoff et al. 2014, PMID 25117855: first author should be Socie, not Sosnoff.
-   - Rusz 2018 *Sleep Medicine* is Parkinson's specific, not MS specific (blocks Phase 8 voice biomarker rationale; replace with the 2025 *J Voice* MS systematic review).
-2. **PM decisions pending user ratification:**
-   - Backup posture: Security Engineer recommends `android:allowBackup="false"` and removing the data extraction rules reference, to prevent the user's session data from being included in cloud based Android Auto Backup. The current scaffold has `allowBackup="true"`.
-   - SPEC.md Section 3 expansion: Patient Advocate recommends adding one sentence noting that the user population includes mobility aid users (cane, walker, wheelchair), since the current "mild gait instability" understates the variance the application will see.
-3. **Compliance Reviewer re read of finalized README** is recommended before the wellness positioning is locked in. The Documentation Engineer applied all flagged drift fixes; a quick verification pass is the remaining step.
-4. **Phase 1 plan reference correction:** during Phase 0 bootstrap the PM corrected 38 path references in `docs/plans/phase-1-foundation.md` from `~/src/MSBattery/` to `~/src/MS-Battery/`. The Phase 1 plan otherwise remains as authored before the iOS to Android pivot decision.
+1. Compliance Reviewer re read of the finalized `README.md` (Phase 0 carryover).
+2. Android Engineer (lead) executes Tasks 2 to 11 of `docs/plans/phase-1-foundation.md` with TDD discipline: data layer, TestModule, MockTestModule, BatteryOrchestrator, UI shell, integration test.
+3. Database Administrator reviews the Room schema and DAOs.
+4. Documentation Engineer updates `README.md` for Phase 1 (delta only; Phase 0 sections are preserved).
+5. Patient Advocate reviews onboarding and home screens.
+6. Code Reviewer reviews the full Phase 1 PR.
+7. QA Engineer signs off.
+
+**Phase 0 closed 2026-05-07.** Carryover items 1 (Citation Auditor vetoes), 2 (PM decisions on backup posture and SPEC Section 3), and 4 (Phase 1 plan path corrections) were all closed by commit c49847e. Carryover item 3 (Compliance Reviewer README re read) is in flight as the first Phase 1 dispatch.
 
 ## Validation log
 
