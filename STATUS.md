@@ -4,14 +4,14 @@ This file is the single source of truth for which phase is next. Read it at the 
 
 ## Next phase
 
-**Phase 1: Foundation.** In progress (started 2026-05-07). Mandatory check in protocol completed; user answered fresh window, more than 4 hours to reset, continue full phase. Phase 0 Resume notes 1, 2, and 4 (Citation Auditor vetoes, PM decisions, plan path corrections) were closed by commit c49847e. Resume note 3 (Compliance Reviewer README re read) is the only Phase 0 carryover and is dispatched as the first Phase 1 prep task.
+**Phase 2: Tap Test.** Not started. Mandatory check in protocol must run before Phase 2 work begins. Phase 2 prep includes triage of the 18 issues the Patient Advocate flagged at the end of Phase 1 (see `docs/qa/patient-advocate-reviews.md`); some of these will be folded into Phase 2's Android Engineer dispatch and some require Compliance Reviewer or Data Engineer ratification first.
 
 ## Phase status table
 
 | # | Phase | Status | Completed on | Window cost | Notes |
 |---|-------|--------|--------------|-------------|-------|
 | 0 | Bootstrap setup | completed | 2026-05-07 | ~65% (within est. 60 to 75% range) | All 12 deliverables produced. Citation Auditor exercised 5 vetoes (deferred to Phase 1 cleanup) and the PM applied 2 session corrections (Oh et al. 2024 attribution, Givon 2009 gait reference values). Compliance Reviewer recommended a finalized README re read which is pending. |
-| 1 | Foundation | in progress |  | est. 70 to 85% | Data layer, TestModule protocol, BatteryOrchestrator, UI shell, mock test integration. Detailed plan in `docs/plans/phase-1-foundation.md`. Started 2026-05-07. |
+| 1 | Foundation | completed | 2026-05-07 | under 50% (under est. 70 to 85% range) | All 12 plan tasks delivered (Tasks 2 to 11 by Android Engineer, Task 12 README delta by Documentation Engineer). 15 commits on `main` from `7499417` through `690d630`. Test suite: 23 tests, 0 failures, 0 errors, 0 skipped, verified by Code Reviewer and QA Engineer independently. DBA schema audit PASS. Patient Advocate APPROVED with 18 issues (0 high, 11 medium, 7 low) deferred to Phase 2 prep. Compliance Reviewer cleared README. Emulator walkthrough deferred to user (headless agents cannot drive AVD). |
 | 2 | Tap Test | not started |  | est. 30 to 45% | Bilateral tap test as first concrete TestModule |
 | 3 | Gait Signal Processing | not started |  | est. 80 to 95% | Pure DSP module: Madgwick filter, Butterworth low pass, step detection, ZUPT stride length, feature extraction. Unit tested against synthetic ground truth |
 | 4 | Gait Test Module Integration | not started |  | est. 60 to 75% | Sensor capture via SensorManager, Compose UI for the gait test, persistence wiring |
@@ -27,17 +27,19 @@ Status values: `not started`, `in progress`, `completed`, `bundled with phase N`
 
 ## Resume notes
 
-**Phase 1 in progress, started 2026-05-07.** Dispatch sequence:
+**Phase 1 closed 2026-05-07.** Open items for Phase 2 prep:
 
-1. Compliance Reviewer re read of the finalized `README.md` (Phase 0 carryover).
-2. Android Engineer (lead) executes Tasks 2 to 11 of `docs/plans/phase-1-foundation.md` with TDD discipline: data layer, TestModule, MockTestModule, BatteryOrchestrator, UI shell, integration test.
-3. Database Administrator reviews the Room schema and DAOs.
-4. Documentation Engineer updates `README.md` for Phase 1 (delta only; Phase 0 sections are preserved).
-5. Patient Advocate reviews onboarding and home screens.
-6. Code Reviewer reviews the full Phase 1 PR.
-7. QA Engineer signs off.
+1. **Patient Advocate Phase 1 review (18 issues, see `docs/qa/patient-advocate-reviews.md` Phase 1 entry)** to triage before or during Phase 2:
+   - 11 medium severity copy and behavior issues (enum jargon in profile and settings, custom dropdown widget, default pre filled values, no skip path on onboarding, disclaimer chunking, no progress indicator on session runner, cancel mid session has no confirmation, DOB display when only year was collected, About disclaimer at small body text, no profile edit path).
+   - 7 low severity issues (button copy, double space hack on home screen, raw timestamps in history, debug strings, complete screen polish, mock pattern awareness, root screen race condition).
+   - Issue 5 (disclaimer rewording) requires Compliance Reviewer ratification before any change ships.
+   - Issues 4 and 17 (nullable `heightCm`, profile edit path) are schema or SPEC.md changes; require Data Engineer and Database Administrator decisions.
+2. **DBA recommendation:** flip `exportSchema = true` in `AppDatabase.kt` and add `room { schemaDirectory(...) }` to `app/build.gradle.kts` before Phase 5 (Gait Validation Suite), so version 1 schema is captured before any future migration. Phase 4 close is the last clean opportunity. Owner: Data Engineer.
+3. **Compliance Reviewer Phase 0 carryover follow ups (not Phase 2 blockers):** re fetch the 2026-01-06 FDA General Wellness reissue ahead of Phase 5 and Phase 11 sign offs; decide beta cohort geography restriction or prepare GDPR consent text ahead of Phase 11; schedule a focused US state law review before Phase 11.
+4. **JDK toolchain note for the user's local environment:** the system JDK at `/usr/lib/jvm/java-21-openjdk-amd64` is JRE only, no `javac`. Phase 1 builds were run with `JAVA_HOME=/snap/android-studio/209/jbr`. The CI workflow uses Temurin JDK 17 and is unaffected. If you want a frictionless `./gradlew` from the system shell, install OpenJDK 17 (`apt install openjdk-17-jdk`) or set `org.gradle.java.home` in `gradle.properties`.
+5. **Emulator walkthrough deferred to user.** Task 10 Step 5 of `docs/plans/phase-1-foundation.md` (manual emulator walk through of disclaimer, profile setup, home, session runner, settings) was not run because the agents are headless. The user should walk the application on a real Android 12+ AVD or device before merging this to a public review channel.
 
-**Phase 0 closed 2026-05-07.** Carryover items 1 (Citation Auditor vetoes), 2 (PM decisions on backup posture and SPEC Section 3), and 4 (Phase 1 plan path corrections) were all closed by commit c49847e. Carryover item 3 (Compliance Reviewer README re read) is in flight as the first Phase 1 dispatch.
+Phase 0 carryover items 1, 2, 3, and 4 were all closed during Phase 1 (commit c49847e for items 1, 2, 4; commit 60b370e for item 3, the Compliance Reviewer README re read).
 
 ## Validation log
 
