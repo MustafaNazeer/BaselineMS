@@ -1,0 +1,42 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# Local Android SDK reference
+local.properties
+
+# Android Studio + IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+.fleet/
+
+# Build outputs
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+
+# Captures
+captures/
+
+# Native
+.cxx/
+
+# Keystore (never commit)
+*.jks
+*.keystore
+keystore.properties
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Misc
+.kotlin/
