@@ -19,25 +19,33 @@ import androidx.compose.ui.unit.dp
 fun DisclaimerScreen(onAcknowledge: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().padding(PaddingValues(24.dp)),
-        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.Start
     ) {
         Text(
             text = "MS Neuro Battery",
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center
+            style = MaterialTheme.typography.headlineLarge
         )
         Text(
-            text = "This app is not a medical device. It does not diagnose or treat any condition. " +
-                "Do not change your treatment based on these results. " +
-                "Share with your neurologist for clinical decisions.",
-            textAlign = TextAlign.Center
+            text = "This app is not a medical device. It does not diagnose or treat any condition.",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Start
+        )
+        Text(
+            text = "Please do not change your treatment based on what you see here.",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Start
+        )
+        Text(
+            text = "When you visit your neurologist, you can share these results to help the conversation.",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Start
         )
         Button(
             onClick = onAcknowledge,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("I understand")
+            Text("Got it, continue")
         }
     }
 }
