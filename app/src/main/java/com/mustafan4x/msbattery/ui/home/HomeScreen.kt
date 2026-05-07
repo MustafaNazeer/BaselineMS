@@ -2,8 +2,10 @@ package com.mustafan4x.msbattery.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.mustafan4x.msbattery.data.SessionDao
 import com.mustafan4x.msbattery.data.SessionEntity
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -53,13 +56,18 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Button(onClick = onStartSession, modifier = Modifier.padding(0.dp)) {
+            Button(onClick = onStartSession) {
                 Icon(Icons.Default.PlayArrow, contentDescription = null)
-                Text("  Start weekly battery", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.width(8.dp))
+                Text("Start this week's check in", style = MaterialTheme.typography.titleMedium)
             }
             Text("History", style = MaterialTheme.typography.titleMedium)
             if (sessions.isEmpty()) {
-                Text("No sessions yet. Run the weekly battery to get started.")
+                Text(
+                    "You have not run a check in yet. The first one takes about ten minutes " +
+                        "and produces a record you can share with your neurologist next visit.",
+                    style = MaterialTheme.typography.bodyLarge
+                )
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(sessions) { session ->
@@ -73,12 +81,38 @@ fun HomeScreen(
 
 @Composable
 private fun SessionRow(session: SessionEntity) {
-    val df = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
     Column {
-        Text(df.format(Date(session.startedAtEpochMs)), style = MaterialTheme.typography.bodyLarge)
+        Text(
+            formatRelative(session.startedAtEpochMs, Locale.getDefault()),
+            style = MaterialTheme.typography.bodyLarge
+        )
         Text(
             if (session.completedAtEpochMs != null) "Completed" else "In progress",
             style = MaterialTheme.typography.bodySmall
         )
+    }
+}
+
+internal fun formatRelative(epochMs: Long, locale: Locale): String {
+    val now = Calendar.getInstance()
+    val that = Calendar.getInstance().apply { timeInMillis = epochMs }
+    val timeFmt = SimpleDateFormat("HH:mm", locale)
+    val daysApart = run {
+        val a = now.clone() as Calendar
+        a.set(Calendar.HOUR_OF_DAY, 0); a.set(Calendar.MINUTE, 0)
+        a.set(Calendar.SECOND, 0); a.set(Calendar.MILLISECOND, 0)
+        val b = that.clone() as Calendar
+        b.set(Calendar.HOUR_OF_DAY, 0); b.set(Calendar.MINUTE, 0)
+        b.set(Calendar.SECOND, 0); b.set(Calendar.MILLISECOND, 0)
+        ((a.timeInMillis - b.timeInMillis) / (24L * 60 * 60 * 1000)).toInt()
+    }
+    return when {
+        daysApart == 0 -> "Today, ${timeFmt.format(Date(epochMs))}"
+        daysApart == 1 -> "Yesterday, ${timeFmt.format(Date(epochMs))}"
+        daysApart in 2..6 -> {
+            val dow = SimpleDateFormat("EEEE", locale).format(Date(epochMs))
+            "$dow, ${timeFmt.format(Date(epochMs))}"
+        }
+        else -> SimpleDateFormat("MMM d", locale).format(Date(epochMs))
     }
 }
