@@ -2,7 +2,9 @@ package com.mustafan4x.msbattery.battery.tap
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mustafan4x.msbattery.battery.TestModule
@@ -221,14 +224,23 @@ internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
     }
 }
 
+internal const val TWO_TARGETS_TAG = "TwoTargets"
+
 @Composable
-private fun TwoTargets(onInTargetTap: (TapSide) -> Unit, onOffTargetTap: () -> Unit) {
+internal fun TwoTargets(onInTargetTap: (TapSide) -> Unit, onOffTargetTap: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 24.dp)
+            .testTag(TWO_TARGETS_TAG)
             .pointerInput(Unit) {
-                detectTapGestures(onTap = { onOffTargetTap() })
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = true)
+                    val up = waitForUpOrCancellation()
+                    if (up != null && !up.isConsumed) {
+                        onOffTargetTap()
+                    }
+                }
             },
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
