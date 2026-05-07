@@ -137,6 +137,236 @@ The table below is the per screen review log. Entries are appended in Phase 1 an
 
 | Date | Phase | Screen or module | MS related concerns considered | Recommended changes | Verdict | Notes |
 |------|-------|------------------|--------------------------------|---------------------|---------|-------|
-|      |       |                  |                                |                     |         |       |
+| 2026-05-07 | 1 | DisclaimerScreen, ProfileSetupScreen, HomeScreen, SessionRunnerScreen, SettingsScreen, MockTestModule | Cognitive fog tolerance, low contrast vision tolerance, dexterity tolerance, dignity of clinical labels, "bad MS day" tone, onboarding gating per Galati 2024 | See detailed entry below | APPROVED WITH RECOMMENDED COPY CHANGES | 18 issues found, 0 high, 11 medium, 7 low. None block Phase 1 close because the application is still on a mock test module and no real patient will use it before Phase 2 introduces the Tap test. Copy and labeling fixes should land before Phase 2. |
 
-(No entries yet. Phase 0 framing notes above are the lens for all future entries.)
+## 2026-05-07, Phase 1 review, onboarding and home shell on the mock test module
+
+### Files reviewed (all read in full at the commit on the branch as of 2026-05-07)
+
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/ui/home/HomeScreen.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/battery/MockTestModule.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt`
+
+### Verdict
+
+**APPROVED WITH RECOMMENDED COPY CHANGES** for Phase 1 close. The Phase 1 deliverable is a scaffold around a mock test module; no real patient will be exposed to this build because Phase 2 introduces the first real test. The framing layer is therefore allowed to ship in its current shape so long as the recommended copy and labeling changes below are tracked and applied before Phase 2 ships a real Tap test to a real device. None of the issues found rise to NEEDS REWORK because none of them silently corrupt clinical data, stigmatize the user permanently, or hide a safety claim.
+
+### What is already good
+
+These are concrete things the Phase 1 implementation got right and which the Patient Advocate wants captured here so they are not regressed in Phase 2 polish:
+
+1. The disclaimer copy lands the wellness vs medical device distinction in three short clauses, in the order a person reading on a small screen actually needs them: not a medical device, do not change treatment, share with neurologist. This is closer to the SPEC.md Section 10 wording than alternative drafts, and it does not catastrophize.
+2. The MS type field in `ProfileSetupScreen.kt` line 60 is labeled "MS type (optional)" and defaults to `MSType.UNDISCLOSED`. A user uncomfortable disclosing can tap Save and continue without ever opening that dropdown. This is the right behavior per the standing objection 5 in the Phase 0 framing.
+3. The `Sex` enum default is also `UNDISCLOSED` (line 37 of `ProfileSetupScreen.kt`), preserving the same out for users uncomfortable disclosing biological sex.
+4. The session list empty state in `HomeScreen.kt` line 62 reads "No sessions yet. Run the weekly battery to get started." and does not shame the user or imply harm from not having a history yet. The tone is acceptable, with the wording caveats noted in issue 7 below.
+5. There are no flashing animations and no rapid auto advancing transitions in any of the reviewed screens. This matters for both photosensitive responses and for cognitive fog. Phase 2 polish must preserve this.
+6. There is no streak counter, no badge, no gamification element anywhere in the reviewed surface. This complies with standing objection 7 in the Phase 0 framing.
+7. The disclaimer is a one tap acknowledgment ("I understand"), not a multi screen carousel. This is on the right side of standing objection 5 (onboarding gating) and aligns with the Galati 2024 recovery of registration to activation rates after Floodlight Open simplified onboarding.
+
+### Issues found
+
+Each issue is listed with: file, line range, severity (low or medium or high), the problem stated in patient terms, and the recommended copy or behavior change. Severity is the Patient Advocate's framing, not WCAG severity (which the Accessibility Specialist owns).
+
+#### Issue 1, raw enum names visible to the user, dignity and jargon
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt`
+- **Lines:** 92, 96 (the `EnumDropdown` composable renders `selected.name` and each option's `option.name` directly)
+- **Also affects:** `app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt` lines 42, 43, 45 (same raw enum `.name` reads)
+- **Severity:** medium
+- **Problem:** the user sees strings like `RRMS`, `PPMS`, `SPMS`, `CIS`, `UNDISCLOSED`, `AMBIDEXTROUS`, `OTHER`, and `FEMALE` rendered in screaming caps because they are raw Kotlin enum names. To a person living with MS, especially one newly diagnosed, seeing your own diagnosis subtype rendered as a four letter all caps acronym next to other four letter all caps acronyms reads like a chart in a clinic, not a personal app. "UNDISCLOSED" reads as a database null sentinel, not as a respectful "prefer not to share." This is the core dignity concern that the standing objection on clinical jargon was written for.
+- **Recommended change:** introduce a per enum display label resolver in the UI layer (no schema change to the Room enums, which can stay as they are). Suggested labels (final wording is the PM's call):
+  - `Sex.FEMALE` -> "Female"
+  - `Sex.MALE` -> "Male"
+  - `Sex.OTHER` -> "Another option" (or "Other") (PM picks)
+  - `Sex.UNDISCLOSED` -> "Prefer not to say"
+  - `Hand.LEFT` -> "Left"
+  - `Hand.RIGHT` -> "Right"
+  - `Hand.AMBIDEXTROUS` -> "Either hand" (more honest for the bilateral tap test framing than the medical Latinate)
+  - `MSType.RRMS` -> "Relapsing remitting (RRMS)"
+  - `MSType.PPMS` -> "Primary progressive (PPMS)"
+  - `MSType.SPMS` -> "Secondary progressive (SPMS)"
+  - `MSType.CIS` -> "Clinically isolated syndrome (CIS)"
+  - `MSType.UNDISCLOSED` -> "Prefer not to say"
+  - `TestType.TAP` -> "Bilateral Tap" (when ever surfaced in UI; not yet surfaced in Phase 1)
+  - `TestType.GAIT` -> "Gait"
+  - `TestType.VISION` -> "Low Contrast Vision"
+  - `TestType.SDMT` -> "Symbol Digit"
+  - `TestType.VOICE` -> "Voice Reading"
+
+#### Issue 2, "EnumDropdown" interaction is a two step gesture and reads as a debug control
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt`
+- **Lines:** 83 to 102
+- **Severity:** medium
+- **Problem:** the current control renders as a static line of text (`label: SELECTED_VALUE`) followed by a separate "Change" button, which then opens a `DropdownMenu`. For a user with cognitive fog this is two cognitive moves to discover and confirm a selection, not one. The user has to read the current state, parse what "Change" applies to, tap Change, find the selection in the dropdown, tap the option, then visually verify the line above updated. A standard Material 3 `ExposedDropdownMenuBox` is one cognitive move (tap the field, pick the option) and is the pattern the user has already been trained on by every other Android app. The current control also has zero affordance that the value can be changed without scrolling to the Change button, which is below the value text.
+- **Recommended change:** replace the custom `EnumDropdown` with a Material 3 `ExposedDropdownMenuBox` that wraps a read only `OutlinedTextField` with a trailing dropdown indicator. The user taps anywhere on the field to open the menu. The Patient Advocate is not specifying the Compose API; the UI/UX Designer or Android Engineer can choose between `ExposedDropdownMenuBox`, a Compose `RadioButton` group rendered as a list (better for accessibility on small lists), or another standard Material 3 selector. The behavior requirement is: one tap to open, one tap to choose, label visible at all times.
+
+#### Issue 3, default profile values are guesses pre filled into the user's record
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt`
+- **Lines:** 40 (height defaults to "170"), 41 (year of birth defaults to "1995")
+- **Severity:** medium
+- **Problem:** the form pre fills 170 cm and 1995 in the year of birth and height fields. A user with cognitive fog who reads the prompt, sees a filled value, and assumes the app has read it from somewhere may tap Save without correcting it. The result is a profile that records a fabricated date of birth and height for a real person, which then propagates into any normative comparison the application later performs (the gait literature norms in `docs/source/clinical-references.md` are height stratified per Givon 2009). The standing concern on the "bad MS day" mode is that the application must accept genuine user input on bad days; the corollary is that it must not invent input on the user's behalf on any day.
+- **Recommended change:** remove the default values. Both fields should start empty with a placeholder such as "Year (for example 1985)" and "Height in cm (for example 168)". The Save button should be disabled until both fields parse to plausible ranges. The plausibility check is a small UX add: year between roughly 1925 and the current year, height between roughly 100 cm and 230 cm. If a user types something outside the range, the field shows an inline message ("Please enter a year between 1925 and 2026") rather than silently coercing or silently accepting. Note: SPEC.md Section 8 stores `dateOfBirthEpochMs` as a `Long`, so the conversion from year of birth to epoch ms can keep its current January 1 of that year convention, but the UI must not invent the year itself.
+
+#### Issue 4, profile setup has no skip path and no progress indication
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt`
+- **Lines:** 43 (TopAppBar title) to 78 (Save button)
+- **Severity:** medium
+- **Problem:** per standing objection 5 in the Phase 0 framing, onboarding flows that gate activation behind multi screen profile fields have a documented retention cost (Galati 2024, registration to activation gap). The Phase 1 implementation makes year of birth, height, biological sex, dominant hand, and MS type all visible on a single screen, which is correct (one screen is better than five), but it does not let the user defer the profile to Settings. A cognitively fatigued user who opens the app for the first time and sees five fields may close the app before tapping the first test. The screen also has no progress indicator (Step 2 of 2) so the user does not know how close they are to the first test.
+- **Recommended change:** add a "Skip for now" text button to the right of "Save and continue" with a body small footnote underneath the form: "You can fill these in any time from Settings. We need them later for the most accurate gait comparisons, but you can run all tests without them." The skip path navigates straight to home with a profile where the medically optional fields are `UNDISCLOSED` and `heightCm` is null (this last is a SPEC.md change, not a unilateral Patient Advocate change; flagging it for PM and Data Engineer to ratify before implementation). Independently, even without the skip path, the TopAppBar should read "Set up profile (1 of 1)" or the screen should otherwise communicate that this is the only setup screen. The current "Set up profile" implies more screens are coming.
+- **PM ratification needed:** the proposal to make `heightCm` nullable touches the Room schema. Patient Advocate flags it as a recommendation, defers to Data Engineer and Database Administrator on whether the schema change is in or out of scope for Phase 1.
+
+#### Issue 5, disclaimer body uses centered text alignment and a single dense paragraph
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt`
+- **Lines:** 30 to 35
+- **Severity:** medium
+- **Problem:** the disclaimer is rendered as one long centered sentence stitched out of three clauses with `+` concatenation in source. Centered body text is significantly harder to read for users with low contrast sensitivity, mild visual impairment, or reading fatigue, because the eye loses the left margin anchor between lines. This is well established in typographic accessibility practice and is also relevant per Phase 0 standing concern 3 (low contrast vision tolerance). The dense single paragraph also asks the user to hold three clinical concepts in working memory at once: "this is not a medical device," "do not change treatment based on results," and "share with neurologist." Cognitive fog tolerance per Phase 0 framing concern 2 prefers chunked, scannable copy.
+- **Recommended change:** render the disclaimer as three separate `Text` lines with `TextAlign.Start`, each one a single short sentence:
+  > This app is not a medical device. It does not diagnose or treat any condition.
+  >
+  > Please do not change your treatment based on what you see here.
+  >
+  > When you visit your neurologist, you can share these results to help the conversation.
+  
+  The third sentence is intentionally warmer than the SPEC.md Section 10 language. SPEC.md says "Share with your neurologist for clinical decisions," which is functionally correct but reads as a directive. The recommended copy preserves the safety claim (the user does not act on results, the neurologist does) while reframing the role of the report from "input to a clinical decision" to "input to a conversation," which is closer to how patients describe what they want from this kind of tool. PM and Compliance Reviewer ratification is required before this copy ships, because the Compliance Reviewer specifically reviewed the original wording in Phase 0.
+
+#### Issue 6, "I understand" button is acceptable but not warm; minimum height not asserted
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt`
+- **Lines:** 36 to 42
+- **Severity:** low
+- **Problem:** the button copy "I understand" is acceptable. It is also slightly transactional. A user with mild cognitive fatigue who reads the disclaimer carefully may pause on whether they actually do understand. Material 3's default `Button` is around 40 dp tall, which is below the 48 dp tap target the Phase 0 framing names as a standing dexterity concern. The Material 3 default is what the Accessibility Specialist will measure against; the Patient Advocate flags it here as cross cutting because a user with hand tremor reading the disclaimer is exactly the user this rule is for.
+- **Recommended change (copy):** change "I understand" to "Got it, continue" or "OK, take me in." The Patient Advocate's preference is "Got it, continue" because it acknowledges the user has read it and confirms forward motion in one phrase.
+- **Recommended change (size):** the Patient Advocate flags the 48 dp minimum as a project wide concern; the Accessibility Specialist owns the technical implementation. No specific code change is requested here; this is a forwarded observation.
+
+#### Issue 7, "Start weekly battery" reads as performative and clinical
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/home/HomeScreen.kt`
+- **Lines:** 56 to 59 (Button copy)
+- **Severity:** low
+- **Problem:** the home call to action is "Start weekly battery." The word "battery" is technically correct (a battery of tests is the clinical term, and the project name uses it), but in a home context it reads as a noun the patient does not normally use about themselves. Patients tend to talk about a "check in," a "session," a "this week's tests," or "my MS tracking." The Phase 0 framing concern on cognitive fog tolerance and on warmth in retention copy applies. There is no welcoming framing for a first time user beyond the empty history message below the button.
+- **Recommended change:** change the button copy to "Start this week's check in" or "Begin this week's session." The screen title in the TopAppBar can stay "MS Battery" because that is the application's name. Independently, when the session list is empty, augment the empty state from the current "No sessions yet. Run the weekly battery to get started." to something warmer and informative:
+  > You have not run a check in yet. The first one takes about ten minutes and produces a record you can share with your neurologist next visit.
+  
+  The mention of duration up front ("about ten minutes") is per standing concern 1 (fatigue tolerance) so the user can decide if today is a good day before starting.
+
+#### Issue 8, button uses two leading spaces as a visual hack to space the icon
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/home/HomeScreen.kt`
+- **Line:** 58 (`Text("  Start weekly battery", ...)`)
+- **Severity:** low
+- **Problem:** the leading double space inside the `Text` call is the Android Engineer's way of nudging the icon and label apart. This is fragile (TalkBack reads it as a leading pause; future Compose updates may collapse the whitespace; the spacing is invisible to the user but the label reads as " Start weekly battery" to a screen reader, with a leading whitespace pause). This is a structural concern, not a copy concern, but it lives at the framing layer because it is the patient facing string.
+- **Recommended change:** replace the double space hack with a `Spacer(Modifier.width(8.dp))` between the `Icon` and the `Text`, or the equivalent Material 3 `Button` content slot pattern. The label string itself becomes "Start this week's check in" per issue 7.
+
+#### Issue 9, session row history shows raw timestamp rather than relative date
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/home/HomeScreen.kt`
+- **Lines:** 74 to 84 (`SessionRow`)
+- **Severity:** low
+- **Problem:** the row prints `2026-05-07 14:30` and a status of "Completed" or "In progress." For a user with cognitive fog scanning their history, "Today" or "This Tuesday" or "Last week" carries more meaning than a yyyy MM dd HH:mm string. The current format is also internationally generic (good) but locale insensitive (the SimpleDateFormat is initialized with `Locale.getDefault()` but the literal pattern is fixed). For the v1 scope the Patient Advocate is not asking for full i18n; just a friendlier surface for the most recent few rows.
+- **Recommended change:** show "Today, 14:30," "Yesterday, 09:15," "Tuesday, 14:30 (3 days ago)," or "May 5" for older entries. A small Kotlin helper that maps an epoch ms to one of these forms is a self contained ask. The status label "Completed" should stay; the alternative ("In progress") should only appear if the user has an actually resumable session, which is itself a Phase 5 or Phase 9 question (resume across app launches).
+
+#### Issue 10, session runner has no progress indication and instructions disappear during the test
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt`
+- **Lines:** 46 to 64 (the `when (val s = state)` block)
+- **Severity:** medium (high once real tests replace the mock; flagged now to land before Phase 2)
+- **Problem:** while a test is running, the user sees only what the `TestModule.Content` composable renders. There is no top level progress indicator like "Test 1 of 5" and the test instructions are not persistently visible. Phase 0 framing concern 2 (cognitive fog tolerance) explicitly names this case: "any test where the instructions are not visible while the test is running." The mock test in Phase 1 does keep its short instruction visible (line 36 of `MockTestModule.kt`), so this is not a Phase 1 close blocker, but the moment the Tap test in Phase 2 hides its instructions during the 30 second tap window, this becomes a real regression.
+- **Recommended change:** the `SessionRunnerScreen` should surface, at the top of the body (below the TopAppBar), a persistent header that shows the current test display name, the test number out of total ("Test 1 of 5"), and (optionally) the estimated duration of this test from `module.estimatedDurationSeconds`. The individual `TestModule.Content` composable owns its instructions, but the orchestrator owns the "where are we in the session" framing. The Phase 1 close can ship with this missing because the only test is the mock, but it must be present before Phase 2 ships the Tap test. Patient Advocate is flagging now so the work is not deferred to Phase 11 polish.
+
+#### Issue 11, Cancel button mid session has no confirmation and lives in the TopAppBar action slot
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt`
+- **Lines:** 32 to 38
+- **Severity:** medium
+- **Problem:** while a session is running, the only escape is a "Cancel" button in the TopAppBar actions slot. A tap on Cancel calls `orchestrator.cancel()` and `onFinished()` immediately, with no confirmation dialog. A user with hand tremor or cog fog who taps the wrong area of the TopAppBar can lose all collected results from the session in progress. This is the precise interaction Phase 0 framing concern 4 (dexterity tolerance) was written for. The TopAppBar action area is also closer to the screen edge, which the Phase 0 framing flags as a tremor problem area.
+- **Recommended change:** replace the immediate cancel with a two step flow: tap Cancel opens a small Material 3 `AlertDialog` titled "Stop this check in?" with body text "Your results so far will not be saved. You can come back to it later." and two actions: "Keep going" (default, primary) and "Stop and discard." The default focus is on Keep going so a stray Enter or accidental tap returns to the test. As a separate ergonomic consideration, the Cancel button should not be the only path; a "Skip this test" path will be needed for the Gait test per Phase 0 standing objection 2 (mobility aid users), but that work belongs in Phase 4, not Phase 1.
+
+#### Issue 12, "Session not started" placeholder reads as a debug string
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt`
+- **Line:** 48
+- **Severity:** low
+- **Problem:** the `BatteryOrchestrator.State.Idle` arm renders the literal string "Session not started." In current navigation flow this state is unreachable because `RootScreen.kt` line 80 starts the orchestrator in the same `remember` block that creates it. So the user almost never sees this string. However, if the navigation ever races (configuration change before `start()` is called), the user sees a flat technical string with no recovery action. For the "bad MS day" tone the Patient Advocate prefers a copy that does not feel like the app crashed.
+- **Recommended change:** replace with "Getting your check in ready..." or, ideally, render a small `CircularProgressIndicator` with no text at all. The state is transient and the user does not need to read it. If the state persists more than a few seconds, that is a bug to surface to the Performance Engineer or Android Engineer, not a string for the user to read.
+
+#### Issue 13, "Session complete" closing screen is terse and does not summarize what was recorded
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt`
+- **Lines:** 59 to 62
+- **Severity:** low
+- **Problem:** when the session completes, the user sees the literal string "Session complete" and a "Done" button. There is no summary of which tests were run, no indication of where the results live, no path into the report. For a user who just spent ten minutes on a battery this is anti climactic. The Phase 0 framing concern 6 (quality score language) is relevant in adjacent: a session that completed at low quality should not feel like a failure.
+- **Recommended change:** for Phase 1, change the literal to "All done. Your check in has been saved." and below it a body small line "You can view your results from the home screen, or share a report later from Settings." For Phase 9 (Reporting) and Phase 10 (PDF Export) the completion screen should also include a primary action "See your results" that navigates into the per session view once that view exists. For Phase 1, the navigation back to Home is acceptable because there is no per session view yet.
+
+#### Issue 14, MockTestModule placeholder copy will silently set Phase 2 expectations if not changed
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/battery/MockTestModule.kt`
+- **Lines:** 25, 26
+- **Severity:** low
+- **Problem:** the mock instructs the user to "Tap Continue" with "This is a mock test used during scaffolding." This is fine for Phase 1 because no real user runs it. However, the patterns are ones the real test modules will inherit by example unless explicitly stopped. Specifically: the instruction is presented above the action and disappears if the user scrolls; the action button label is generic ("Continue"); there is no countdown; there is no indication of what the test is for.
+- **Recommended change:** none for Phase 1 itself. This is a flagged note for the Phase 2 Tap test review and onward. The Patient Advocate is recording here that the `TestModule.Content` contract should preserve four properties the mock does not yet model: instructions visible during the test, a countdown or progress visible during the test, an action label that is task specific (not "Continue"), and a task purpose visible at the top ("This test measures finger speed and rhythm in each hand").
+
+#### Issue 15, Settings shows "Date of birth" with day precision when only year was collected
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt`
+- **Line:** 41
+- **Severity:** medium
+- **Problem:** profile setup in `ProfileSetupScreen.kt` line 49 collects only the year of birth, then in line 64 constructs an epoch ms from January 1 of that year. Settings then renders "Date of birth: 1995-01-01." A user reading this in Settings will reasonably believe the application thinks their birthday is January 1. For a user with cognitive fog this can be confusing; for any user this is mildly disrespectful (the application has invented two thirds of a date it never asked for).
+- **Recommended change:** label the row "Year of birth: 1995" and store the underlying epoch ms unchanged. The display logic does the year extraction (`Calendar.YEAR` from the stored epoch ms in the user's locale's calendar). The Room schema does not change. PM ratification needed only if the team wants to capture the day separately later; for v1, year of birth is sufficient per the gait normative literature.
+
+#### Issue 16, Settings About text is rendered at bodySmall and uses spacer hack
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt`
+- **Lines:** 47 (`Text(" ")` as a spacer), 49 to 52 (`bodySmall` typography on the about text)
+- **Severity:** medium
+- **Problem:** the About text in Settings is the only place the medical device disclaimer appears after onboarding. It is rendered at `MaterialTheme.typography.bodySmall`, the smallest body size in Material 3. For a user with mild visual impairment or low contrast sensitivity, this is the wrong scale for the most regulatorily and clinically important sentence in the application. The Phase 0 framing concern 3 (low contrast vision tolerance) applies. Separately, the `Text(" ")` on line 47 is being used as a vertical spacer; it works visually but reads as an empty announcement to TalkBack and adds nothing for sighted users either.
+- **Recommended change (size):** render the About disclaimer at `MaterialTheme.typography.bodyMedium` or `bodyLarge`. The Patient Advocate's preference is `bodyLarge` because this is the sentence the user is most likely to read carefully on a bad MS day, and it should be set in a size the user can read without reaching for reading glasses they are not wearing on the couch.
+- **Recommended change (spacer):** replace `Text(" ")` with `Spacer(Modifier.height(16.dp))`. This is structural cleanup, not a copy change, but it goes in the same patch.
+
+#### Issue 17, Settings has no path to edit the profile
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt`
+- **Lines:** 38 to 46 (the read only profile block)
+- **Severity:** medium
+- **Problem:** the profile fields are display only. A user who entered a value incorrectly during onboarding (because of cog fog, because of a typo, because the height conversion was wrong) cannot fix it from Settings. They have to clear app data or reinstall, both of which destroy their session history. This is a "bad MS day" landmine: the user enters a wrong value one day and is stuck with it forever, and any height stratified gait comparison the application later does is wrong for them. The Phase 0 framing concern 4 (dexterity tolerance) is relevant: a user who fat fingers the height field on day one with mild hand tremor cannot recover.
+- **Recommended change:** add an "Edit profile" button at the bottom of the profile block in Settings that navigates to the profile setup screen pre populated with current values. The same screen handles edit and create, distinguished by whether `userProfileDao.getFirst()` returns a row. The PM and Android Engineer can decide whether to fold this into the Phase 1 close or to defer to early Phase 2; the Patient Advocate flags it as needing to land before any external user (beta cohort) sees the application.
+
+#### Issue 18, RootScreen race between disclaimer and profile checks
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt`
+- **Lines:** 32 to 45
+- **Severity:** low
+- **Problem:** this is a structural framing observation, not a copy issue. The `startDestination` is computed from `disclaimerAcknowledged` (a synchronous SharedPreferences read) and `hasProfile` (a suspending DAO call wrapped in `LaunchedEffect`). On a slow device, the navigation graph picks `disclaimer` or `profile` before `hasProfile` resolves, which means a returning user with a profile may briefly land on the profile setup screen before the suspending check completes. For a user with cognitive fog who opens the app expecting to see their history, briefly landing on a profile setup screen is disorienting. The actual navigation is brief and self correcting because of the `popUpTo` calls, but the flicker is real.
+- **Recommended change (framing only):** flag this to the Android Engineer as a Phase 1 polish note. The fix is to compute `startDestination` only after both checks have resolved (either gate the `NavHost` behind a small splash or load both values in a single suspending block before the first composition picks a destination). The Patient Advocate is not specifying the implementation. For Phase 1 close, this is a low severity flicker that does not affect correctness.
+
+### Cross cutting observations (not numbered as issues)
+
+1. **Tap target sizing across all screens.** The Patient Advocate flags this as a cross cutting concern but defers technical implementation to the Accessibility Specialist (agent 12), who owns the WCAG 2.1 AA tap target rule. The Patient Advocate's standing position is that 48 dp minimum applies to every interactive element, no exceptions, and that the `IconButton` for Settings in `HomeScreen.kt` line 45 specifically should be measured. No concrete change is requested here; this is a forwarded observation to the Accessibility Specialist for the Phase 11 audit.
+
+2. **Material 3 type scale defaults.** All screens use `MaterialTheme.typography.titleMedium`, `bodyLarge`, `bodySmall`, etc., which means Dynamic Type will work later when the user changes the system font scale. This is the right pattern. Issue 16 is the one place where the typography choice is wrong for the content; everything else is using the scale correctly and should be preserved.
+
+3. **No flashing animations, no rapid auto advances.** Confirmed by code reading. Phase 2 polish must preserve this.
+
+4. **No streaks, no badges, no gamification.** Confirmed. Phase 11 retention work must not introduce them silently.
+
+5. **No clinical claim leakage.** No copy in the reviewed surface implies the application diagnoses, treats, or interprets results clinically. The disclaimer in Issue 5 and the about text in Issue 16 are the two places where the wellness vs medical device boundary is restated; both are present and correct in substance even where the rendering needs work.
+
+### Uncertainties (Patient Advocate did not assert these as findings)
+
+1. The proposal in Issue 4 to make `heightCm` nullable is a Room schema change and a SPEC.md change. The Patient Advocate flags it as a recommendation only. The PM and the Data Engineer (agent 05) and the Database Administrator (agent 06) decide whether nullable height is in scope for Phase 1.
+2. The proposal in Issue 5 to soften the disclaimer wording from SPEC.md Section 10 ("Share with your neurologist for clinical decisions") to a warmer ("you can share these results to help the conversation") needs the Compliance Reviewer (agent 21) to ratify before it ships. The Patient Advocate is not asserting that the warmer version is regulatorily safe; it is a copy proposal that has to be vetted by the role that owns FDA SaMD framing.
+3. The "edit profile" path in Issue 17 may interact with how the SPEC.md "append only at the Session level" rule applies to `UserProfileEntity`. SPEC.md Section 8 is silent on whether the user profile is mutable or whether profile edits should produce a new row. The Patient Advocate flags this as a Data Engineer decision.
+4. The Patient Advocate did not run the application on a physical device. All findings are from reading the source. The Patient Advocate has high confidence in the copy and labeling findings (Issues 1, 5, 6, 7, 9, 12, 13, 15, 16) and in the structural findings that follow from clear code patterns (Issues 2, 3, 4, 11, 14, 17, 18). Issue 10 is the one finding where running the application on a device would sharpen the recommendation; the source level conclusion is sufficient to flag it now.
+
+### Handoff
+
+The Patient Advocate hands back to the Project Manager. The PM ratifies the recommended copy and labeling changes (and the schema and compliance items flagged in the uncertainties), then dispatches the Android Engineer (agent 03) to apply the changes, the Compliance Reviewer (agent 21) to ratify the disclaimer rewording, and the Data Engineer (agent 05) to weigh in on the nullable height question. The Patient Advocate's next scheduled review is Phase 2 (Tap test).
+
+(End of 2026-05-07 Phase 1 entry. Append only convention: this entry is not edited in place. Subsequent reviews append new dated sections.)
