@@ -1,0 +1,383 @@
+# Compliance Review, MS Neuro Battery
+
+This is a living document maintained by the Compliance Reviewer (agent 21). Every entry records the date, the regulatory regime considered, the artifact reviewed, the specific wording or behavior reviewed, the relevant regulatory text with citation, and a verdict of COMPLIANT, NON COMPLIANT (with recommended remediation), or AMBIGUOUS (needs legal counsel beyond what this agent can decide).
+
+The Compliance Reviewer holds veto power on regulatory drift. The veto can only be overridden by the user.
+
+## Entry 1, Phase 0 initial review
+
+**Date:** 2026-05-07
+**Reviewer:** Compliance Reviewer (agent 21)
+**Artifacts reviewed:**
+- `SPEC.md` (full document, with focus on Section 1 vision, Section 2 problem statement, Section 4 non goals, Section 6 test descriptions, Section 9 validation, Section 10 privacy and safety, Section 13 risks).
+- `README.md` (full document, current stub state from the GitHub initial commit).
+
+**Authoritative sources consulted in this session:**
+- FDA, "General Wellness: Policy for Low Risk Devices," final guidance, originally issued 2016-07-29, superseded by the 2019 update, reissued on 2026-01-06. Published at https://www.fda.gov/regulatory-information/search-fda-guidance-documents/general-wellness-policy-low-risk-devices. Two factor test and chronic disease language quoted below.
+- FDA, "Step 3: Is the Software Function Intended For Maintaining or Encouraging a Healthy Lifestyle?" decision page on the Digital Health Center of Excellence site, https://www.fda.gov/medical-devices/digital-health-center-excellence/step-3-software-function-intended-maintaining-or-encouraging-healthy-lifestyle. (Page returned a transient 404 to the WebFetch tool during this review session; the policy text quoted below is taken from the FDA guidance document and from secondary summaries that quote the guidance verbatim. Re verify before Phase 5 sign off.)
+- Google Play, "Health Content and Services" policy, https://support.google.com/googleplay/android-developer/answer/16679511, current as of the 2026-04-15 effective date for the Developer Program Policies.
+- Google Play, "Health app categories and additional information," https://support.google.com/googleplay/android-developer/answer/13996367, recognizing three categories: Health and Fitness, Medical, and Human Subjects Research.
+- 45 CFR 160.103 (HIPAA definitions), via the HHS HIPAA portal and the Cornell Legal Information Institute mirror at https://www.law.cornell.edu/cfr/text/45/160.103.
+- GDPR Article 4 (definitions), https://gdpr-info.eu/art-4-gdpr/.
+
+## 1. Regulatory framing assessment
+
+### 1.1 FDA Software as a Medical Device classification
+
+**Quoted policy text (FDA General Wellness guidance, two factor test):**
+
+> "For purposes of this guidance, CDRH defines general wellness products as products that meet the following two factors: (1) are intended for only general wellness use, as defined in this guidance, and (2) present a low risk to the safety of users and other persons."
+
+> "A general wellness product has (1) an intended use that relates to maintaining or encouraging a general state of health or a healthy activity, or (2) an intended use that relates the role of healthy lifestyle with helping to reduce the risk or impact of certain chronic diseases or conditions and where it is well understood and accepted that healthy lifestyle choices may play an important role in health outcomes."
+
+> "If the product is invasive, involves an intervention or technology that may pose a risk to a user's safety if device controls are not applied (such as risks from lasers, radiation exposure, or implants), raises novel questions of usability, or raises questions of biocompatibility, then the device is not covered by this guidance."
+
+**The 21st Century Cures Act, codified at section 520(o)(1)(B) of the FD&C Act,** statutorily excludes from the medical device definition software functions that are "intended for maintaining or encouraging a healthy lifestyle and is unrelated to the diagnosis, cure, mitigation, prevention, or treatment of a disease or condition."
+
+**Application to MS Battery:**
+
+| Factor | MS Battery position |
+|--------|---------------------|
+| Invasive? | No. Touchscreen, IMU, microphone, camera. |
+| Lasers, radiation, implants? | No. |
+| Novel usability or biocompatibility risks? | No. Standard Android sensors. |
+| Intended use claims diagnosis, cure, mitigation, prevention, or treatment of MS? | No. Section 4 lists "Diagnose or treat MS or any other condition" and "Replace clinical assessment" as explicit non goals. |
+| Intended use is to maintain or encourage a healthy activity (self administered weekly tests for self awareness and to share with a neurologist)? | Yes, when worded carefully. |
+
+**Verdict: COMPLIANT, with specific wording fixes recommended in Section 4 of this review.** The application as designed sits within the General Wellness framework provided certain phrases in `SPEC.md` and `README.md` are tightened. The application does not diagnose, does not treat, does not prescribe, does not replace clinical assessment, does not declare the `INTERNET` permission, does not transmit data off device, and explicitly defers FDA clearance as a non goal. The five tests are positioned as an objective, self administered record that the user can share with a neurologist.
+
+**Floodlight MS (Roche)** ships in 17 countries on iOS and Android without FDA clearance, classifying as wellness, with similar test composition (gait, cognition, vision, hand function). MS Battery's positioning is strictly more conservative than Floodlight's because (a) it does no cloud sync, (b) it does not aggregate population data, and (c) it does not run as a Roche-supervised study. **MS Sherpa (Orikami, Netherlands)** is a CE Class I medical device prescribed by a doctor; MS Battery deliberately avoids that path and `SPEC.md` Section 4 non goal 3 ("Earn FDA clearance in this initial scope") confirms this.
+
+**Note on the 2026-01-06 FDA reissue.** The General Wellness guidance was reissued by FDA on January 6, 2026. Per industry summaries (Faegre Drinker, January 2026; Kendall PC, 2026), the 2026 reissue takes "a broader approach of what constitutes nondevice wellness products than the previous guidance," explicitly extending the framework to "noninvasive wearable products that measure activity, recovery, sleep, pulse, or fitness related biomarkers" when "intended solely for wellness use." The two factor test from the 2016 and 2019 versions remains in force. MS Battery's positioning continues to clear the 2026 framework.
+
+### 1.2 HIPAA scope
+
+**Quoted policy text (45 CFR 160.103):**
+
+> "Covered entity means: (1) A health plan. (2) A health care clearinghouse. (3) A health care provider who transmits any health information in electronic form in connection with a transaction covered by this subchapter."
+
+> "Business associate means, with respect to a covered entity, a person who: (i) On behalf of such covered entity ... creates, receives, maintains, or transmits protected health information for a function or activity regulated by this subchapter."
+
+**Application to MS Battery:**
+
+- MS Battery is not a health plan.
+- MS Battery is not a health care clearinghouse.
+- MS Battery is not a health care provider. It does not deliver care, does not bill, does not transmit health information in electronic form in connection with a HIPAA transaction (claims, eligibility, payment, etc.).
+- MS Battery is not a business associate. There is no covered entity on whose behalf MS Battery creates, receives, maintains, or transmits protected health information. The application stores test results on the user's own device. The user, acting on their own initiative, may export a PDF and share it with their neurologist; that exchange is between two natural persons, the patient and the patient's clinician, and does not put the application or its developer into HIPAA scope.
+
+**Verdict: COMPLIANT.** MS Battery is outside HIPAA scope as currently designed. This conclusion holds as long as: (a) no backend is added that receives data from the application, (b) no contractual arrangement with a covered entity is entered into where MS Battery would receive PHI on the entity's behalf, (c) no functionality is added that transmits health information electronically in connection with a HIPAA transaction.
+
+`SPEC.md` Section 10's claim, "This shape avoids HIPAA scope (the application is not a covered entity or business associate, and never receives data on a server)," is accurate.
+
+### 1.3 GDPR scope
+
+**Quoted policy text (GDPR Article 4):**
+
+> "'personal data' means any information relating to an identified or identifiable natural person ('data subject')"
+>
+> "'processing' means any operation or set of operations which is performed on personal data or on sets of personal data, whether or not by automated means, such as collection, recording, organisation, structuring, storage, adaptation or alteration, retrieval, consultation, use, disclosure by transmission, dissemination or otherwise making available, alignment or combination, restriction, erasure or destruction"
+>
+> "'data concerning health' means personal data related to the physical or mental health of a natural person, including the provision of health care services, which reveal information about his or her health status"
+>
+> "'controller' means the natural or legal person, public authority, agency or other body which, alone or jointly with others, determines the purposes and means of the processing of personal data"
+
+**Application to MS Battery:**
+
+- The application processes special category data within the meaning of Article 9(1) (data concerning health) when it computes and stores test features such as cadence, stride length, jitter, shimmer, SDMT correct count, and Sloan score. That processing happens locally on the data subject's own device.
+- Recital 18 of the GDPR ("This Regulation does not apply to the processing of personal data by a natural person in the course of a purely personal or household activity") and Article 2(2)(c) of the GDPR exempt processing carried out by a natural person in the course of a purely personal or household activity from GDPR scope. Self administered tests recorded on the user's own device for the user's own benefit fit that exemption from the data subject's perspective.
+- From the developer's perspective, however, the question is whether the developer is a "controller" of personal data. As long as the application does not transmit data off device, does not collect telemetry, does not declare the `INTERNET` permission, and the developer therefore never receives any personal data, the developer is not a controller of any data subject's personal data through the application's normal operation.
+- The Phase 11 beta cohort changes this. If a beta tester is in the EU, and the developer collects survey responses, that survey response collection is a processing activity for which the developer is a controller. That activity is governed by GDPR. See Section 3 of this review for the consent text requirements that follow.
+
+**Verdict: COMPLIANT for the application's normal operation. Conditionally compliant for the Phase 11 beta cohort, conditional on the consent text described in Section 3.** No remote processing of personal data occurs through the application. `SPEC.md` Section 10's privacy posture is sufficient. Any wording that implies remote processing or any future telemetry would change this verdict immediately.
+
+### 1.4 Google Play Health Apps policy
+
+**Quoted policy text (Google Play, Health Content and Services):**
+
+> "We don't allow apps with health and medical related functionalities that are misleading or potentially harmful."
+>
+> Apps offering medical features must include "a clear disclaimer in their app description indicating that the app is 'not a medical device and does not diagnose, treat, cure, or prevent any medical condition.'"
+>
+> Developers must "remind users to consult a healthcare professional for medical advice, diagnosis, or treatment."
+>
+> "Apps that are regulated as a medical device must provide proof of approval, clearance or certification by the relevant authority upon request."
+
+**Quoted policy text (Google Play, Health App Categories):**
+
+> Health and Fitness Apps: "Apps that help users manage their health and fitness. These apps usually inform or let users track or sync information about their personal health and fitness" including fitness, nutrition, wellness, and sleep tracking.
+>
+> Medical Apps: "Apps that provide medical information, resources, or tools to users to enhance medical care, facilitate diagnosis and treatment, and improve overall health outcomes." This category includes "Software as a Medical Device (SaMD) apps regulated by entities like the FDA."
+
+**Application to MS Battery:**
+
+- MS Battery is a Health and Fitness app per Play's category definitions, not a Medical app. It tracks self administered objective test results for the user's personal benefit. It does not provide medical information, does not facilitate diagnosis, and does not facilitate treatment.
+- The disclaimer required by Play Health Content and Services policy is already specified in `SPEC.md` Section 10: "This is not a medical device. It does not diagnose or treat any condition. Do not change your treatment based on these results. Share with your neurologist for clinical decisions." This is verbatim within the policy's expected disclaimer language.
+- The Play Console listing copy, drafted in Phase 11, must mirror this disclaimer text and must not contain any clinical claim. Final Play Console review by the Compliance Reviewer is scheduled for Phase 11.
+- The Health apps declaration form on the App content page in Play Console must be completed accurately by the DevOps Engineer in Phase 11. The Compliance Reviewer reviews the declaration before submission.
+
+**Verdict: COMPLIANT, conditional on Phase 11 Play Console listing copy matching the SPEC Section 10 disclaimer and the Health apps declaration being completed honestly.**
+
+## 2. Disclaimer text review
+
+**Proposed text (SPEC.md Section 10, first launch disclaimer):**
+
+> "This is not a medical device. It does not diagnose or treat any condition. Do not change your treatment based on these results. Share with your neurologist for clinical decisions."
+
+**Evaluation:**
+
+The proposed text covers:
+- Negation of medical device status: "This is not a medical device."
+- Negation of diagnostic claim: "It does not diagnose ... any condition."
+- Negation of treatment claim: "It does not ... treat any condition."
+- Direction not to alter treatment based on the application: "Do not change your treatment based on these results."
+- Direction to involve the clinician: "Share with your neurologist for clinical decisions."
+
+This is the minimum required by the Google Play Health Content and Services policy and tracks the FDA non device positioning closely.
+
+**Recommended additions, ranked by priority:**
+
+1. **(Recommended.)** Add an explicit non validation statement: "These results are not validated for any clinical use." This reduces the chance that a user, or a clinician viewing the exported PDF, treats a single number as a clinical measurement. The application's own Phase 5 validation work establishes accuracy against measured ground truth, not clinical fitness for any specific clinical decision; the disclaimer should make that boundary clear.
+
+2. **(Recommended.)** Explicitly direct the user not to make any treatment decision, not just not to "change" treatment. Some users have not yet started treatment. Suggested addition: "Do not start, stop, or change any treatment based on these results."
+
+3. **(Recommended.)** Explicitly point the user to neurologist led care as the primary clinical pathway, not a generic clinician. The current text already says "neurologist," which is the right specialty for MS; keep that specificity.
+
+4. **(Optional, considered.)** A pointer to call the patient's clinician or emergency services in the case of a sudden change in symptoms. This is standard for some health apps but risks crossing into clinical advice itself ("if your symptoms suddenly worsen, call ..."). Recommendation: do not include this in the first launch disclaimer; if a "what to do if symptoms change" pointer is wanted, route the user to public, neutral resources rather than the application itself making the recommendation. Defer this to the Patient Advocate's review.
+
+5. **(Optional, considered.)** A statement that the application is "for personal informational use only." This is conventional in wellness disclaimers and harmless to include.
+
+**Recommended final disclaimer text:**
+
+> "This is not a medical device. It does not diagnose or treat any condition. Results are not validated for any clinical use. Do not start, stop, or change any treatment based on these results. Share results with your neurologist for clinical decisions."
+
+This rewrite is offered for the Documentation Engineer (or Android Engineer when the disclaimer screen is implemented) to consider; the final wording is the user's call. The Compliance Reviewer's veto applies to wording that drifts in the opposite direction (toward clinical claims), not to the user's editorial preferences within the wellness frame.
+
+## 3. Beta cohort consent text scope
+
+The beta cohort runs in Phase 11. Per `SPEC.md` Section 9 item 4, the cohort is 10 to 20 people including a target of 2 to 3 self identified MS patients recruited through an MS support community. The full consent text is Phase 11 work. The Compliance Reviewer specifies the must have elements now so that Phase 11 can draft against a fixed checklist.
+
+**Mandatory elements of the beta cohort consent text:**
+
+1. **Purpose of the beta.** State plainly: gathering feedback on usability, perceived value, and clarity of the report. State explicitly that the beta is not a clinical trial and is not regulated as one.
+
+2. **Status of the application.** Restate the wellness positioning verbatim: "This is not a medical device. It does not diagnose or treat any condition. Results are not validated for any clinical use."
+
+3. **Data on device only.** State that all test data is stored on the participant's own device, that the application does not transmit data to any server, and that the participant's results are visible only to the participant unless the participant chooses to share them.
+
+4. **What the developer receives.** State exactly what the developer receives from the participant: survey responses on usability and value, plus any free text feedback the participant chooses to send. State that no test results, no audio recordings, no IMU traces, and no PDF exports are sent to the developer unless the participant explicitly attaches them to a feedback message.
+
+5. **Right to withdraw.** State that the participant may withdraw at any time, for any reason, without giving a reason, by uninstalling the application and notifying the developer. State that withdrawal incurs no penalty.
+
+6. **Contact information.** Provide a real, monitored email address for the developer. State the response time expectation honestly (for example, "within a week").
+
+7. **No compensation.** State explicitly that the beta is unpaid. Do not imply that participation is a service to the MS community in language that would obligate participation.
+
+8. **No clinical advice from the developer.** State explicitly that the developer is not a clinician, does not provide clinical advice, and cannot interpret the participant's results clinically. Direct any clinical questions to the participant's own neurologist.
+
+9. **GDPR specific elements (if any EU participant joins the cohort).** If even one beta participant is in the EU, GDPR Article 7 conditions for consent apply, plus the lawful basis for processing under Article 6, plus the special category basis under Article 9(2)(a) (explicit consent for processing data concerning health) for any survey response that touches health. The consent must be:
+   - Freely given, specific, informed, and unambiguous.
+   - Separable from other terms (a single tick box, not bundled with general app terms).
+   - Withdrawable as easily as it was given.
+   - Documented (the developer must be able to demonstrate that the participant consented).
+   The consent text must also list the data subject rights in Articles 15 to 21 (access, rectification, erasure, restriction, portability, objection) and the right to lodge a complaint with a supervisory authority (Article 77).
+
+10. **Risk acknowledgment.** State the realistic risks of beta participation: the application is pre release, may crash, may produce incorrect results, and may not work on every device. Direct the participant not to rely on the application for any clinical purpose during the beta.
+
+11. **Identification.** Identify the developer (Mustafan4x, individual developer, plus an email address). Do not present the project as institutionally backed; it is not.
+
+The full consent text and the Phase 11 review pass on it are deferred to Phase 11. The above is the scope checklist.
+
+## 4. Specific wording drift to fix now
+
+The Compliance Reviewer reviewed `SPEC.md` and `README.md` line by line for wording that drifts toward clinical claims and identified the following items. None are individually fatal; collectively they are worth fixing before Phase 1 begins because the Documentation Engineer will be asked in Wave 2 to finalize the README, and these issues should feed directly into that pass.
+
+### Drift 4.1, README.md line 3, "neurological battery"
+
+**Quoted phrase:**
+
+> "lets people living with Multiple Sclerosis self administer a five test neurological battery once a week"
+
+**Why it drifts:**
+
+"Neurological battery" is conventional clinical terminology for a clinician administered assessment that produces results used in clinical decision making (for example, in a neurologist's exam room or in a clinical trial). Used in user facing copy on a wellness app, the phrase is on the boundary, because it implies clinical equivalence to a neurologist's assessment.
+
+**Recommended replacement:**
+
+> "lets people living with Multiple Sclerosis self administer a short, sensor backed set of five tests once a week"
+
+The phrase "sensor backed" is honest about what the application actually does (uses phone sensors), and "set of five tests" avoids the term of art "battery" if the Documentation Engineer wants the strictest possible wording. If "battery" is retained for brand and project name purposes, prefer "wellness battery" or "self administered battery" over "neurological battery" in user facing prose. The internal `SPEC.md` Section 1 and the project name "MS Neuro Battery" can keep the neuro framing because the spec is an internal document; the user facing README is what a Play reviewer or a regulator would read.
+
+### Drift 4.2, README.md line 5, "validated gait analysis pipeline"
+
+**Quoted phrase:**
+
+> "The technical centerpiece is a validated gait analysis pipeline that turns 30 seconds of phone IMU data into stride length, cadence, step time variability, and stride asymmetry, validated against a measured walking course."
+
+**Why it drifts:**
+
+"Validated" is a term of art with two meanings: (a) engineering validation, meaning the pipeline's outputs match measured ground truth on a known input, and (b) clinical validation, meaning the pipeline's outputs predict a clinical outcome. The Phase 5 validation work in `SPEC.md` Section 7.2 is purely (a). Used without qualification, "validated" can read as (b) to a clinician or a Play reviewer.
+
+The phrase also uses "validated" twice in one sentence, which compounds the problem.
+
+**Recommended replacement:**
+
+> "The technical centerpiece is a gait analysis pipeline that turns 30 seconds of phone IMU data into stride length, cadence, step time variability, and stride asymmetry. Pipeline accuracy is validated against a measured walking course; the validation methodology and achieved error numbers are documented in the project's Validation section."
+
+This rephrasing makes it explicit that what is validated is the pipeline's engineering accuracy, not a clinical claim. It also signposts to the Validation section instead of leaving "validated" as a free standing claim.
+
+### Drift 4.3, SPEC.md Section 2 lines 16 and 18, "tracked", "deteriorate silently", "detected late"
+
+**Quoted phrases:**
+
+> "Disease activity and disability are tracked using the Expanded Disability Status Scale (EDSS), which is administered by a neurologist during clinic visits scheduled every three to six months. Between those visits patients deteriorate silently, with no objective record of how their walking, hand dexterity, vision, cognition, or speech is changing day by day or week by week."
+
+> "The clinical consequence is that subtle relapses or gradual progression are often detected late."
+
+**Why it drifts:**
+
+These phrases sit in the problem statement, which explains why the project exists. They describe a clinical reality (disease activity is tracked clinically; relapses can be missed between visits; progression is silent). They do not, on their face, claim that the application diagnoses or treats. However, the implicit narrative is that the application fills the "tracked" and "detected" gap: the reader is meant to infer that the application offers an objective record that helps catch what is otherwise missed.
+
+The internal SPEC.md is allowed to be more direct about its motivation than the user facing README; SPEC.md is not a Play listing or a marketing surface. **No change is required to `SPEC.md` Section 2 itself.** The drift only matters if these phrases bleed into the README or the Play listing.
+
+**Recommended action:**
+
+- Leave `SPEC.md` Section 2 as is.
+- Phase 0 README finalization (Documentation Engineer in Wave 2) **must not** carry the phrases "deteriorate silently," "detected late," or "monitor disease activity" into the README or any user facing surface. The README's framing of the problem should be either (a) silent on disease detection and focused on the patient's experience of self awareness and clinic prep, or (b) phrased in clearly informational terms ("MS clinics typically see patients every three to six months; some people want a record between visits to discuss with their neurologist").
+
+### Drift 4.4, SPEC.md Section 2 line 18, "self administered clinical tool"
+
+**Quoted phrase:**
+
+> "There are research apps in this space, most notably Roche's FLOODLIGHT, but they are study only, locked to specific protocols, and not available to the broader MS community as a self administered clinical tool."
+
+**Why it drifts:**
+
+"Self administered clinical tool" implies that MS Battery is a clinical tool. A clinical tool is a tool used in clinical decision making. The application is positioned as wellness, not as a clinical tool.
+
+**Recommended replacement (for the SPEC.md):**
+
+> "There are research apps in this space, most notably Roche's FLOODLIGHT, but they are study only, locked to specific protocols, and not available to the broader MS community as a self administered self tracking application."
+
+Substituting "self tracking application" for "clinical tool" preserves the comparison to Floodlight without claiming MS Battery is a clinical instrument.
+
+### Drift 4.5, README.md line 9, "Phase 0 (project scaffold) is the next phase"
+
+**Quoted phrase:**
+
+> "Bootstrap complete. Phase 0 (project scaffold) is the next phase."
+
+**Why it drifts (not regulatory; status accuracy):**
+
+This is not a compliance issue but is worth flagging in the same pass: per `STATUS.md`, Phase 0 is in progress (started 2026-05-07), not "the next phase." The Documentation Engineer's Wave 2 README pass should reconcile.
+
+**Recommended replacement:**
+
+> "Phase 0 (bootstrap setup) is in progress. See `STATUS.md` for the current state."
+
+### Drift 4.6, SPEC.md Section 6.3 line 159, "validated for tracking optic neuritis recovery and progression"
+
+**Quoted phrase:**
+
+> "Sloan low contrast acuity, validated for tracking optic neuritis recovery and progression in MS."
+
+**Why it drifts:**
+
+This phrase describes the **clinical literature on the Sloan chart**, not a claim about MS Battery's app. Read in context (Section 6.3 is the clinical basis subsection of the test description), it is accurate: Sloan is in fact validated in MS literature for that purpose. **No change required to `SPEC.md`.** This sentence must not be lifted verbatim into the README without context, because in user facing copy it would read as a claim that the application tracks optic neuritis recovery and progression. The Documentation Engineer should describe what the test does ("a low contrast letter chart") in the README and reserve the clinical pedigree language for the SPEC and the docs/source/clinical-references.md.
+
+### Drift 4.7, SPEC.md Section 6.4 line 167, "sensitivity to MS related cognitive change"
+
+**Quoted phrase:**
+
+> "Strong test retest reliability and sensitivity to MS related cognitive change."
+
+**Why it drifts:**
+
+Same pattern as 4.6: this is a description of the SDMT's clinical pedigree, accurate in context, not a claim that MS Battery detects cognitive change. **No change required to `SPEC.md`.** Same caveat: this language should not be lifted into user facing copy without rephrasing.
+
+### Drift 4.8, SPEC.md Section 7.1.1 line 211, "highly discriminating in the MS literature"
+
+**Quoted phrase:**
+
+> "Per stride features ... are highly discriminating in the MS literature"
+
+**Why it drifts (in context of a derived user facing artifact):**
+
+Same pattern. Accurate description of the literature, allowed in `SPEC.md` and `docs/source/clinical-references.md`, must not bleed into user facing copy as a claim that the application discriminates MS from non MS in any individual user.
+
+### Summary of wording drift
+
+| Item | Artifact | Verdict | Action owner |
+|------|----------|---------|--------------|
+| 4.1 "neurological battery" | README | NON COMPLIANT for Phase 0 final README | Documentation Engineer in Wave 2 |
+| 4.2 "validated gait analysis pipeline" | README | NON COMPLIANT for Phase 0 final README | Documentation Engineer in Wave 2 |
+| 4.3 "deteriorate silently," "detected late" | SPEC.md (internal); risk on README | COMPLIANT in SPEC.md, must not propagate to README | Documentation Engineer in Wave 2 |
+| 4.4 "self administered clinical tool" | SPEC.md | NON COMPLIANT in SPEC.md; recommend rephrase | PM or Documentation Engineer |
+| 4.5 status line | README | Inaccurate, not a compliance issue | Documentation Engineer in Wave 2 |
+| 4.6 Sloan clinical pedigree | SPEC.md Section 6.3 | COMPLIANT in SPEC.md, must not propagate to README without context | Documentation Engineer in Wave 2 |
+| 4.7 SDMT clinical pedigree | SPEC.md Section 6.4 | COMPLIANT in SPEC.md, must not propagate to README without context | Documentation Engineer in Wave 2 |
+| 4.8 per stride features discriminating in MS literature | SPEC.md Section 7.1.1 | COMPLIANT in SPEC.md, must not propagate to user facing copy | Documentation Engineer in Wave 2 |
+
+## 5. Veto register
+
+The Compliance Reviewer will exercise veto power on any of the following changes from this point forward. Each veto can be overridden only by the user (per `agents/21-compliance-reviewer.md` and `docs/plan.md` coordination rules).
+
+1. **Adding any clinical claim to user facing copy.** Includes phrases of the form: "detects MS progression," "monitors disease activity," "tracks your MS," "diagnoses optic neuritis," "predicts relapse," "measures your disability," or any equivalent wording in the application UI, README, Play listing, PDF report, or beta consent text.
+
+2. **Adding the `INTERNET` permission to `AndroidManifest.xml`.** This veto is held jointly with the Security Engineer (agent 07). Adding `INTERNET` would convert the application from a self contained on device wellness application to a connected application, which would invalidate the HIPAA scope analysis in Section 1.2 and require re evaluation under Play Health Apps policy. The veto applies regardless of stated purpose for adding the permission.
+
+3. **Adding cloud sync, telemetry, analytics SDK, or any backend service that receives data from the application.** Same reason as item 2; same joint veto with Security Engineer.
+
+4. **Adding an account, login, or remote identifier system.** Same reason; would put the developer into a controller relationship for personal data and require GDPR compliance work that is currently scoped out.
+
+5. **Suggesting in any user facing surface that the application be used to make treatment decisions.** Includes phrases of the form: "if your stride length drops, talk to your neurologist about adjusting your treatment," or "your test scores indicate disease activity is increasing." The application is allowed to display objective results; it is not allowed to recommend treatment changes.
+
+6. **Aggregating user data into population statistics that are then displayed back to the user as comparisons.** "Your stride length is in the bottom 25 percent of MS patients your age" implies a clinical comparison and is closer to a clinical claim. Reference range overlays (Phase 9) on charts must be drawn from published norms in `docs/source/clinical-references.md` and labeled as informational, not diagnostic, with a visible disclaimer on each chart.
+
+7. **Allowing the PDF report to imply diagnosis or recommend action.** The PDF report (Phase 10) is a record of objective measurements over time. It can include reference ranges from published literature with informational labels. It must not include sentences of the form "your results suggest worsening MS," "consider increasing your dose," "this is consistent with a relapse," or anything else a Play reviewer or an FDA reviewer would read as a clinical interpretation.
+
+8. **Releasing to a Play Store track (internal, closed, open, production) without a final compliance pass on the Play Console listing copy and the Health apps declaration form.** Phase 11 only.
+
+9. **Recruiting EU based beta participants without a GDPR compliant consent text.** See Section 3 above.
+
+10. **Any change in the framing of the application as a clinical, medical, or diagnostic product, in any artifact under the project root.** This is a catch all for cases not enumerated above.
+
+## 6. Coordination notes for Wave 2
+
+The Documentation Engineer (agent 14) is dispatched in Wave 2 to finalize the README and write `docs/architecture.md`. The following items from this review feed directly into that work:
+
+- Apply the rewrites in Section 4.1, 4.2, 4.5 to the README.
+- Do not propagate the phrases listed in Section 4.3, 4.6, 4.7, 4.8 from the SPEC.md into the README.
+- The recommended final disclaimer text in Section 2 may be used as the on screen disclaimer copy when the Android Engineer implements the first launch disclaimer screen in Phase 1. The Documentation Engineer should consider whether the same wording belongs in the README's Disclaimer section. Today's README Disclaimer section is acceptable but does not include the "results are not validated for any clinical use" line; recommended to add it.
+- The Compliance Reviewer is available for a quick review of the finalized README before Phase 0 close.
+
+The PM (agent 00) should consider whether to also dispatch the Compliance Reviewer for a quick re read of `SPEC.md` Section 2 to apply the recommended rewrite in Section 4.4 of this review (replacing "self administered clinical tool" with "self administered self tracking application"). This is a one line edit.
+
+## 7. Open questions and uncertainty
+
+The Compliance Reviewer flags the following items where certainty was not reached and judgment is deferred to the user or to Phase 11:
+
+1. **The 2026-01-06 FDA General Wellness reissue.** The FDA's own page returned a 404 to the WebFetch tool during this review session. The two factor test and the chronic disease language quoted in Section 1.1 of this review are taken from the FDA guidance text as historically published and from secondary summaries that quote it verbatim. The 2026 reissue is reported by industry summaries (Faegre Drinker, Kendall PC) to broaden the wellness scope rather than narrow it, which strengthens MS Battery's position rather than weakening it. The Compliance Reviewer recommends a re fetch of the FDA page before the Phase 5 sign off and again before the Phase 11 sign off, in case the reissue contains specific examples or new restrictions that affect MS Battery's positioning. Stale recollection is not an acceptable basis for a Phase 11 sign off.
+
+2. **EU residency of beta participants.** The Phase 11 beta cohort plan in `SPEC.md` Section 9 does not specify recruitment geography. If the MS support community used for recruitment is global, EU participants are likely. The full GDPR consent obligations in Section 3 item 9 of this review activate as soon as one EU participant joins. The PM should decide ahead of Phase 11 whether to (a) restrict beta recruitment to non EU participants and document that restriction, (b) prepare the GDPR compliant consent text for any participant, or (c) have the Compliance Reviewer flag any specific recruitment channel before it is used.
+
+3. **State law overlay in the United States.** Some US states (notably California with the CCPA and CMIA, Washington with the My Health My Data Act, and Connecticut, Colorado, Utah, Virginia with their respective privacy acts) have health data laws that are stricter than HIPAA and that apply to entities outside HIPAA scope. The Compliance Reviewer has not done a state by state review in this Phase 0 pass. As long as the application processes data only on the user's own device and the developer receives no personal data, the state law exposure is limited; but the moment the beta cohort survey responses are collected, US state privacy laws may apply. Recommend a focused state law review before Phase 11.
+
+4. **The PDF export and the user's neurologist.** When the user shares the PDF with a neurologist, the neurologist may be a HIPAA covered entity. The neurologist's receipt of the PDF is not a HIPAA covered transaction (it is a patient providing the patient's own information to the patient's own provider). The application is not in the loop. This is the conventional analysis and the Compliance Reviewer is confident in it. Flagging it here for the record so that future reviewers do not raise it as a new question.
+
+5. **The "Clinical basis" subsection in each Section 6 test description.** These are accurate descriptions of the published clinical literature for each test, not claims about MS Battery. They are appropriate in `SPEC.md` (an internal design document) and would also be appropriate in a "References" or "Test design rationale" section of the README that is clearly framed as referencing the literature, not as making a claim about the application. If the Documentation Engineer wants to include this material in the README, the framing must be: "these tests are designed to mirror the following published clinical instruments," not: "this application detects what the following clinical instruments detect."
+
+## 8. Verdict for Phase 0 close
+
+- **`SPEC.md` Section 4 non goals:** COMPLIANT. The non goals explicitly disclaim diagnosis, treatment, FDA clearance, and replacement of clinical assessment.
+- **`SPEC.md` Section 10 privacy and safety:** COMPLIANT. The disclaimer text is sufficient and the privacy posture is sufficient. Recommended additions in Section 2 of this review are non blocking.
+- **`SPEC.md` Section 13 risks and mitigations:** COMPLIANT. The mitigation for "Google Play review friction for a health app" correctly identifies wellness positioning and disclaimer presence as the route through review.
+- **`SPEC.md` other sections:** Drift items 4.4 (one phrase), 4.6, 4.7, 4.8 are acceptable in the SPEC.md as an internal design document; they must not propagate to user facing surfaces.
+- **`README.md` (current stub state):** NON COMPLIANT for Phase 0 final state. Drift items 4.1 and 4.2 require fixing in the Wave 2 Documentation Engineer pass. The current Disclaimer section is acceptable; the recommended addition of the non validation line is non blocking.
+
+**Recommendation to PM:** Phase 0 may close on the SPEC.md side without further changes (or with the optional one line edit in 4.4). Phase 0 may not close on the README side until the Wave 2 Documentation Engineer pass applies fixes 4.1, 4.2, and 4.5, after which the Compliance Reviewer will perform a quick re read.
+
+**Sign off (Phase 0, partial):** The Compliance Reviewer signs off on the regulatory framing of `SPEC.md` Section 4 non goals and Section 10 privacy and safety, conditional on the README revisions described above being completed before Phase 0 closes.
+
+---
+
+End of Entry 1.
