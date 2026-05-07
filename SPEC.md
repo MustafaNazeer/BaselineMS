@@ -17,7 +17,7 @@ Multiple Sclerosis is a chronic, progressive neurological disease that affects r
 
 The clinical consequence is that subtle relapses or gradual progression are often detected late. The patient experience consequence is that people feel powerless to track their own disease and often arrive at appointments unable to articulate what has changed since the last visit.
 
-There are research apps in this space, most notably Roche's FLOODLIGHT, but they are study only, locked to specific protocols, and not available to the broader MS community as a self administered clinical tool. There is a real and unfilled gap. Globally, the MS patient population skews toward Android devices, particularly outside the US and Western Europe, which strengthens the case for an Android first build.
+There are research apps in this space, most notably Roche's FLOODLIGHT, but they are study only, locked to specific protocols, and not available to the broader MS community as a self administered self tracking application. There is a real and unfilled gap. Globally, the MS patient population skews toward Android devices, particularly outside the US and Western Europe, which strengthens the case for an Android first build.
 
 ## 3. Target Users
 
@@ -27,6 +27,7 @@ There are research apps in this space, most notably Roche's FLOODLIGHT, but they
 - Owns an Android phone running Android 12 (API 31) or later.
 - Comfortable using a smartphone for at least basic tasks.
 - May have mild visual impairment, mild cognitive fatigue, mild hand tremor or weakness, and mild gait instability. The application must remain usable across all of these.
+- May also use a mobility aid (cane, walker, or wheelchair). The gait test offers a contextual skip path for users who cannot self administer a 30 second straight line walk; the rest of the battery remains accessible.
 - Wants a simple, weekly check in that produces a record they can share with their neurologist.
 
 ### Secondary user: the patient's neurologist

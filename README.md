@@ -18,7 +18,7 @@ This application is not a medical device. It does not diagnose or treat any cond
 
 ## Status
 
-Phase 0 (bootstrap setup) is in progress. See `STATUS.md` for the current state and `docs/plan.md` for the full multi phase plan.
+Phase 0 (bootstrap setup) is complete; Phase 1 (Foundation) is the next phase. See `STATUS.md` for the current state and `docs/plan.md` for the full multi phase plan.
 
 ## How it is built
 
