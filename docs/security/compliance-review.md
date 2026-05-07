@@ -381,3 +381,88 @@ The Compliance Reviewer flags the following items where certainty was not reache
 ---
 
 End of Entry 1.
+
+## Entry 2, Phase 0 carryover, finalized README re read
+
+**Date:** 2026-05-07
+**Reviewer:** Compliance Reviewer (agent 21)
+**Artifact reviewed:**
+- `/home/mustafa/src/MS-Battery/README.md` (current finalized state, post Wave 2 Documentation Engineer pass).
+
+**Authoritative sources consulted in this session:**
+- Entry 1 of this document (the prior Phase 0 review, in particular Section 4 wording drift items and Section 8 Phase 0 close verdict).
+- `SPEC.md` Section 4 non goals (no diagnosis, no treatment, no FDA clearance, no cloud sync, no EHR integration) and Section 10 privacy and safety. No new external policy fetches were necessary for this re read because the regulatory frame established in Entry 1 has not changed (the 2026-01-06 FDA General Wellness reissue, the Google Play Health Content and Services policy current as of 2026-04-15, 45 CFR 160.103, and GDPR Article 4 are all the same as during Entry 1, which was authored on the same date). Re fetch is still recommended ahead of Phase 5 sign off and Phase 11 sign off per Entry 1 Section 7 item 1.
+
+## 1. Verification of Wave 2 fixes
+
+The following items from Entry 1 Section 4 were tracked into the finalized README:
+
+| Drift item | Entry 1 verdict | Finalized README state | Verification |
+|------------|-----------------|------------------------|--------------|
+| 4.1 "neurological battery" in user facing copy | NON COMPLIANT for Phase 0 final README | Line 3 reads "self administer a short, sensor backed set of five tests once a week," matching the recommended replacement. The phrase "neurological battery" no longer appears in the README. The project name "MS Neuro Battery" remains in the title (allowed: project name, not a clinical claim). | FIXED |
+| 4.2 "validated gait analysis pipeline" | NON COMPLIANT for Phase 0 final README | Line 5 reads "The technical centerpiece is a gait analysis pipeline ... Pipeline accuracy is validated against a measured walking course; methodology and error numbers documented in the project's Validation section." "Validated" appears once, qualified as engineering validation against a measured ground truth, with a signpost to the Validation section. | FIXED |
+| 4.3 "deteriorate silently," "detected late," "monitor disease activity" must not propagate to README | Allowed in SPEC.md, must not appear in README | None of these phrases appear in the README. The Problem section frames the gap in patient experience terms ("a simple, self directed way to keep an objective record ... so that they can bring something concrete to their next neurology appointment") without claiming the application detects what is otherwise missed. | FIXED |
+| 4.5 "Phase 0 ... is the next phase" status line | Inaccurate, not regulatory | Line 21 reads "Phase 0 (bootstrap setup) is complete; Phase 1 (Foundation) is the next phase," matching `STATUS.md`. | FIXED |
+| 4.6, 4.7, 4.8 SPEC.md clinical pedigree language must not propagate to README | Allowed in SPEC.md, must not appear in README without rephrasing | None of the phrases "validated for tracking optic neuritis recovery and progression," "sensitivity to MS related cognitive change," or "highly discriminating in the MS literature" appear in the README. | FIXED |
+
+## 2. Section by section regulatory drift sweep on the finalized README
+
+The Compliance Reviewer re read every section of the README looking for any new drift introduced during Wave 2 finalization that was not anticipated in Entry 1.
+
+**Title and header (line 1).** "MS Neuro Battery" is the project name. Acceptable per Entry 1 Section 4.1.
+
+**Lead paragraphs (lines 3 to 5).**
+- "track results longitudinally on device" uses "track" as in tracking the user's own data points over time, parallel to "track your steps" or "track your sleep," not as in "tracking your MS" or "tracking disease activity." Acceptable wellness framing under FDA General Wellness guidance and Google Play Health and Fitness category.
+- "share a clinician facing PDF report" describes the format and intended reader of the export (a PDF that a neurologist can read), not a clinical instrument claim. The PDF is the same artifact that `SPEC.md` Section 8.3 describes; the Compliance Reviewer's veto in Entry 1 Section 5 item 7 applies to PDF *content* (no diagnostic interpretation, no treatment recommendation), not to the framing that the PDF is designed to be readable by a clinician. Acceptable.
+- "Pipeline accuracy is validated against a measured walking course; methodology and error numbers documented in the project's Validation section" is the recommended replacement for the prior "validated gait analysis pipeline" phrasing.
+
+**Problem section (lines 7 to 9).** The Problem section reframes the gap as "people living with MS often want a simple, self directed way to keep an objective record of how their walking, hand dexterity, vision, cognition, and speech are changing, so that they can bring something concrete to their next neurology appointment." This is patient experience framing, not disease detection framing. The closing sentence, "MS Neuro Battery aims to fill that gap as a personal record keeping tool, not as a diagnostic instrument," explicitly disclaims diagnostic status. Acceptable, in fact stronger than the minimum required.
+
+**Solution section (lines 11 to 13).** "Each test design mirrors a published clinical instrument; the application is not a substitute for any of those instruments and does not produce clinical interpretations." This is the framing pattern endorsed in Entry 1 Section 7 item 5: "these tests are designed to mirror the following published clinical instruments," not "this application detects what those instruments detect." Acceptable.
+
+**What this is not section (lines 15 to 17).** Reads: "This application is not a medical device. It does not diagnose or treat any condition. Results are not validated for any clinical use. Do not start, stop, or change any treatment based on these results. Share results with your neurologist for clinical decisions." This is verbatim the recommended final disclaimer text from Entry 1 Section 2, including the non validation line and the "do not start, stop, or change any treatment" expansion. Strongest acceptable form. Satisfies Google Play Health Content and Services disclaimer requirements (medical device disclaimer present, direction to consult a healthcare professional present).
+
+**Status section (lines 19 to 21).** Status accurate per `STATUS.md`. No regulatory content.
+
+**How it is built section (lines 23 to 31).** Architecture and pointer index. No regulatory content.
+
+**Privacy section (lines 33 to 35).** Factual statements about technical posture: no INTERNET permission, no cloud sync, no account, no analytics SDK, in memory audio processing, discarded camera frames, user initiated Share Intent. All claims are technically verifiable against the manifest and the source. No HIPAA, GDPR, or FDA implications. Acceptable.
+
+**Validation section (lines 37 to 39).** Reads: "Reserved for the validation numbers produced in Phase 5. Stride length error percent against a measured 25 meter walking course, cadence error percent, and test retest reliability (intraclass correlation coefficient) for the gait pipeline's primary features will be reported here once the experiments are complete." Frames the numbers as engineering accuracy against a measured ground truth, not as clinical validation. ICC is a standard test retest reliability statistic, not a clinical fitness claim. The section title is simply "Validation" rather than "Engineering validation" or "Pipeline accuracy validation"; the section body makes the scope unambiguous in the first sentence (stride length error against a measured walking course is an engineering metric). Acceptable. The Compliance Reviewer notes that future Phase 5 prose written into this section must not drift toward clinical validation language ("clinical accuracy," "diagnostic accuracy," "predictive value for MS progression," etc.). Phase 5 will be reviewed under the post test feedback wording task in `agents/21-compliance-reviewer.md`.
+
+**Retention section (lines 41 to 43).** Frames retention as product engagement (whether the user keeps using the application), not as clinical efficacy. The Galati et al. 2024 figure is cited as an empirical floor for product engagement, not as a clinical outcome. Acceptable.
+
+**Acknowledgments section (lines 45 to 52).** Two Floodlight Open citations. The framing "draw on two published analyses of the Floodlight Open dataset" describes the project's design influences, not clinical equivalence claims. Acceptable.
+
+**Repository section (lines 54 to 56).** GitHub URL only. No regulatory content.
+
+## 3. Verdict
+
+**`README.md` (finalized state):** COMPLIANT for Phase 0 close.
+
+The finalized README:
+- Sits cleanly within the FDA General Wellness framework (the application is positioned as wellness or research, not as a Software as a Medical Device; the wording avoids diagnosis, treatment, prevention, cure, and mitigation claims; the disclaimer is verbatim within the policy's expected language).
+- Sits cleanly outside HIPAA scope (no claim or hint of any data leaving the user's device).
+- Sits cleanly within the GDPR Recital 18 and Article 2(2)(c) household exemption analysis from Entry 1 Section 1.3, since the README does not introduce any backend, account, or remote identifier that would put the developer into a controller relationship.
+- Satisfies the Google Play Health Content and Services policy's disclaimer requirements (medical device disclaimer present, direction to consult a healthcare professional present, no medical claims, no clinical claims).
+- Categorizes cleanly into Google Play's Health and Fitness category (objective self administered test results tracked for the user's personal benefit), not the Medical category.
+- Does not propagate any of the Entry 1 Section 4.6, 4.7, 4.8 clinical pedigree language from `SPEC.md` into user facing copy.
+
+**Phase 0 carryover from Entry 1 Section 8:** CLEARED. The Wave 2 Documentation Engineer pass applied all recommended fixes and introduced no new drift.
+
+## 4. Open items carried forward
+
+The following items from Entry 1 remain open and are tracked for later phases. They are not Phase 0 carryover.
+
+- The 2026-01-06 FDA General Wellness reissue should be re fetched ahead of Phase 5 sign off and Phase 11 sign off (Entry 1 Section 7 item 1).
+- The PM should decide ahead of Phase 11 whether to restrict beta recruitment geography or prepare GDPR compliant consent text (Entry 1 Section 7 item 2).
+- A focused US state law review (CCPA, CMIA, My Health My Data Act, and other state privacy acts) is recommended before Phase 11 (Entry 1 Section 7 item 3).
+- The optional one line edit to `SPEC.md` Section 2 ("self administered clinical tool" rephrased to "self administered self tracking application") from Entry 1 Section 4.4 was not part of this re read scope; verify status with the PM separately if a SPEC.md re read is requested.
+
+## 5. Sign off
+
+**Sign off (Phase 0, README portion):** The Compliance Reviewer signs off on the finalized README. The conditional component of the Entry 1 Phase 0 sign off (the Wave 2 README revisions) is now satisfied. Phase 0 close is COMPLIANT on the README side.
+
+---
+
+End of Entry 2.
