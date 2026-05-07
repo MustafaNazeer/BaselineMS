@@ -157,17 +157,20 @@ git commit -m "data: phase 2 decision on nullable heightCm and profile edit path
 - Two on screen circular targets, left and right, each at least 96 dp visible diameter (more than the 48 dp minimum WCAG floor; sized for tremor and weakness tolerance per Patient Advocate Phase 0 framing concern 4). Hit test radius is the visible radius; no expanded forgiveness zone in v1 (a forgiveness zone would inflate tap counts beyond what 9HPT scoring supports, per Patient Advocate framing).
 - One round per hand. Round order is dominant first then non dominant, matching 9HPT clinical convention per Clinical Validator Phase 0 sign off item 3.
 - Each round is 30 seconds of alternating taps. Counter starts at zero; instructions and a countdown timer are persistently visible (Patient Advocate Issue 14).
-- A tap is "valid" when (a) it lands inside one of the two target hit regions, AND (b) it is on the opposite side from the previous valid tap (alternation constraint). The very first tap of a round is valid if it lands inside any target.
-- A tap is a "miss" when (a) it lands outside both target hit regions, OR (b) it lands inside the same target as the previous valid tap (a non alternating in target tap).
+- A tap is "valid" when (a) it lands inside one of the two target hit regions, AND (b) it is on the opposite side from the previous valid tap (alternation constraint). The very first valid tap of a round is the first in target tap that lands inside any target.
+- A tap is a "non alternating in target tap" when it lands inside the same target as the previous valid tap. Recorded as a `TapEvent` with `kind = NON_ALTERNATING`, but does not advance the alternation pointer.
+- A tap is "off target" when it lands outside both target hit regions. Recorded only as an integer counter on the `TapRound`, not as an individual `TapEvent`, because the side of an off target tap is not meaningful for v1.
 - Features computed at the end of each round and rolled up at the end of both rounds:
   - `dominant_tap_rate_hz`: count of valid taps in dominant round divided by 30. Spec name: "tap rate (taps per second)" per `SPEC.md` Section 6.1.
   - `non_dominant_tap_rate_hz`: same for non dominant round.
   - `dominant_iti_cv`: coefficient of variation (stddev divided by mean) of inter tap intervals in milliseconds among valid taps in the dominant round.
   - `non_dominant_iti_cv`: same for non dominant round.
   - `asymmetry_index`: `(dominant_tap_rate_hz - non_dominant_tap_rate_hz) / mean(dominant_tap_rate_hz, non_dominant_tap_rate_hz)`. Signed: positive when dominant is faster than non dominant, which is the typical case. Stored raw; the Phase 9 Reporting layer decides display.
-  - `miss_rate`: total misses across both rounds divided by total valid taps plus total misses across both rounds.
-  - `dominant_in_target_taps`: integer count.
-  - `non_dominant_in_target_taps`: integer count.
+  - `miss_rate`: combined miss count across both rounds divided by total tap count across both rounds. Combined miss count is `non_alternating_taps + off_target_taps` summed across both rounds. Total tap count is `valid_taps + non_alternating_taps + off_target_taps` summed across both rounds. This combined definition was ratified by the Clinical Validator's Phase 2 sign off note in `docs/source/clinical-references.md` (Option A).
+  - `dominant_in_target_taps`: integer count of valid plus non alternating taps in the dominant round (i.e. all in target taps).
+  - `non_dominant_in_target_taps`: same for non dominant round.
+  - `dominant_off_target_taps`: integer count of off target taps in the dominant round.
+  - `non_dominant_off_target_taps`: same for non dominant round.
 - Quality score, value in 0.0 to 1.0:
   - 0.0 if either round produced fewer than 10 valid taps (insufficient stride count analog; signals the patient could not engage with the test).
   - Otherwise, multiply 1.0 by:
@@ -514,12 +517,18 @@ private fun <T> EnumMenuBox(
 
 This single file edit closes Patient Advocate Issues 1 (raw enum names; via `displayLabel` calls), 2 (custom dropdown; via `ExposedDropdownMenuBox`), 3 (default values; both fields now start empty with placeholder copy), and the TopAppBar half of Issue 4 (the title now reads "Set up profile (1 of 1)" so the user knows this is the only setup screen). The "Skip for now" button half of Issue 4 is held for Step 2 below, which depends on Phase 2A Task 2.
 
-- [ ] **Step 2: If Phase 2A Task 2 ratified nullable `heightCm` and the skip path, add the Skip button**
+- [ ] **Step 2: Apply the schema migration approved by the Data Engineer and DBA**
 
-If the Data Engineer plus DBA verdict in Phase 2A Task 2 was YES on nullable `heightCm`:
+The Data Engineer's `docs/data/schema.md` "Phase 2 schema decisions, 2026-05-07" section ratified `heightCm: Double?` with a full `Migration(1, 2)` code block (Path A). The DBA's `docs/data/schema.md` "Phase 2 schema audit, DBA verdict, 2026-05-07" section reviewed the migration and recommended the KSP arg form for `exportSchema`. The Android Engineer applies all of the following from those two sections, in this commit ordering:
 
-- Modify `app/src/main/java/com/mustafan4x/msbattery/data/UserProfileEntity.kt` to make `heightCm: Double?` (Data Engineer makes the schema change, not the Android Engineer; this step is the Android Engineer's portion only).
-- Below the "Save and continue" button in `ProfileSetupScreen.kt`, add:
+1. Add the KSP `room.schemaLocation` arg to `app/build.gradle.kts` and flip `exportSchema = true` in `AppDatabase.kt`. Build once to capture `schemas/com.mustafan4x.msbattery.data.AppDatabase/1.json`. Commit this v1 snapshot capture as a separate commit before any version bump (per DBA Item 5 commit ordering).
+2. Modify `app/src/main/java/com/mustafan4x/msbattery/data/UserProfileEntity.kt` to make `heightCm: Double?` (nullable).
+3. Bump `AppDatabase` `version` from 1 to 2.
+4. Add the `MIGRATION_1_2` `Migration` object exactly as written in `docs/data/schema.md` Path A code, and wire it into the `Room.databaseBuilder(...)` call in `MSBatteryApp.kt` via `.addMigrations(MIGRATION_1_2)`.
+5. Build again to capture the v2 snapshot, then commit the schema bump and migration.
+6. Add the Robolectric migration test from `docs/data/schema.md` with the five DBA modifications (assert all seven post migration columns; add the empty table case method; verify `MigrationTestHelper` constructor signature against the actual `room-testing` version on the classpath; switch `check` to `assertEquals`; add the post migration null insert read back assertion).
+
+The skip path Skip for now button below is then added to `ProfileSetupScreen.kt` after Save and continue:
 
 ```kotlin
 TextButton(
@@ -543,29 +552,33 @@ TextButton(
 }
 ```
 
-If the verdict was NO, skip Step 2 entirely. Document the deferral in the commit message in Step 3 below.
+`SettingsScreen.kt` already renders `p.heightCm?.toInt() ?: "Not provided"` in Task 9 below, so the nullable read site is covered.
 
 - [ ] **Step 3: Run the build and existing tests**
 
 Run: `./gradlew :app:assembleDebug :app:testDebugUnitTest`
 
-Expected: BUILD SUCCESSFUL, all 24 plus tests pass (the 23 from Phase 1 plus the four new `EnumLabelsTest` tests from Task 4).
+Expected: BUILD SUCCESSFUL. All 23 Phase 1 tests still pass plus the four new `EnumLabelsTest` tests from Task 4 plus the new migration test from this task. Total expected: roughly 28 to 30 tests.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Commit (in two commits, per DBA commit ordering)**
 
-If skip path landed:
+```bash
+git add app/build.gradle.kts \
+         app/src/main/java/com/mustafan4x/msbattery/data/AppDatabase.kt \
+         app/schemas/com.mustafan4x.msbattery.data.AppDatabase/1.json
+git commit -m "data: capture v1 Room schema snapshot via KSP exportSchema"
+```
+
+Then a second commit:
 
 ```bash
 git add app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt \
-         app/src/main/java/com/mustafan4x/msbattery/data/UserProfileEntity.kt
-git commit -m "ui(onboarding): exposed dropdown menu, no default values, plausibility validation, skip path"
-```
-
-If skip path deferred:
-
-```bash
-git add app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt
-git commit -m "ui(onboarding): exposed dropdown menu, no default values, plausibility validation; skip path deferred per data engineer verdict"
+         app/src/main/java/com/mustafan4x/msbattery/data/UserProfileEntity.kt \
+         app/src/main/java/com/mustafan4x/msbattery/data/AppDatabase.kt \
+         app/src/main/java/com/mustafan4x/msbattery/MSBatteryApp.kt \
+         app/src/test/java/com/mustafan4x/msbattery/data/Migration1To2Test.kt \
+         app/schemas/com.mustafan4x.msbattery.data.AppDatabase/2.json
+git commit -m "ui(onboarding): exposed dropdown menu, no default values, plausibility validation, skip path; data: nullable heightCm via Migration(1, 2)"
 ```
 
 ### Task 6: Disclaimer chunking and (conditional) wording softening (Patient Advocate Issues 5 and 6)
@@ -575,13 +588,13 @@ git commit -m "ui(onboarding): exposed dropdown menu, no default values, plausib
 
 **Why:** Patient Advocate Issue 5 names dense centered body text as a low contrast sensitivity and cog fog burden. The structural fix (chunking into three left aligned sentences) is independent of regulatory wording. The wording softening of sentence 3 is gated on Phase 2A Task 1.
 
-- [ ] **Step 1: Apply the structural fix unconditionally**
+- [ ] **Step 1: Apply the structural fix and the ratified wording**
+
+The Compliance Reviewer's `docs/security/compliance-review.md` Entry 3 ratified the bare Patient Advocate proposal for sentence 3 ("When you visit your neurologist, you can share these results to help the conversation.") and the "Got it, continue" button copy as both COMPLIANT. Both ship verbatim.
 
 File: `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt`
 
-Replace the body of the `Column` so the disclaimer renders as three separate `Text` lines with `TextAlign.Start`. The exact wording for each sentence depends on the Phase 2A Task 1 verdict; if COMPLIANT, use the Patient Advocate proposal verbatim. If NON COMPLIANT or AMBIGUOUS, fall back to the SPEC.md Section 10 wording verbatim, split at sentence boundaries.
-
-If COMPLIANT (Patient Advocate proposal applies), the file becomes:
+Replace the entire file with:
 
 ```kotlin
 package com.mustafan4x.msbattery.ui.onboarding
@@ -591,6 +604,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -599,7 +613,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.padding
 
 @Composable
 fun DisclaimerScreen(onAcknowledge: () -> Unit) {
@@ -631,27 +644,11 @@ fun DisclaimerScreen(onAcknowledge: () -> Unit) {
             onClick = onAcknowledge,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (BUTTON_RATIFIED) "Got it, continue" else "I understand")
+            Text("Got it, continue")
         }
     }
 }
-
-private const val BUTTON_RATIFIED = true
 ```
-
-If NON COMPLIANT or AMBIGUOUS, the third Text reads:
-
-```kotlin
-Text(
-    text = "Share with your neurologist for clinical decisions.",
-    style = MaterialTheme.typography.bodyLarge,
-    textAlign = TextAlign.Start
-),
-```
-
-and the `BUTTON_RATIFIED` constant is `false`.
-
-The `BUTTON_RATIFIED` constant is a one shot internal switch that the Code Reviewer will request to be inlined in the Phase 2 close commit (the constant exists only to make the diff readable across both verdicts; it is not a runtime feature flag).
 
 - [ ] **Step 2: Run the build and existing tests**
 
@@ -1243,18 +1240,14 @@ fun RootScreen() {
         composable("settings") {
             SettingsScreen(
                 userProfileDao = app.database.userProfileDao(),
-                onEditProfile = if (PROFILE_EDIT_ENABLED) {
-                    { nav.navigate("profile") }
-                } else null
+                onEditProfile = { nav.navigate("profile") }
             )
         }
     }
 }
-
-private const val PROFILE_EDIT_ENABLED = false
 ```
 
-`PROFILE_EDIT_ENABLED` flips to `true` if Phase 2A Task 2 verdict was YES on profile edit. If NO, the constant stays `false` and the Settings screen does not render the Edit profile button. Like `BUTTON_RATIFIED` in Task 6, the Code Reviewer will request the constant be inlined at Phase 2 close.
+The Data Engineer's `docs/data/schema.md` "Phase 2 schema decisions, 2026-05-07" section ratified `UserProfileEntity` as MUTABLE with no schema change, and the DBA's audit section confirmed PASS on the mutability path with one constraint: the Edit profile path must reuse the existing row's `id` (load via `getFirst()`, mutate via `.copy(...)`, insert with `OnConflictStrategy.REPLACE`) so the singleton invariant holds. `ProfileSetupScreen.kt` in Task 5 currently always inserts a fresh `UserProfileEntity` (which mints a new `UUID`), which would break the invariant during edit. The Android Engineer must therefore extend `ProfileSetupScreen` to accept an optional pre populated `UserProfileEntity` parameter; when present, the Save and continue button reuses that entity's `id` rather than minting a new one. The Edit profile nav route in `RootScreen` passes the existing profile from `userProfileDao.getFirst()` to the screen.
 
 - [ ] **Step 2: Run the build and existing tests**
 
@@ -1292,7 +1285,7 @@ package com.mustafan4x.msbattery.battery.tap
 
 enum class TapSide { LEFT, RIGHT }
 
-enum class TapKind { VALID, MISS_OUT_OF_TARGET, MISS_NON_ALTERNATING }
+enum class TapKind { VALID, NON_ALTERNATING }
 
 data class TapEvent(
     val timestampMs: Long,
@@ -1300,6 +1293,8 @@ data class TapEvent(
     val kind: TapKind
 )
 ```
+
+`TapEvent` represents only in target taps; the `side` and `kind` are meaningful only when the tap landed inside a target. Off target taps are recorded as a per round counter on `TapRound` (see Step 2) rather than as individual events, because the side of an off target tap is not meaningful for v1 per the Clinical Validator Phase 2 sign off note.
 
 - [ ] **Step 2: Create `TapRound.kt`**
 
@@ -1313,7 +1308,8 @@ enum class HandRole { DOMINANT, NON_DOMINANT }
 data class TapRound(
     val role: HandRole,
     val durationMs: Long,
-    val events: List<TapEvent>
+    val events: List<TapEvent>,
+    val offTargetTaps: Int = 0
 )
 ```
 
@@ -1353,8 +1349,7 @@ import kotlin.math.abs
 class TapFeaturesTest {
 
     private fun valid(t: Long, side: TapSide) = TapEvent(t, side, TapKind.VALID)
-    private fun missOut(t: Long, side: TapSide) = TapEvent(t, side, TapKind.MISS_OUT_OF_TARGET)
-    private fun missAlt(t: Long, side: TapSide) = TapEvent(t, side, TapKind.MISS_NON_ALTERNATING)
+    private fun nonAlt(t: Long, side: TapSide) = TapEvent(t, side, TapKind.NON_ALTERNATING)
 
     @Test
     fun tapRateMetronomic200msIs5Hz() {
@@ -1367,14 +1362,13 @@ class TapFeaturesTest {
     }
 
     @Test
-    fun tapRateIgnoresMisses() {
+    fun tapRateIgnoresNonAlternatingAndOffTarget() {
         val events = listOf(
             valid(0L, TapSide.LEFT),
-            missOut(100L, TapSide.LEFT),
             valid(200L, TapSide.RIGHT),
-            missAlt(300L, TapSide.RIGHT)
+            nonAlt(300L, TapSide.RIGHT)
         )
-        val round = TapRound(HandRole.DOMINANT, durationMs = 30_000L, events = events)
+        val round = TapRound(HandRole.DOMINANT, durationMs = 30_000L, events = events, offTargetTaps = 5)
         val r = TapFeatures.computeRound(round)
         assertEquals(2.0 / 30.0, r.tapRateHz, 0.0001)
     }
@@ -1412,15 +1406,15 @@ class TapFeaturesTest {
     fun missCountsAreSurfaced() {
         val events = listOf(
             valid(0L, TapSide.LEFT),
-            missOut(50L, TapSide.RIGHT),
             valid(100L, TapSide.RIGHT),
-            missAlt(150L, TapSide.RIGHT),
+            nonAlt(150L, TapSide.RIGHT),
             valid(200L, TapSide.LEFT)
         )
-        val round = TapRound(HandRole.DOMINANT, durationMs = 30_000L, events = events)
+        val round = TapRound(HandRole.DOMINANT, durationMs = 30_000L, events = events, offTargetTaps = 2)
         val r = TapFeatures.computeRound(round)
         assertEquals(3, r.validTaps)
-        assertEquals(2, r.misses)
+        assertEquals(1, r.nonAlternatingTaps)
+        assertEquals(2, r.offTargetTaps)
     }
 }
 ```
@@ -1444,14 +1438,15 @@ data class RoundFeatures(
     val tapRateHz: Double,
     val itiCv: Double,
     val validTaps: Int,
-    val misses: Int
+    val nonAlternatingTaps: Int,
+    val offTargetTaps: Int
 )
 
 object TapFeatures {
 
     fun computeRound(round: TapRound): RoundFeatures {
         val valid = round.events.filter { it.kind == TapKind.VALID }
-        val misses = round.events.count { it.kind != TapKind.VALID }
+        val nonAlt = round.events.count { it.kind == TapKind.NON_ALTERNATING }
         val durationSec = round.durationMs / 1000.0
         val tapRateHz = if (durationSec > 0.0) valid.size / durationSec else 0.0
 
@@ -1468,7 +1463,8 @@ object TapFeatures {
             tapRateHz = tapRateHz,
             itiCv = itiCv,
             validTaps = valid.size,
-            misses = misses
+            nonAlternatingTaps = nonAlt,
+            offTargetTaps = round.offTargetTaps
         )
     }
 }
@@ -1521,18 +1517,26 @@ Append to `TapFeaturesTest.kt` (still inside the same class):
     }
 
     @Test
-    fun missRateIsMissesOverTotal() {
-        val dom = TapRound(HandRole.DOMINANT, 30_000L, listOf(
-            valid(0L, TapSide.LEFT),
-            valid(200L, TapSide.RIGHT),
-            missOut(300L, TapSide.LEFT)
-        ))
-        val nondom = TapRound(HandRole.NON_DOMINANT, 30_000L, listOf(
-            valid(0L, TapSide.LEFT),
-            missAlt(100L, TapSide.LEFT)
-        ))
+    fun missRateCombinesNonAlternatingAndOffTarget() {
+        val dom = TapRound(
+            HandRole.DOMINANT, 30_000L,
+            events = listOf(
+                valid(0L, TapSide.LEFT),
+                valid(200L, TapSide.RIGHT),
+                nonAlt(300L, TapSide.RIGHT)
+            ),
+            offTargetTaps = 1
+        )
+        val nondom = TapRound(
+            HandRole.NON_DOMINANT, 30_000L,
+            events = listOf(
+                valid(0L, TapSide.LEFT),
+                nonAlt(100L, TapSide.LEFT)
+            ),
+            offTargetTaps = 0
+        )
         val s = TapFeatures.computeSession(dom, nondom)
-        assertEquals(2.0 / 5.0, s.missRate, 0.0001)
+        assertEquals(3.0 / 6.0, s.missRate, 0.0001)
     }
 
     @Test
@@ -1568,7 +1572,8 @@ Append to `TapFeaturesTest.kt` (still inside the same class):
             "dominant_tap_rate_hz", "non_dominant_tap_rate_hz",
             "dominant_iti_cv", "non_dominant_iti_cv",
             "asymmetry_index", "miss_rate",
-            "dominant_in_target_taps", "non_dominant_in_target_taps"
+            "dominant_in_target_taps", "non_dominant_in_target_taps",
+            "dominant_off_target_taps", "non_dominant_off_target_taps"
         )
         assertEquals(expected, map.keys)
     }
@@ -1599,8 +1604,10 @@ data class SessionFeatures(
         "non_dominant_iti_cv" to nonDominant.itiCv,
         "asymmetry_index" to asymmetryIndex,
         "miss_rate" to missRate,
-        "dominant_in_target_taps" to dominant.validTaps.toDouble(),
-        "non_dominant_in_target_taps" to nonDominant.validTaps.toDouble()
+        "dominant_in_target_taps" to (dominant.validTaps + dominant.nonAlternatingTaps).toDouble(),
+        "non_dominant_in_target_taps" to (nonDominant.validTaps + nonDominant.nonAlternatingTaps).toDouble(),
+        "dominant_off_target_taps" to dominant.offTargetTaps.toDouble(),
+        "non_dominant_off_target_taps" to nonDominant.offTargetTaps.toDouble()
     )
 }
 
@@ -1610,7 +1617,7 @@ fun TapFeatures.computeSession(dominant: TapRound, nonDominant: TapRound): Sessi
     val mean = (d.tapRateHz + n.tapRateHz) / 2.0
     val asymmetry = if (mean <= 0.0) 0.0 else (d.tapRateHz - n.tapRateHz) / mean
     val totalValid = d.validTaps + n.validTaps
-    val totalMisses = d.misses + n.misses
+    val totalMisses = d.nonAlternatingTaps + n.nonAlternatingTaps + d.offTargetTaps + n.offTargetTaps
     val total = totalValid + totalMisses
     val missRate = if (total == 0) 0.0 else totalMisses.toDouble() / total.toDouble()
 
@@ -1771,6 +1778,7 @@ Append to the existing import block at the top of `app/src/main/java/com/mustafa
 ```kotlin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -1792,6 +1800,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -1821,6 +1830,8 @@ internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
     var phase by remember { mutableStateOf<TapPhase>(TapPhase.PreInstructions) }
     var dominantEvents by remember { mutableStateOf<List<TapEvent>>(emptyList()) }
     var nonDominantEvents by remember { mutableStateOf<List<TapEvent>>(emptyList()) }
+    var dominantOffTarget by remember { mutableStateOf(0) }
+    var nonDominantOffTarget by remember { mutableStateOf(0) }
     var liveTapCount by remember { mutableStateOf(0) }
     var elapsedSec by remember { mutableStateOf(0) }
 
@@ -1847,12 +1858,14 @@ internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
                     val dominantRound = TapRound(
                         role = HandRole.DOMINANT,
                         durationMs = ROUND_DURATION_MS,
-                        events = dominantEvents
+                        events = dominantEvents,
+                        offTargetTaps = dominantOffTarget
                     )
                     val nonDominantRound = TapRound(
                         role = HandRole.NON_DOMINANT,
                         durationMs = ROUND_DURATION_MS,
-                        events = nonDominantEvents
+                        events = nonDominantEvents,
+                        offTargetTaps = nonDominantOffTarget
                     )
                     val features = TapFeatures.computeSession(dominantRound, nonDominantRound)
                     onComplete(
@@ -1898,6 +1911,10 @@ internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
                 Button(onClick = {
                     liveTapCount = 0
                     elapsedSec = 0
+                    dominantEvents = emptyList()
+                    nonDominantEvents = emptyList()
+                    dominantOffTarget = 0
+                    nonDominantOffTarget = 0
                     phase = TapPhase.Countdown(role = HandRole.DOMINANT, secondsRemaining = COUNTDOWN_SECONDS)
                 }) { Text("Start dominant hand round") }
             }
@@ -1915,26 +1932,35 @@ internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
                 val remaining = (totalSec - elapsedSec).coerceAtLeast(0)
                 Text("$roleLabel, $remaining seconds left", style = MaterialTheme.typography.titleMedium)
                 Text("Taps so far: $liveTapCount", style = MaterialTheme.typography.bodyMedium)
-                TwoTargets(onTap = { side ->
-                    val events = if (p.role == HandRole.DOMINANT) dominantEvents else nonDominantEvents
-                    val previous = events.lastOrNull { it.kind == TapKind.VALID }
-                    val kind = when {
-                        previous == null -> TapKind.VALID
-                        previous.side != side -> TapKind.VALID
-                        else -> TapKind.MISS_NON_ALTERNATING
+                TwoTargets(
+                    onInTargetTap = { side ->
+                        val events = if (p.role == HandRole.DOMINANT) dominantEvents else nonDominantEvents
+                        val previous = events.lastOrNull { it.kind == TapKind.VALID }
+                        val kind = when {
+                            previous == null -> TapKind.VALID
+                            previous.side != side -> TapKind.VALID
+                            else -> TapKind.NON_ALTERNATING
+                        }
+                        val event = TapEvent(
+                            timestampMs = System.currentTimeMillis() - p.startedAtMs,
+                            side = side,
+                            kind = kind
+                        )
+                        if (p.role == HandRole.DOMINANT) {
+                            dominantEvents = dominantEvents + event
+                        } else {
+                            nonDominantEvents = nonDominantEvents + event
+                        }
+                        if (kind == TapKind.VALID) liveTapCount += 1
+                    },
+                    onOffTargetTap = {
+                        if (p.role == HandRole.DOMINANT) {
+                            dominantOffTarget += 1
+                        } else {
+                            nonDominantOffTarget += 1
+                        }
                     }
-                    val event = TapEvent(
-                        timestampMs = System.currentTimeMillis() - p.startedAtMs,
-                        side = side,
-                        kind = kind
-                    )
-                    if (p.role == HandRole.DOMINANT) {
-                        dominantEvents = dominantEvents + event
-                    } else {
-                        nonDominantEvents = nonDominantEvents + event
-                    }
-                    if (kind == TapKind.VALID) liveTapCount += 1
-                })
+                )
             }
             is TapPhase.Rest -> {
                 Text(
@@ -1955,15 +1981,20 @@ internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
 }
 
 @Composable
-private fun TwoTargets(onTap: (TapSide) -> Unit) {
+private fun TwoTargets(onInTargetTap: (TapSide) -> Unit, onOffTargetTap: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { onOffTargetTap() })
+            },
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Target(side = TapSide.LEFT, onTap = onTap)
+        Target(side = TapSide.LEFT, onTap = onInTargetTap)
         Spacer(Modifier.size(16.dp))
-        Target(side = TapSide.RIGHT, onTap = onTap)
+        Target(side = TapSide.RIGHT, onTap = onInTargetTap)
     }
 }
 
@@ -1991,7 +2022,8 @@ Notes on the design decisions in this code:
 - The 120 dp diameter target sits well above the 48 dp WCAG floor and the 96 dp design summary minimum, sized for tremor and weakness tolerance per Patient Advocate Phase 0 framing.
 - `Modifier.clickable { onTap(side) }` fires once per click (the indication ripple is reset at each finger lift), which correctly counts each finger press as one tap. An earlier version of this plan used a raw `pointerInput` event loop, which would have fired on every motion event during a press and over counted; that bug was caught in the writing-plans self review.
 - A separate `elapsedSec` state drives the per second countdown display and the round end transition, so the displayed seconds remaining update every second. The single `delay(ROUND_DURATION_MS)` pattern would have left the displayed countdown frozen.
-- Off target touches are not recorded as misses in v1, because `clickable` on the target itself does not fire for taps that land outside the target's circular hit region. Capturing off target taps as misses would require a parent `pointerInput` over the whole test area. Patient Advocate Phase 0 framing concern 4 cautions against penalizing tremor patients for off target taps, so the v1 design records only in target taps and counts non alternating in target taps as misses. The `miss_rate` feature therefore reflects alternation discipline, not aim. This trade off is explicitly flagged for Patient Advocate review in Phase 2D Task 18; if the Patient Advocate pushes back, Phase 11 polish can add an off target capture layer.
+- Off target taps are captured by a parent `pointerInput { detectTapGestures }` on the Row that holds the two `Target` Boxes. When the user taps inside a target, the target's `Modifier.clickable` consumes the event and the parent's `detectTapGestures` does not fire (Compose pointer event consumption semantics). When the user taps the gap between targets or outside both target circles but inside the Row's bounds, only the parent's `detectTapGestures` fires and increments the off target counter. This is the resolution the Clinical Validator's Phase 2 sign off note ratified (Option A: capture both off target and non alternating taps as separate counts; persist both in the features map). The `miss_rate` feature therefore combines alternation discipline failures with aim failures, with each surfaced separately in `dominant_off_target_taps`, `non_dominant_off_target_taps`, and the in target tap counts so the Phase 9 Reporting layer can render them honestly.
+- Off target taps that land outside the Row's bounds (for example, on the persistent test header at the top of the screen) are not captured. That is acceptable for v1: the user is positioned to tap near the targets, and a tap that lands on the header is most likely a deliberate user interaction with the header rather than a missed tap. The Patient Advocate Phase 0 framing concern 4 (do not punish tremor patients for off target taps beyond what the literature scores) is honored by the 120 dp generous target size; a tap that lands inside the Row but outside both 120 dp targets is a meaningful aim signal.
 
 - [ ] **Step 2: Run the build and existing tests**
 
@@ -2167,7 +2199,7 @@ git commit -m "qa: phase 2 regression checklist and manual walkthrough notes"
 
 - [ ] **Step 1: PM dispatches Code Reviewer**
 
-The Code Reviewer reads the entire Phase 2 diff (all commits from Phase 2A through Phase 2D so far), checks the inherited rules from `CLAUDE.md` (no dashes as prose punctuation, no emojis, no `Co-Authored-By` trailers, default to no comments), checks Kotlin and Compose idiom, and verifies the TDD discipline was followed in Tasks 4, 12, 13, and 14. The Code Reviewer specifically checks that the `BUTTON_RATIFIED` and `PROFILE_EDIT_ENABLED` constants in Tasks 6 and 10 are inlined or removed before merge.
+The Code Reviewer reads the entire Phase 2 diff (all commits from Phase 2A through Phase 2D so far), checks the inherited rules from `CLAUDE.md` (no dashes as prose punctuation, no emojis, no `Co-Authored-By` trailers, default to no comments), checks Kotlin and Compose idiom, and verifies the TDD discipline was followed in Tasks 4, 12, 13, and 14.
 
 - [ ] **Step 2: Address review comments**
 
@@ -2213,7 +2245,7 @@ Per `CLAUDE.md`. The PM asks the three check in questions and waits for the user
 This is the checklist the writing-plans skill mandates. Run before handing off.
 
 1. **Spec coverage.** SPEC.md Section 6.1 specifies: 30 seconds alternating taps on two targets, dominant then non dominant; tap rate, ITI CV, dominant vs non dominant asymmetry, miss rate; quality score factors of sufficient taps, sustained engagement, and in target landings. Tasks 11 to 15 cover all six. SPEC.md Section 11 testing strategy: unit tests on signal processing math (Tasks 12 to 14), Compose UI smoke test (Task 16), real device walkthrough (Task 19). Patient Advocate Phase 1 carryover: Issues 1, 2, 3, 4 partial, 5 partial, 7, 8, 9, 10, 11, 12, 13, 15, 16, 18 all addressed. Issues 4 schema part, 5 wording part, 6 button copy, 17 profile edit gated on Phase 2A verdicts.
-2. **Placeholder scan.** No "TBD", "implement later", or "similar to Task N" references; every code step has actual code; every test step has expected output. The two flag constants `BUTTON_RATIFIED` and `PROFILE_EDIT_ENABLED` are explicitly called out for inlining at Phase 2 close.
-3. **Type consistency.** `TestModule`, `TestResultPayload`, `TestType.TAP`, `BatteryOrchestrator`, `SessionEntity`, `TestResultEntity`, `UserProfileEntity`, `Hand`, `Sex`, `MSType` all match Phase 1 source. `TapEvent`, `TapSide`, `TapKind`, `TapRound`, `HandRole`, `RoundFeatures`, `SessionFeatures`, `BilateralTapTest`, `BilateralTapTestContent` are introduced consistently across Tasks 11 to 15. The `displayLabel()` extension is referenced consistently across `EnumLabels.kt`, `ProfileSetupScreen.kt`, `SettingsScreen.kt`, and `SessionRunnerScreen.kt`. `TapFeatures.computeRound` and `TapFeatures.computeSession` are both attached to the `TapFeatures` object and called as `TapFeatures.computeRound(...)` and `TapFeatures.computeSession(...)` everywhere.
+2. **Placeholder scan.** No "TBD", "implement later", or "similar to Task N" references; every code step has actual code; every test step has expected output. The Phase 2A verdicts (Compliance Reviewer, Data Engineer, DBA, Clinical Validator) are all in and the plan was revised on 2026-05-07 to remove the conditional flag constants and apply the ratified outcomes inline (bare Patient Advocate sentence 3, "Got it, continue" button, nullable `heightCm` with `Migration(1, 2)`, profile edit path).
+3. **Type consistency.** `TestModule`, `TestResultPayload`, `TestType.TAP`, `BatteryOrchestrator`, `SessionEntity`, `TestResultEntity`, `UserProfileEntity`, `Hand`, `Sex`, `MSType` all match Phase 1 source. `TapEvent`, `TapSide`, `TapKind` (two values, `VALID` and `NON_ALTERNATING`), `TapRound` (with `events` and `offTargetTaps`), `HandRole`, `RoundFeatures` (with `validTaps`, `nonAlternatingTaps`, `offTargetTaps`), `SessionFeatures`, `BilateralTapTest`, `BilateralTapTestContent` are introduced consistently across Tasks 11 to 15. The Clinical Validator's Option A resolution (capture both off target and non alternating taps as separate counts; persist in features map) is implemented across Tasks 11 (data model), 12 (per round), 13 (per session and feature map), and 15 (Compose UI parent `pointerInput` capturing off target taps). The `displayLabel()` extension is referenced consistently across `EnumLabels.kt`, `ProfileSetupScreen.kt`, `SettingsScreen.kt`, and `SessionRunnerScreen.kt`. `TapFeatures.computeRound` and `TapFeatures.computeSession` are both attached to the `TapFeatures` object and called as `TapFeatures.computeRound(...)` and `TapFeatures.computeSession(...)` everywhere.
 
 If the self review finds issues, the PM fixes them in this file before dispatching any specialist.
