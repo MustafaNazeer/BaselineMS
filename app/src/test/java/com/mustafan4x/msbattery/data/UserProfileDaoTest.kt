@@ -44,7 +44,7 @@ class UserProfileDaoTest {
 
         val fetched = dao.getFirst()
         assertNotNull(fetched)
-        assertEquals(170.0, fetched!!.heightCm, 0.0001)
+        assertEquals(170.0, fetched!!.heightCm!!, 0.0001)
         assertEquals(Sex.FEMALE, fetched.biologicalSex)
         assertEquals(MSType.UNDISCLOSED, fetched.msTypeDisclosed)
     }
