@@ -5,11 +5,17 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [UserProfileEntity::class],
+    entities = [
+        UserProfileEntity::class,
+        SessionEntity::class,
+        TestResultEntity::class,
+    ],
     version = 1,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userProfileDao(): UserProfileDao
+    abstract fun sessionDao(): SessionDao
+    abstract fun testResultDao(): TestResultDao
 }
