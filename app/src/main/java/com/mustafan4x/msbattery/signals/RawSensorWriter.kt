@@ -23,9 +23,9 @@ import java.util.zip.GZIPOutputStream
  * and closes on completion; if the source flow throws, the writer closes the file and rethrows so
  * partial data is still recoverable from the gzip stream's last complete deflate block.
  */
-class RawSensorWriter(private val target: File) {
+open class RawSensorWriter(private val target: File) {
 
-    suspend fun write(samples: Flow<ImuSample>): Long {
+    open suspend fun write(samples: Flow<ImuSample>): Long {
         target.parentFile?.mkdirs()
         var count = 0L
         val fileOut = FileOutputStream(target)

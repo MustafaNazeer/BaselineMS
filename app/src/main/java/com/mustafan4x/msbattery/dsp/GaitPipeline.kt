@@ -45,7 +45,7 @@ import kotlin.math.min
  * during walking, not the startup transient. Phase 4 sensor capture provides a real standing
  * window before the walk that production code can use for the same purpose.
  */
-class GaitPipeline {
+open class GaitPipeline {
 
     private val butterworth = ButterworthLowPass(cutoffHz = 20.0, sampleRateHz = 100.0)
     private val madgwick = Madgwick(beta = 0.1)
@@ -58,7 +58,7 @@ class GaitPipeline {
     private val zupt = Zupt()
     private val featureExtractor = FeatureExtractor()
 
-    fun process(samples: List<ImuSample>): GaitFeatures {
+    open fun process(samples: List<ImuSample>): GaitFeatures {
         val n = samples.size
         if (n == 0) return emptyFeatures()
 
