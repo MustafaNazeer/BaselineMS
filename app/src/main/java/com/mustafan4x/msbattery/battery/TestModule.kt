@@ -8,6 +8,7 @@ import kotlinx.serialization.json.Json
 interface TestResultPayload {
     val qualityScore: Double
     val features: Map<String, Double>
+    val rawSensorRelativePath: String? get() = null
 }
 
 interface TestModule {

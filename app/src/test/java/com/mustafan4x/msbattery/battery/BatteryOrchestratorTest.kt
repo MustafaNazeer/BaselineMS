@@ -85,9 +85,15 @@ class BatteryOrchestratorTest {
             deviceInfo = "Pixel"
         )
         orchestrator.start(); advanceUntilIdle()
-        orchestrator.recordResult(testType = TestType.TAP, qualityScore = 0.9, features = mapOf("a" to 1.0))
+        orchestrator.recordResult(
+            testType = TestType.TAP,
+            payload = MockTestModule.MockResult(qualityScore = 0.9, features = mapOf("a" to 1.0))
+        )
         advanceUntilIdle()
-        orchestrator.recordResult(testType = TestType.GAIT, qualityScore = 0.8, features = mapOf("b" to 2.0))
+        orchestrator.recordResult(
+            testType = TestType.GAIT,
+            payload = MockTestModule.MockResult(qualityScore = 0.8, features = mapOf("b" to 2.0))
+        )
         advanceUntilIdle()
 
         assertEquals(BatteryOrchestrator.State.Completed, orchestrator.state.value)

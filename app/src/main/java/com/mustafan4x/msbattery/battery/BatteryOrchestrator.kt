@@ -42,22 +42,23 @@ class BatteryOrchestrator(
         }
     }
 
-    fun recordResult(testType: TestType, qualityScore: Double, features: Map<String, Double>) {
+    fun recordResult(testType: TestType, payload: TestResultPayload) {
         val current = _state.value
         if (current !is State.Running) return
         val sessionId = activeSessionId ?: return
 
         viewModelScope.launch {
             val now = System.currentTimeMillis()
-            val featuresJson = Json.encodeToString(features)
+            val featuresJson = Json.encodeToString(payload.features)
             testResultDao.insert(
                 TestResultEntity(
                     sessionId = sessionId,
                     testType = testType,
                     startedAtEpochMs = now,
                     completedAtEpochMs = now,
-                    qualityScore = qualityScore,
-                    featuresJson = featuresJson
+                    qualityScore = payload.qualityScore,
+                    featuresJson = featuresJson,
+                    rawSensorRelativePath = payload.rawSensorRelativePath
                 )
             )
 

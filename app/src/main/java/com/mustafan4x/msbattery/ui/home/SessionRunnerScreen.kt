@@ -84,8 +84,7 @@ fun SessionRunnerScreen(
                     module.Content { result ->
                         orchestrator.recordResult(
                             testType = module.testType,
-                            qualityScore = result.qualityScore,
-                            features = result.features
+                            payload = result
                         )
                     }
                 }

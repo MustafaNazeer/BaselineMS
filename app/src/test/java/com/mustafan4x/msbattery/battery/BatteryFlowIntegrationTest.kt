@@ -58,9 +58,18 @@ class BatteryFlowIntegrationTest {
 
         assertEquals(BatteryOrchestrator.State.Idle, orchestrator.state.value)
         orchestrator.start(); advanceUntilIdle()
-        orchestrator.recordResult(TestType.TAP, 0.9, mapOf("a" to 1.0)); advanceUntilIdle()
-        orchestrator.recordResult(TestType.GAIT, 0.8, mapOf("b" to 2.0)); advanceUntilIdle()
-        orchestrator.recordResult(TestType.VISION, 0.7, mapOf("c" to 3.0)); advanceUntilIdle()
+        orchestrator.recordResult(
+            TestType.TAP,
+            MockTestModule.MockResult(0.9, mapOf("a" to 1.0))
+        ); advanceUntilIdle()
+        orchestrator.recordResult(
+            TestType.GAIT,
+            MockTestModule.MockResult(0.8, mapOf("b" to 2.0))
+        ); advanceUntilIdle()
+        orchestrator.recordResult(
+            TestType.VISION,
+            MockTestModule.MockResult(0.7, mapOf("c" to 3.0))
+        ); advanceUntilIdle()
 
         assertEquals(BatteryOrchestrator.State.Completed, orchestrator.state.value)
 
