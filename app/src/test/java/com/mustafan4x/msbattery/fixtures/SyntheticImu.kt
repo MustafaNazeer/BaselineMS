@@ -186,6 +186,4 @@ class SyntheticImu(
             z + gaussian() * noiseLevelMps2
         )
     }
-
-    private fun Quaternion.inverse(): Quaternion = Quaternion(w, -x, -y, -z).normalized()
 }
