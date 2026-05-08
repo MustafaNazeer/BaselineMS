@@ -450,3 +450,117 @@ After the non dominant round completes, `onComplete` is called and `phase = TapP
 Patient Advocate hands back to the Project Manager. Findings 1, 2, and 3 are recommended for the Android Engineer before Phase 3 begins. Findings 4 and 5 can be deferred to Phase 11 polish if the PM prefers. Finding 4 gap width question should be routed to the Clinical Validator for normative guidance.
 
 (End of 2026-05-07 Phase 2 entry. Append only convention: this entry is not edited in place.)
+
+## 2026-05-07, Phase 4 review, Gait Test Module Integration
+
+### Files reviewed (read in full at HEAD on `main` as of 2026-05-07)
+
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitInstructionsScreen.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitCountdownScreen.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitCaptureScreen.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitDoneScreen.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTestState.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTestViewModel.kt`
+- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTest.kt`
+
+### Verdict
+
+**APPROVED WITH FINDINGS.** The gait test as integrated lands the safety framing the Phase 0 framing standing objection 2 demands, the screens are uncluttered, the Cancel button is present and is not adversarial, and no copy in the Done screen punishes a low quality session as user failure. Three medium severity findings and two low severity findings are listed below; one of the medium findings (Finding 1, Cancel reachability while phone is in pocket) is a direct consequence of the front pocket capture posture and warrants attention before Phase 4 close, but the Patient Advocate's read is that the present implementation is acceptable to ship as Phase 4 minimum because it does not silently corrupt clinical data, does not stigmatize the user, and does not gate progress through the battery on the gait result. The remaining findings are properly Phase 11 polish or future feature work.
+
+### Concern by concern evaluation
+
+#### Concern 1, walking safety per Galati 2024 quit cluster 4
+
+**Verified yes.** The instructions copy in `GaitInstructionsScreen.kt` lines 47 to 49 is verbatim: "Walk in a straight line for 30 seconds. Place your phone in a front pocket. Use a flat, unobstructed surface; have a wall or counter within reach if you need it. If you do not feel safe walking right now, you can skip this test." The four safety hooks the Patient Advocate looked for are all present: explicit straight line direction, explicit flat surface direction, explicit "wall or counter within reach" affordance, and the explicit "do not feel safe = skip" framing. The Skip control is a `TextButton` directly below the primary `I am ready` button (lines 67 to 77), reachable in one tap, not buried behind a confirmation dialog. This satisfies the Galati 2024 cluster 4 framing directly, and the verbatim Floodlight quote ("I can only proceed so far because I'm in the car. I can't stand and balance.") is the lens this passes under.
+
+#### Concern 2, patient pocket reality and walking aid users
+
+**Verified partially.** Phase 4 minimum (front pocket only) is what the implementation honors, and the plan explicitly named accommodation of held in hand or alternate pocket placements as Phase 11 follow up work. The current `GaitInstructionsScreen` body is silent on what a wheelchair user, a walker user, or a forearm crutch user should do; it offers the Skip path, which is the right Phase 4 minimum, but it does not surface to the user that skipping is the correct action for them rather than a personal failure. This is a Finding (Finding 4 below) that the Patient Advocate is deferring to Phase 11 because the Skip path is functional, the data is not corrupted, and the current copy does not shame the skipping user.
+
+#### Concern 3, EDSS 6+ patients and the 800 ms inter peak ceiling
+
+**Verified yes for the post test feedback layer; the underlying clinical limitation is documented in `docs/source/clinical-references.md`.** The Done screen at `GaitDoneScreen.kt` lines 34 to 38 maps the quality score to three plain language confidence bands ("Captured with high confidence" above 0.8; "Captured with limited confidence" between 0.5 and 0.8 inclusive; "Captured but quality is low" below 0.5). None of the bands use the words "invalid," "failed," "too poor to use," or "please retry" that standing objection 6 in the Phase 0 framing prohibits. A patient whose cadence falls below the 75 steps per minute floor (800 ms ceiling) may see "Captured but quality is low," which is descriptive rather than judgmental and is acceptable. The Clinical Validator's Phase 0 caveat 4 on `docs/source/clinical-references.md` already records that EDSS 6 to 6.5 patients are out of scope for the gait module as currently specified and that the limitation should be made explicit in the README and the in app About screen; that is a Phase 9 or Phase 11 documentation task, not a Phase 4 blocker.
+
+#### Concern 4, heat sensitivity
+
+**Verified yes.** The instructions copy nowhere encourages walking fast. The phrase used in `BilateralTapTest`'s instructions ("as fast as you can manage") does not appear here; the gait copy says "Walk in a straight line," with no rate qualifier. The 30 second active capture plus 3 second countdown is brief enough that Uhthoff phenomenon induction is unlikely on most days, and the absence of a "walk briskly" or "walk at your fastest comfortable pace" instruction protects the heat sensitive subset of the persona. No change requested under this concern.
+
+#### Concern 5, emergency cancel UX and the standing objection 5 (cancel without shame)
+
+**Verified yes for the surface, partially for the ergonomics.** The Cancel control on `GaitCaptureScreen.kt` lines 62 to 73 is a full width `OutlinedButton` with a 64 dp minimum height, sitting directly below the elapsed seconds readout. It is unambiguous in label ("Cancel") and is not styled as a destructive action with red affordance, which keeps the register acceptable per standing objection 5. The Cancelled state in `GaitTest.kt` lines 61 to 64 routes back through a zero quality `GaitDoneScreen` with a Continue button, so the user can advance to the next test in the battery without losing their position; this is the right behavior for a non shaming cancel. The ergonomic concern is that during the actual capture the phone is in a front pocket, which means the physical reachability of the button is not the issue this concern was originally framed around; Finding 1 below records the practical consequence.
+
+### Evaluation of the three AE flagged items
+
+#### Item a, the "Get ready to walk" headline above the numeric countdown
+
+**Helpful, keep.** The plan literal copy spec for the Countdown screen specified only the numeric display. The AE added a `headlineMedium` "Get ready to walk" line above the `displayLarge` number on `GaitCountdownScreen.kt` lines 36 to 40. This addition is on the right side of the Phase 0 framing concern 2 (cognitive fog tolerance) for two reasons. First, a bare giant number with no accompanying label loads working memory (the user has to remember from the prior screen what is being counted down). Second, on a TalkBack pass the headline gives a screen reader a one phrase semantic anchor before the number is announced, which improves the cognitive scaffold for low vision users. The Patient Advocate endorses the addition. The addition does not change the test pacing, does not push the user to do anything they did not opt into on the previous screen, and does not introduce a new tap target. This is exactly the kind of small humanizing copy add the Phase 0 framing concern 2 calls for.
+
+#### Item b, rendering the Cancelled state as a zero quality Done screen
+
+**Acceptable for Phase 4. A dedicated cancel confirmation screen is not needed, but a small copy improvement is recommended in Finding 2 below.** The decision the AE made (route Cancelled through `GaitDoneScreen` with a synthesized zero quality `GaitFeatures` so the user can tap Continue and advance) is the right behavior under standing objection 5: a cancelled session is not a failure, it is data the user chose not to record, and the user must not be stranded. The implementation also correctly does not persist a real `TestResultEntity` for the cancelled session because `GaitTest.kt` line 63 calls `onComplete(skippedPayload())` which carries `qualityScore = 0.0` and `rawSensorRelativePath = null`; the orchestrator can then either skip persistence or persist a quality 0.0 placeholder. The Patient Advocate prefers the orchestrator to skip persistence on cancel rather than fill the History row with phantom 0.0 entries, but that is a Phase 11 polish question for the Android Engineer to weigh against the Data Engineer. The cancel confirmation dialog the Phase 1 review's Issue 11 added for the Session Runner Cancel is a separate flow (the Session Runner level "Stop this check in?" dialog) and remains in place above this gait test level Cancel. The user is therefore protected against a stray tap by the Session Runner's own confirmation if they hit the top level Cancel; the gait Capture Cancel below it is an intentional opt out that the user has had the safety framing for since the Instructions screen. One dialog at the higher level is enough; a second dialog at the gait level would be friction the Phase 0 framing concern 2 (cognitive fog) does not want.
+
+#### Item c, "do not feel safe = skip" framing on the Instructions screen
+
+**Verified yes.** The exact framing is in the body copy on `GaitInstructionsScreen.kt` line 49: "If you do not feel safe walking right now, you can skip this test." The Skip CTA at line 73 ("Skip for now") is the matching action. The "right now" qualifier is the load bearing word here: it tells the user the skip is per session, not a permanent waiver, and it removes any implication that the user is opting out of their own data collection forever. This is the framing the Patient Advocate would have written if the Patient Advocate were drafting the copy. No change requested.
+
+### Findings
+
+#### Finding 1, Cancel button reachability while the phone is in a front pocket, severity: medium
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitCaptureScreen.kt` lines 62 to 73.
+- **Problem:** the Cancel button is rendered on the screen during a capture in which the phone is, by design, in a front pocket. A user who feels unsafe mid walk and wants to abort has to (a) remove the phone from the pocket, (b) wake the screen, (c) locate the Cancel control, and (d) tap it, while still possibly off balance. This is not an ergonomic failure unique to this implementation (it is inherent to the front pocket capture posture), but it is worth surfacing because the Phase 0 framing standing objection 5 named "cancellable without shame" and the practical reachability of the cancel during the test is the load bearing detail. The current screen is also silent on what happens if the user simply stops walking; the capture continues to the 30 second mark and the pipeline produces a low quality score from the missing samples, which is acceptable per the Phase 0 framing concern 7 ("bad MS day" honesty), but the user has no in test signal that simply stopping is also a way out.
+- **File affected:** `GaitCaptureScreen.kt`.
+- **Recommended owner:** Android Engineer; UI/UX Designer for tone.
+- **Recommended target phase:** Phase 11 polish. The minimum viable mitigation is a single sentence on the Instructions screen ("If you need to stop, you can take the phone out of your pocket and tap Cancel, or just stop walking and the test will end on its own with reduced confidence.") that primes the user before the capture begins. A more invasive Phase 11 ergonomic improvement would be a hardware volume key Cancel chord per Android accessibility guidance, but that is a future feature, not a Phase 4 blocker.
+
+#### Finding 2, Cancelled state Done screen says "Captured but quality is low" rather than acknowledging the cancel, severity: medium
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTest.kt` lines 61 to 64; `GaitDoneScreen.kt` lines 34 to 38.
+- **Problem:** when the user taps Cancel mid capture, the AE renders a zero quality `GaitDoneScreen`. Because the qualityScore is 0.0, the band the screen picks is "Captured but quality is low," which is the same band a heat fatigued user who finished the walk under bad conditions would see. The two cases are not the same: one is a user who chose to stop, the other is a user who completed but produced noisy data. Conflating them in the post test copy is a small dignity miss. The verbatim "Your gait test is complete." line on `GaitDoneScreen.kt` line 53 is also factually misleading after a cancel, because the test is not complete, it was cancelled.
+- **File affected:** `GaitTest.kt` (route the Cancelled state to a different copy variant) or `GaitDoneScreen.kt` (accept a `wasCancelled` flag).
+- **Recommended owner:** Android Engineer.
+- **Recommended target phase:** Phase 4 fix is small (a `Cancelled` arm that renders distinct copy: "Test stopped. No data was saved for this round." plus a Continue CTA), but the Patient Advocate is comfortable with this landing in Phase 11 polish if Phase 4 close is tight on window. Marking it medium because it is the kind of detail the user notices and the kind that erodes trust over time, even though it does not corrupt data or block the battery.
+
+#### Finding 3, no contextual messaging for mobility aid users on the Instructions screen, severity: medium
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitInstructionsScreen.kt` lines 41 to 52.
+- **Problem:** the Instructions copy assumes a user who can walk 30 seconds in a straight line with the phone in a front pocket. The Skip path is present, which is the right Phase 4 minimum (verified under Concern 2), but a wheelchair user, a walker user, or a cane user has no signal that the Skip path is the correct action for them rather than a personal opt out. The Phase 0 framing standing objection 2 explicitly named this concern, and the verbatim Galati 2024 quote ("I can only proceed so far because I'm in the car. I can't stand and balance.") is the load bearing evidence.
+- **File affected:** `GaitInstructionsScreen.kt`.
+- **Recommended owner:** Android Engineer for the copy change; UI/UX Designer for tone.
+- **Recommended target phase:** Phase 11 polish, alongside the Phase 11 follow up the plan already named (alternate pocket positions, held in hand, etc.). A one sentence add to the body copy ("If you use a cane, walker, or wheelchair, the gait test may not produce useful results for you. Skipping is the right choice.") would close the gap. The Patient Advocate is not asking for a per profile setting that suppresses the gait test for declared mobility aid users (that touches the Room schema and the SPEC.md user profile) but is flagging the path for Phase 11.
+
+#### Finding 4, low quality copy on a bad MS day session conflated with first time confused users, severity: low
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitDoneScreen.kt` lines 34 to 38.
+- **Problem:** the three quality bands are applied uniformly. A patient who walks well but produces noisy data because the phone shifted in their pocket gets the same "Captured but quality is low" message as a patient on a flare day. The Phase 0 framing concern 7 ("bad MS day" mode and quality score honesty) calls for the application to not punish bad day data; the current copy does not punish, but it also does not contextualize. This is properly Phase 9 or Phase 10 work where the per session view can surface a richer narrative; for Phase 4 the simple band copy is acceptable.
+- **File affected:** `GaitDoneScreen.kt`.
+- **Recommended owner:** Android Engineer in coordination with Clinical Outcomes Reviewer.
+- **Recommended target phase:** Phase 11 polish or Phase 9 reporting work. Not a Phase 4 blocker.
+
+#### Finding 5, "Your gait test is complete." line is technically accurate on Done but uninformative, severity: low
+
+- **File:** `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitDoneScreen.kt` line 53.
+- **Problem:** the body line is purely transitional. A patient who finished a 30 second walk has earned a slightly warmer acknowledgment than "Your gait test is complete." compared with the BilateralTapTest's Phase 2 review Finding 5 which the Patient Advocate already flagged at the same low severity. For consistency across the battery, both modules' post test screens should land on similar warmth. The Phase 0 framing concern on warmth in retention copy applies here too.
+- **File affected:** `GaitDoneScreen.kt`.
+- **Recommended owner:** Android Engineer; UI/UX Designer for tone.
+- **Recommended target phase:** Phase 11 polish.
+
+### Recommendations for the Code Reviewer Task 12 verdict to consider
+
+1. **No finding above is BLOCKING.** Findings 1 through 5 are deferrable. Finding 1 (Cancel reachability) is the closest to a real Phase 4 concern but the mitigation the Patient Advocate recommends is a one sentence Instructions screen add, which the Code Reviewer can either fold into the Phase 4 close as a small follow up or carry forward to Phase 11 with a note in `STATUS.md` Resume notes. Findings 2 through 5 are Phase 11 polish.
+2. **AE flagged item a (the "Get ready to walk" headline) is endorsed.** The Code Reviewer can treat this as a design improvement over the plan's literal copy spec rather than a deviation from the plan; the Patient Advocate's endorsement is on the record above.
+3. **AE flagged item b (Cancelled rendered as zero quality Done) is acceptable for Phase 4 in its current shape.** The Code Reviewer should not require a dedicated cancel confirmation screen. The Patient Advocate would prefer the orchestrator to skip persistence on cancel rather than insert a phantom 0.0 row in History (per Finding 2 deferred consideration), but the current shape does not corrupt data and is appropriate for Phase 4 close.
+4. **AE flagged item c ("do not feel safe = skip" framing) is verified verbatim.** No copy change needed at this level.
+5. **Cross cutting note for the Code Reviewer.** No copy in the reviewed surface uses em dashes, en dashes, or hyphens as prose punctuation, no emojis are present, and no AI attribution is in any docstring. The KDoc on `GaitTest.kt` line 25 ("Hilt free") and `GaitTestViewModel.kt` line 32 ("`composable("session")`") are honest engineering KDoc, not user facing copy, and are out of scope for the Patient Advocate review.
+
+### Uncertainties
+
+1. The Patient Advocate did not run the application on a physical device. All findings are from reading the source. The Cancel reachability assessment in Finding 1 is the one finding where running the app with the phone actually in a pocket would sharpen the recommendation; the source level conclusion is sufficient to flag it now.
+2. The Patient Advocate did not verify whether the orchestrator persists a `TestResultEntity` row when `GaitTest.skippedPayload()` is delivered with `qualityScore = 0.0` and `rawSensorRelativePath = null`. The recommended Phase 11 behavior (skip persistence on cancel) depends on the orchestrator's current handling, which the Patient Advocate did not read in this pass; flagging for the Android Engineer and Data Engineer to confirm.
+3. The Patient Advocate did not verify the `BilateralTapTest`'s instructions copy for cross battery consistency in Finding 5. The Phase 2 review at this same date's prior entry covered that test in detail; the Patient Advocate is recommending the cross battery polish as a Phase 11 task without re reading `BilateralTapTest.kt` in this pass.
+
+### Handoff
+
+Patient Advocate hands back to the Project Manager. None of the five findings is a Phase 4 blocker; the Code Reviewer's Task 12 review can proceed without waiting on a fix commit. Findings 2 through 5 belong in the Phase 11 polish queue alongside the Phase 1 and Phase 2 carryover items already there. Finding 1 (Cancel reachability mitigation copy on Instructions) is small enough that the PM may elect to fold it into Phase 4 close as a one line copy add; the Patient Advocate is comfortable either way.
+
+(End of 2026-05-07 Phase 4 entry. Append only convention: this entry is not edited in place.)
