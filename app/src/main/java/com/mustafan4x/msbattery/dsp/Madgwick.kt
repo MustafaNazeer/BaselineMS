@@ -17,9 +17,9 @@ import kotlin.math.sqrt
  * not allocate Vector3 or Quaternion objects on the per sample path apart from the one new
  * Quaternion that replaces the field; primitive Doubles carry the rest of the work.
  *
- * The default beta gain (0.1) is the value Madgwick reports as a reasonable starting point in
- * the paper. The test suite runs at higher beta (0.5) for fast convergence on the static test
- * and at zero beta for pure gyro integration on the rotation test.
+ * The default beta gain (0.1) is the project's chosen starting value (see ADR 0002 for the
+ * tuning revisit conditions). The test suite runs at higher beta (0.5) for fast convergence on
+ * the static test and at zero beta for pure gyro integration on the rotation test.
  */
 class Madgwick(private val beta: Double = 0.1) {
 

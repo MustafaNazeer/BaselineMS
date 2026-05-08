@@ -72,8 +72,9 @@ class GaitPipeline {
 
         val steps = stepDetector.detect(verticalFiltered, timestampSeconds)
 
+        val medianStepIntervalSeconds = medianStepInterval(steps)
         val lateralAtStep = DoubleArray(steps.size) { i ->
-            lateralAtStepIndex(lateralFiltered, steps, i, timestampSeconds)
+            lateralAtStepIndex(lateralFiltered, steps, i, timestampSeconds, medianStepIntervalSeconds)
         }
         val footSteps = stridePairing.assignFeet(steps, lateralAtStep)
 
@@ -121,11 +122,11 @@ class GaitPipeline {
         lateral: DoubleArray,
         steps: List<StepEvent>,
         i: Int,
-        timestampSeconds: DoubleArray
+        timestampSeconds: DoubleArray,
+        medianStepIntervalSeconds: Double
     ): Double {
         if (steps.isEmpty()) return 0.0
-        val medianStepInterval = medianStepInterval(steps)
-        val targetTime = steps[i].timeSeconds - medianStepInterval / 2.0
+        val targetTime = steps[i].timeSeconds - medianStepIntervalSeconds / 2.0
         val idx = nearestIndex(targetTime, timestampSeconds)
         return lateral[idx]
     }
@@ -211,10 +212,10 @@ class GaitPipeline {
      * over the trial. Returns the residual mean in degrees and the absolute yaw drift in
      * degrees.
      *
-     * The Madgwick filter is configured at beta = 0.1 which Madgwick (2010) recommends for
-     * walking IMU streams. From an identity initial state with zero gyro (the synthetic
-     * fixture's pose), beta = 0.1 converges to the true pocket orientation only after several
-     * seconds. To avoid penalising that physical convergence transient on the quality score,
+     * The Madgwick filter is configured at beta = 0.1, the project's chosen starting value
+     * (see ADR 0002 for the tuning revisit conditions). From an identity initial state with
+     * zero gyro (the synthetic fixture's pose), beta = 0.1 converges to the true pocket
+     * orientation only after several seconds. To avoid penalising that physical convergence transient on the quality score,
      * the pipeline pre warms the filter with the time averaged accelerometer vector held
      * constant for `prewarmIterations` virtual samples before running the real input. By the
      * time the real input starts the filter is already aligned with the static gravity

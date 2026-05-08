@@ -9,6 +9,17 @@ data class Quaternion(val w: Double, val x: Double, val y: Double, val z: Double
         return Quaternion(w / n, x / n, y / n, z / n)
     }
 
+    /**
+     * Returns the rotation that undoes this one. For unit quaternions this is the conjugate
+     * `Quaternion(w, -x, -y, -z)`; the result is normalized so the API stays well behaved on
+     * inputs that are slightly off the unit sphere. The intended round trip property is
+     * `q.inverse().rotate(q.rotate(v))` is approximately `v` for unit `q`. The Phase 3 DSP code
+     * does not call this on the per sample loop, so the allocation cost of constructing a new
+     * Quaternion is acceptable; consumers that need an in place conjugate should inline the
+     * sign flip themselves.
+     */
+    fun inverse(): Quaternion = Quaternion(w, -x, -y, -z).normalized()
+
     fun rotate(v: Vector3): Vector3 {
         val ww = w * w; val xx = x * x; val yy = y * y; val zz = z * z
         val wx = w * x; val wy = w * y; val wz = w * z
