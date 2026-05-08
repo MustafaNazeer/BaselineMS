@@ -278,8 +278,8 @@ stride time = 2 step intervals." Drop the "half the mean step interval" framing.
 returns nothing.
 `git log --format='%B' 4996ed4..HEAD | grep -P '[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}]'`
 returns nothing.
-`git diff 4996ed4..HEAD -- '*.kt' '*.md' | grep -P '^[+-].*[em-dash or en-dash]'` returns
-nothing (verified with `[—–]` regex on the diff output).
+`git diff 4996ed4..HEAD -- '*.kt' '*.md' | grep -P '^[+-].*[\x{2013}\x{2014}]'` returns
+nothing (the regex matches U+2013 EN DASH and U+2014 EM DASH on the diff output).
 Spot read of the ADR, the citation audit log Phase 3 section, the fixtures.md, the
 perf review, and the SPEC.md and STATUS.md diffs shows only ASCII hyphens used inside
 identifiers, file paths, URLs, and code (the only contexts where the global CLAUDE.md
