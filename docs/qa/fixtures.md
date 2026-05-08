@@ -285,3 +285,54 @@ The Phase 5 walking course experiment is the correct venue for revisiting this l
 - Clinical Validator Phase 0 Gait Test sign off (`docs/source/clinical-references.md`). Source of the stride count adequacy caveat (47 steps in 30 seconds at the Givon MS mean) and the maximum inter peak distance ceiling (800 ms).
 - Clinical Validator Phase 2 Bilateral Tap Test sign off (`docs/source/clinical-references.md`). Source of the symmetric mean denominator asymmetry index convention used across both the tap and gait modules.
 - `SPEC.md` Section 6.2 (gait test summary) and Section 7 (gait module deep dive). Source of the 30 second trial duration, the 100 Hz capture rate, the 250 ms minimum and 800 ms maximum inter peak distance constraints, and the straight line walking scope.
+
+## 7. Phase 5 calibration log
+
+This section is appended in Phase 5 Part A as the Phase 3 CR L1 close out for the three previously uncovered fixtures (`slowWalk`, `briskWalk`, `severeAsymmetry`). Each calibration entry records what was measured against the production `GaitPipeline` (not what the synthetic generator produces in isolation), what fell inside the Phase 3 acceptance bands, what fell outside, and what is deferred to a future Phase 5 calibration session that will land once real walking course recordings arrive.
+
+The Phase 3 acceptance bands carried forward from `STATUS.md` Phase 3 close are: cadence within 5 percent, stride length within 5 percent, asymmetry index absolute error under 0.025.
+
+### 7.1 `slowWalk` (Phase 3 CR L1 close)
+
+| Feature | Ground truth | Recovered | Error | Within band |
+|---|---|---|---|---|
+| Cadence (steps per minute) | 80.0 | 78.026 | 2.47 percent | yes (5 percent band) |
+| Stride length (meters) | 0.85 | 0.8477 | 0.27 percent | yes (5 percent band) |
+
+Asserted in `GaitPipelineIntegrationTest.slow walk recovers cadence within 5 percent and stride length within 5 percent`. No deferred items for this fixture.
+
+### 7.2 `briskWalk` (Phase 3 CR L1 close)
+
+| Feature | Ground truth | Recovered | Error | Within band |
+|---|---|---|---|---|
+| Cadence (steps per minute) | 130.0 | 128.043 | 1.51 percent | yes (5 percent band) |
+| Stride length (meters) | 1.55 | 1.5440 | 0.39 percent | yes (5 percent band) |
+
+Asserted in `GaitPipelineIntegrationTest.brisk walk recovers cadence within 5 percent and stride length within 5 percent`. No deferred items for this fixture.
+
+### 7.3 `severeAsymmetry` (Phase 3 CR L1 partial close, asymmetry index deferred)
+
+| Feature | Ground truth | Recovered | Error | Within band |
+|---|---|---|---|---|
+| Cadence (steps per minute) | 90.0 | 88.029 | 2.19 percent | yes (5 percent band) |
+| Stride length (meters) | 1.05 | 1.0418 | 0.78 percent | yes (5 percent band) |
+| Asymmetry index (absolute) | 0.2609 | 0.1127 | 0.1482 absolute | NO (5.9x the 0.025 band) |
+
+Asserted on cadence and stride length only in `GaitPipelineIntegrationTest.severe asymmetry recovers cadence within 5 percent and stride length within 5 percent`. The asymmetry index assertion is intentionally absent from that test and is deferred to Phase 5 calibration per `STATUS.md` Resume notes items 8 and 10(a).
+
+**Diagnosis.** The recovered asymmetry index of 0.1127 is roughly 43 percent of the ground truth 0.2609. The divergence has two coupled causes:
+
+1. The synthetic generator emits lateral sway as a continuous half cadence sinusoid on world X (one cycle per stride pair), evaluated at a fixed phase relationship to heel strike timing. At high asymmetry the alternating step intervals diverge sharply (the dominant foot mean step time of 760 ms versus the non dominant foot mean step time of 585 ms in `severeAsymmetry`), so the lateral sway does not consistently reach a single signed extremum at the dominant versus non dominant heel strike instant.
+2. The pipeline's stride pairing logic in `StridePairing.assignFeet` samples lateral acceleration at a fixed offset (a quarter of the median step interval) before each detected step. With a 175 ms gap between dominant and non dominant step times, that median based offset misassigns feet on a non trivial fraction of steps, which in turn pushes left and right step time means toward each other and shrinks the recovered asymmetry index.
+
+This is the same class of synthetic versus pipeline divergence already documented in `STATUS.md` Resume notes item 10(a) under "lateral sampling offset (a quarter step interval before each detected step) is a synthetic only quirk because the synthetic generator's lateral sway evaluates to zero exactly at step times". Item 8 names the three previously uncovered fixtures (`slowWalk`, `briskWalk`, `severeAsymmetry`) as a Phase 5 reviewer task; this calibration entry is the Part A audit slice of that task.
+
+**Deferral rationale.** The Part A scope is bounded to agent doable prep (synthetic fixture coverage closure, ICC methodology, validation report scaffolding) per `docs/plans/phase-5-gait-validation-suite.md`. Calibrating the synthetic lateral sway model or the pipeline stride pairing requires real walking course recordings as the ground truth anchor; without that anchor any change to either side risks tuning the synthetic generator and the pipeline to each other rather than to physical reality. The Phase 5 calibration session that picks up the deferred item will have real recordings in hand and will choose among the three resolution paths below.
+
+**Resolution paths the Phase 5 calibration session can choose from.** The prior Test Fixture Engineer audit identified three options; the Phase 5 calibration session picks one informed by the real walking course data:
+
+1. **Synthetic generator step time aware lateral sway.** Replace the continuous half cadence sinusoid with a per step lateral pulse whose phase is locked to each individual step's timing (rather than to the half cadence average). This produces a clean signed extremum at every heel strike regardless of step time variability. Closes the divergence at the fixture level without touching pipeline code.
+2. **Pipeline per step adaptive offset.** Replace `StridePairing.assignFeet`'s median step interval lateral sampler with a per step offset derived from the local inter peak interval at each detected step. This handles real recordings where step time variability is larger than the synthetic generator currently models, in addition to closing the synthetic fixture divergence.
+3. **Accept the divergence and document the limitation.** If the real walking course recordings show that the pipeline recovers the asymmetry index correctly on real signals, the synthetic versus real divergence on `severeAsymmetry` becomes a known synthetic only artifact. The validation report would document the artifact alongside the real signal accuracy numbers, and the integration test would remain at cadence and stride length only.
+
+The choice is not made in Part A. It is made by the Phase 5 calibration session that has real recordings to compare against.

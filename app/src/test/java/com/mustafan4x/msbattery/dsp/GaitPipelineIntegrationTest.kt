@@ -42,6 +42,38 @@ class GaitPipelineIntegrationTest {
         assertWithin(0.906, f.meanStrideLengthMeters, 0.04)
     }
 
+    @Test
+    fun `slow walk recovers cadence within 5 percent and stride length within 5 percent`() {
+        val samples = PreCannedFixtures.slowWalk().generate().toList()
+        val f = pipeline.process(samples)
+        assertWithin(80.0, f.cadenceStepsPerMinute, 0.05)
+        assertWithin(0.85, f.meanStrideLengthMeters, 0.05)
+    }
+
+    @Test
+    fun `brisk walk recovers cadence within 5 percent and stride length within 5 percent`() {
+        val samples = PreCannedFixtures.briskWalk().generate().toList()
+        val f = pipeline.process(samples)
+        assertWithin(130.0, f.cadenceStepsPerMinute, 0.05)
+        assertWithin(1.55, f.meanStrideLengthMeters, 0.05)
+    }
+
+    @Test
+    fun `severe asymmetry recovers cadence within 5 percent and stride length within 5 percent`() {
+        val samples = PreCannedFixtures.severeAsymmetry().generate().toList()
+        val f = pipeline.process(samples)
+        assertWithin(90.0, f.cadenceStepsPerMinute, 0.05)
+        assertWithin(1.05, f.meanStrideLengthMeters, 0.05)
+        /*
+         * Asymmetry index assertion deferred to Phase 5 calibration per STATUS.md Resume notes
+         * items 8 and 10(a). Recovered asymmetry index for severeAsymmetry (0.1127) misses the
+         * ground truth (0.2609) by 5.9x the 0.025 absolute band; the divergence stems from the
+         * synthetic generator's continuous half cadence lateral sway interacting with the
+         * pipeline's median step interval lateral sampler at high asymmetry. See
+         * docs/qa/fixtures.md Section 7 for the calibration log entry and resolution paths.
+         */
+    }
+
     private fun assertWithin(expected: Double, actual: Double, fraction: Double) {
         val tolerance = expected * fraction
         assertTrue(
