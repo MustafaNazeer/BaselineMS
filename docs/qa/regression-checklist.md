@@ -195,3 +195,116 @@ The manual emulator walkthrough is the user's responsibility. The QA Engineer is
 - The one known Gradle warning (`allowBackup tools:replace with no competing declaration`) is unchanged from Phase 1. It does not affect the application's backup posture.
 - The `assembleDebug` run was `BUILD SUCCESSFUL in 930ms` with 37 actionable tasks (4 executed, 33 up to date). No new Kotlin compiler warnings or AGP warnings appeared in the output beyond the `allowBackup` warning noted above.
 - I did not modify any application code, tests, or configuration during sign off; only this document was touched.
+
+---
+
+## Phase 3 close, 2026-05-07
+
+**Verdict:** PASS WITH NOTES. Phase 3 is signed off cleanly on the test bar (all 83 unit tests pass, zero failures, zero errors, zero skipped). The notes below are carryover items the PM should track in `STATUS.md` Resume notes for Phase 4 and Phase 11; none of them block Phase 3 close.
+
+**Test suite run.**
+
+- Command: `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --rerun-tasks --console=plain`
+- Outcome: `BUILD SUCCESSFUL in 13s`, 30 actionable tasks executed.
+- Total tests run: **83 tests across 25 suites, 0 failures, 0 errors, 0 skipped** (verified by parsing `app/build/test-results/testDebugUnitTest/TEST-*.xml`).
+- Phase 2 close baseline was 48 tests; Phase 3 grew the suite by 35 tests across 11 new suites for a Phase 3 close total of 83 tests across 25 suites. Strict growth confirmed.
+- Per suite breakdown of the 11 Phase 3 additions:
+  - `com.mustafan4x.msbattery.dsp.ButterworthLowPassTest`: 3 tests, all pass.
+  - `com.mustafan4x.msbattery.dsp.MadgwickTest`: 2 tests, all pass.
+  - `com.mustafan4x.msbattery.dsp.WorldFrameTest`: 2 tests, all pass.
+  - `com.mustafan4x.msbattery.dsp.StepDetectorTest`: 2 tests, all pass.
+  - `com.mustafan4x.msbattery.dsp.StridePairingTest`: 4 tests, all pass.
+  - `com.mustafan4x.msbattery.dsp.ZuptTest`: 3 tests, all pass.
+  - `com.mustafan4x.msbattery.dsp.FeatureExtractorTest`: 7 tests, all pass.
+  - `com.mustafan4x.msbattery.dsp.QuaternionTest`: 2 tests, all pass (added by the M2 fix in commit `78c14e5` after the Code Reviewer verdict).
+  - `com.mustafan4x.msbattery.dsp.GaitPipelineIntegrationTest`: 4 tests, all pass.
+  - `com.mustafan4x.msbattery.fixtures.SyntheticImuTest`: 6 tests, all pass.
+- All 14 Phase 1 and Phase 2 suites carry forward with their counts unchanged.
+
+**Privacy and architectural rail spot checks.**
+
+- `grep -rn "import android" app/src/main/java/com/mustafan4x/msbattery/dsp/` returns nothing. The DSP package is pure Kotlin with zero `android.*` imports, as required by `SPEC.md` Section 5.2 and the Phase 3 plan architectural rail.
+- `grep -n "INTERNET" app/src/main/AndroidManifest.xml` returns nothing. The carryover Phase 1 and Phase 2 invariant (no `android.permission.INTERNET`) holds. Security Engineer's hard rail is intact.
+
+### Falsifiable conditions for Phase 3 (DSP package)
+
+The conditions below are the regression tripwires for any future change that touches `app/src/main/java/com/mustafan4x/msbattery/dsp/` or `app/src/test/java/com/mustafan4x/msbattery/fixtures/`. Each item names the verification command or grep that confirms the condition holds.
+
+#### Per fixture pipeline accuracy budgets (`GaitPipelineIntegrationTest`)
+
+The integration test exercises four of the seven `PreCannedFixtures` entries. The other three (`slowWalk`, `briskWalk`, `severeAsymmetry`) are declared but not yet exercised; see L1 in the carryover notes below.
+
+- [ ] `healthyControlNormal` recovers cadence within 3 percent of 115.2 steps per minute. Verify with `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.dsp.GaitPipelineIntegrationTest.healthy control normal recovers cadence within 3 percent and stride length within 2 percent"`. The assertion lives at `app/src/test/java/com/mustafan4x/msbattery/dsp/GaitPipelineIntegrationTest.kt` line 15.
+- [ ] `healthyControlNormal` recovers stride length within 2 percent of 1.442 m. Same test method as above; the assertion is at line 16.
+- [ ] `msTypicalNormal` recovers cadence within 3 percent of 94.4 steps per minute. Verify with the test method `MS typical normal recovers within the same envelope`; assertion at line 24.
+- [ ] `msTypicalNormal` recovers stride length within 2 percent of 0.906 m. Same test method; assertion at line 25.
+- [ ] `noisyMsNormal` recovers cadence within 5 percent of 94.4 steps per minute under 0.5 m per second squared additive Gaussian noise. Verify with the test method `noisy MS normal still recovers cadence within 5 percent and stride length within 4 percent`; assertion at line 41.
+- [ ] `noisyMsNormal` recovers stride length within 4 percent of 0.906 m under noise. Same test method; assertion at line 42.
+
+The 2 percent stride length target on the clean fixtures matches `SPEC.md` Section 7.2 layer 1. The 3 percent cadence target tracks `SPEC.md` Section 7.2 layer 2 ahead of the real walking course measurement scheduled for Phase 5.
+
+#### Asymmetry index recovery
+
+- [ ] `mildAsymmetry` recovers a stride asymmetry index within 0.04 of the expected value 0.10. Verify with the test method `mild asymmetry recovers a positive asymmetry index of about 0_1`; assertion at `GaitPipelineIntegrationTest.kt` line 34. The `mildAsymmetry` fixture is configured with `asymmetryRatio = 1.10` per `PreCannedFixtures.kt` line 52.
+
+#### Quality score floors
+
+- [ ] `healthyControlNormal` produces a quality score strictly above 0.8. Assertion at `GaitPipelineIntegrationTest.kt` line 17.
+- [ ] `msTypicalNormal` produces a quality score strictly above 0.7. Assertion at `GaitPipelineIntegrationTest.kt` line 26.
+
+The two floor values reflect the orientation residual quality model documented in `GaitPipeline.kt` lines 226 to 271; the higher floor on the healthy fixture reflects the higher cadence (more strides per trial) and the lower stride time variability.
+
+#### Per module DSP unit test bars
+
+Each falsifiable condition below is "the named test class passes with the recorded test count." The verification command is `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.dsp.<ClassName>"`.
+
+- [ ] `ButterworthLowPassTest` passes with 3 tests. Covers DC pass, high frequency suppression, and zero phase response.
+- [ ] `MadgwickTest` passes with 2 tests. Covers static gravity convergence and gyroscope only integration.
+- [ ] `WorldFrameTest` passes with 2 tests. Covers gravity removal and device to world rotation.
+- [ ] `StepDetectorTest` passes with 2 tests. Covers peak prominence rejection and minimum inter peak distance.
+- [ ] `StridePairingTest` passes with 4 tests. Covers lateral sign assignment, alternation discipline, edge cases.
+- [ ] `ZuptTest` passes with 3 tests. Covers velocity reset at mid stance, integration over a single segment, and per stride displacement.
+- [ ] `FeatureExtractorTest` passes with 7 tests. Covers cadence, stride length mean, step time CV, asymmetry, double support time, and the `toMap()` projection.
+- [ ] `QuaternionTest` passes with 2 tests. Covers `inverse()` round trip and unit norm preservation; added in commit `78c14e5` to support the M2 fix.
+
+#### Synthetic generator round trip tests
+
+- [ ] `SyntheticImuTest` passes with 6 tests. Verify with `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.fixtures.SyntheticImuTest"`. The six round trip checks ensure the fixture generator's stated ground truth (number of heel strikes, mean stride length, asymmetry ratio, step time CV, gravity addition, and rotation vector convention) is recoverable by inversion of the generator's parameters. If a future change to `SyntheticImu.kt` regresses any of these round trips, every downstream pipeline test is invalidated.
+
+#### Suite growth and green bar
+
+- [ ] Total test count remains strictly greater than 48 (the Phase 2 close baseline). Verify with `python3 -c "import xml.etree.ElementTree as ET; import glob; print(sum(int(ET.parse(f).getroot().attrib.get('tests', 0)) for f in glob.glob('app/build/test-results/testDebugUnitTest/TEST-*.xml')))"`. Phase 3 close measured 83.
+- [ ] Total failures, errors, and skipped each equal 0. Verify with the same XML aggregation, summing the `failures`, `errors`, and `skipped` attributes on each `<testsuite>` root.
+
+#### Architectural rails (carryover from Phase 1 and Phase 2)
+
+- [ ] No `android.*` import appears anywhere under `app/src/main/java/com/mustafan4x/msbattery/dsp/`. Verify with `grep -rn "import android" app/src/main/java/com/mustafan4x/msbattery/dsp/`. The DSP package is pure Kotlin per `SPEC.md` Section 5.2 ("Signal Processing. Pure Kotlin. No sensor or UI imports.").
+- [ ] No `android.permission.INTERNET` appears in `app/src/main/AndroidManifest.xml`. Verify with `grep -n "INTERNET" app/src/main/AndroidManifest.xml`. This is the Security Engineer's hard rail per `SPEC.md` Section 10 and the carryover Phase 1 plus Phase 2 invariant.
+
+### Sign off and carryover items
+
+**Verdict: PASS WITH NOTES.** All falsifiable conditions above hold at Phase 3 close. The notes below are documented carryover for the PM to capture in `STATUS.md` Resume notes for Phase 4 and Phase 11. None of them blocked Phase 3 close.
+
+**Carryover items for Phase 4 (Sensor Integration and Android Engineer dispatch):**
+
+1. **Code Reviewer M3 (rotationVector null fallback).** `GaitPipeline.rotateToWorld` falls back to `Quaternion.IDENTITY` when `ImuSample.rotationVector` is null, which would silently skip the world frame transform on a device that does not expose `TYPE_ROTATION_VECTOR`. The Phase 4 Sensor Integration Engineer must either populate `rotationVector` from the from scratch Madgwick filter in the signals layer, or update the DSP `rotateToWorld` to compute its own Madgwick estimate as a fallback. No Phase 3 unit test exercises this null path because every fixture populates `rotationVector`. Documented in `docs/qa/code-review-phase-3.md` MINOR M3 (lines 113 to 146).
+
+**Carryover items for Phase 5 (real walking course validation and reviewer cleanup):**
+
+2. **Citation Auditor PARTIAL P3.1 (Madgwick 2010 equation specificity).** The ADR `docs/adr/0002-madgwick-from-scratch.md` cites "eq 11 to eq 33" of the Madgwick 2010 University of Bristol technical report; the bibliography does not record equation numbers and the Phase 3 audit did not re fetch the primary source. Recommended Phase 5 home: a Citation Auditor follow up pass that either re fetches the primary source to verify the equation range or rewrites the ADR clause to drop the equation specificity. Documented in `docs/source/citation-audit-log.md` lines 423 to 429. The companion P3.2 was closed by the Signal Processing Engineer's M1 cleanup commit `78c14e5`.
+3. **Code Reviewer L1 (three pre canned fixtures uncovered by integration tests).** `slowWalk`, `briskWalk`, and `severeAsymmetry` are declared in `PreCannedFixtures.kt` lines 27 to 69 but are not exercised by `GaitPipelineIntegrationTest.kt`. Recommended home: a Phase 5 reviewer task or Phase 11 polish task that adds three integration test cases (or the equivalent regression checklist conditions). The CR's recommended tolerances are 3 percent cadence and 5 percent stride length on the slow and brisk envelopes, and asymmetry index within 0.05 of 0.2609 on `severeAsymmetry`. The QA Engineer is not adding the three cases now because doing so would either require modifying production test code (out of role for this sign off) or the looser 5 percent stride length envelope would need an SPE dispatch first to confirm the implementation actually meets it; both paths are better fitted into Phase 5 calibration work alongside the real walking course recordings.
+4. **Synthetic generator magnitude minima inversion caveat.** `docs/qa/fixtures.md` Section 2.1 documents that the synthetic forward propulsion peak amplitude (about 16.7 m per second squared on `healthyControlNormal`) exceeds the world Z heel strike Gaussian peak (5.0 m per second squared), so the local minima of the synthetic three axis acceleration magnitude fall AT the heel strike instants rather than between them. The pipeline accommodates this on the synthetic side, but the real walking course recordings in Phase 5 will need to confirm whether real signals exhibit the same inversion. If real recordings show the published convention (minima between heel strikes, at mid stance), the Test Fixture Engineer will need to recalibrate the forward propulsion amplitude or the pipeline's mid stance detector will need a band passed magnitude input.
+
+**Informational items recorded for completeness, no carryover action required:**
+
+5. **Performance Engineer INFORMATIONAL findings 1, 2, 3.** `docs/perf/latency-budgets.md` lines 66 to 88 flag (1) `medianStepInterval` recomputed inside the lateral at step initializer, (2) Kotlin `DoubleArray(size, init)` autoboxing of the init lambda, and (3) `ArrayList<Double>` autoboxing in `computeAsymmetry`. None are blocking and none require Phase 4 action; the Phase 4 real device measurement on `IMU sampling: actual sample rate within 5 percent of nominal 100 Hz, jitter under 5 ms p99` will confirm whether any of them surface as measured regressions. INFORMATIONAL 1 was promoted to MINOR M4 by the Code Reviewer and was closed by the SPE's commit `78c14e5` (median hoisted out of the loop).
+
+**Manual walkthrough note.**
+
+There is no Phase 3 manual emulator walkthrough. Phase 3 is a pure Kotlin DSP module with no UI surface, no Compose screens added, and no `app/src/main/AndroidManifest.xml` changes. The DSP module is exercised entirely through the JVM unit test suite. The first user facing manifestation of the gait pipeline lands in Phase 4, when the Sensor Integration Engineer wires `SensorManager` to `Flow<ImuSample>` and the Android Engineer adds the gait test screen; the manual walkthrough for that surface is the QA Engineer's deliverable at Phase 4 close.
+
+**Uncertainties and notes.**
+
+- The `--rerun-tasks` invocation produced `BUILD SUCCESSFUL in 13s` with 30 actionable tasks executed and the full 83 test count. A subsequent cached run produced `BUILD SUCCESSFUL in 827ms` with 1 executed task. Both runs yield 0 failures, 0 errors, 0 skipped. The green result is reproducible.
+- The Code Reviewer's verdict in `docs/qa/code-review-phase-3.md` was generated against commit `b23c287` and recorded 81 tests. The current `HEAD` (`cf81970`) is two commits past that point; the M2 fix in commit `78c14e5` added two `QuaternionTest` cases (`inverse round trip` and `inverse preserves unit norm`) to support the new public `Quaternion.inverse()` method, lifting the count from 81 to 83. The `cf81970` follow up dropped a now redundant private `Quaternion.inverse` extension from the fixtures package without changing the test count. The Phase 3 sign off bar is the current `HEAD` count of 83.
+- I did not modify any application code, tests, or configuration during sign off; only this document was touched.
