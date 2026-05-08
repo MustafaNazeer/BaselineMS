@@ -4,7 +4,7 @@
 
 ## Initial budgets
 
-- **IMU sampling:** actual sample rate within 5 percent of nominal 100 Hz. Jitter under 5 ms p99. Zero dropped windows over a 30 second capture.
+- **IMU sampling:** actual sample rate within 5 percent of nominal 100 Hz. Jitter under 5 ms p99. Zero dropped 1 second sub windows over a 30 second capture, where a sub window is dropped when its cumulative delta drift exceeds 5 percent of nominal (the bucket's actual elapsed time falls outside 950 to 1050 ms). See `docs/observability/sensor-runbook.md` for the methodology.
 - **Audio capture:** zero glitches over a 30 second capture at 44.1 kHz mono.
 - **UI:** 60 fps target on a Pixel 6 class device. 30 fps minimum on a budget Android 12 phone.
 - **Battery:** a full weekly battery session (all five tests) consumes under 1 percent of phone battery.
