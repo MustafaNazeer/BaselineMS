@@ -30,14 +30,15 @@ class BatteryOrchestrator(
     private val _state = MutableStateFlow<State>(State.Idle)
     val state: StateFlow<State> = _state.asStateFlow()
 
-    private var activeSessionId: String? = null
+    private var _activeSessionId: String? = null
+    val activeSessionId: String? get() = _activeSessionId
 
     fun start() {
         if (modules.isEmpty()) return
         viewModelScope.launch {
             val session = SessionEntity(deviceInfo = deviceInfo)
             sessionDao.insert(session)
-            activeSessionId = session.id
+            _activeSessionId = session.id
             _state.value = State.Running(index = 0)
         }
     }
@@ -45,7 +46,7 @@ class BatteryOrchestrator(
     fun recordResult(testType: TestType, payload: TestResultPayload) {
         val current = _state.value
         if (current !is State.Running) return
-        val sessionId = activeSessionId ?: return
+        val sessionId = _activeSessionId ?: return
 
         viewModelScope.launch {
             val now = System.currentTimeMillis()
@@ -76,19 +77,19 @@ class BatteryOrchestrator(
     }
 
     fun cancel() {
-        val sessionId = activeSessionId
+        val sessionId = _activeSessionId
         viewModelScope.launch {
             if (sessionId != null) {
                 val session = sessionDao.getById(sessionId)
                 if (session != null) sessionDao.delete(session)
             }
-            activeSessionId = null
+            _activeSessionId = null
             _state.value = State.Idle
         }
     }
 
     fun reset() {
-        activeSessionId = null
+        _activeSessionId = null
         _state.value = State.Idle
     }
 }

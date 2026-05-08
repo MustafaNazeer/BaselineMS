@@ -19,13 +19,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.mustafan4x.msbattery.MSBatteryApp
 import com.mustafan4x.msbattery.battery.BatteryOrchestrator
+import com.mustafan4x.msbattery.battery.gait.GaitTest
+import com.mustafan4x.msbattery.battery.gait.GaitTestViewModel
 import com.mustafan4x.msbattery.battery.tap.BilateralTapTest
+import com.mustafan4x.msbattery.data.TestType
+import com.mustafan4x.msbattery.dsp.GaitPipeline
+import com.mustafan4x.msbattery.signals.RawSensorWriter
 import com.mustafan4x.msbattery.ui.home.HomeScreen
 import com.mustafan4x.msbattery.ui.home.SessionRunnerScreen
 import com.mustafan4x.msbattery.ui.onboarding.DisclaimerScreen
 import com.mustafan4x.msbattery.ui.onboarding.ProfileSetupScreen
 import com.mustafan4x.msbattery.ui.settings.SettingsScreen
 import com.mustafan4x.msbattery.util.DeviceInfo
+import java.io.File
 
 private const val PREFS = "msbattery_prefs"
 private const val KEY_DISCLAIMER = "disclaimer_acknowledged"
@@ -94,12 +100,32 @@ fun RootScreen() {
         }
         composable("session") {
             val orchestrator = remember {
-                BatteryOrchestrator(
-                    modules = listOf(BilateralTapTest()),
+                lateinit var built: BatteryOrchestrator
+                val gaitTest = GaitTest(
+                    viewModelFactory = { coroutineScope ->
+                        val sessionId = built.activeSessionId ?: "unknown-session"
+                        val targetFile = File(
+                            app.filesDir,
+                            "sensor_traces/$sessionId/${TestType.GAIT.name}.csv.gz"
+                        )
+                        GaitTestViewModel(
+                            imuSource = app.imuSource,
+                            gaitPipeline = GaitPipeline(),
+                            rawSensorWriter = RawSensorWriter(targetFile),
+                            destinationFile = targetFile,
+                            filesDir = app.filesDir,
+                            scope = coroutineScope
+                        )
+                    }
+                )
+                built = BatteryOrchestrator(
+                    modules = listOf(BilateralTapTest(), gaitTest),
                     sessionDao = app.database.sessionDao(),
                     testResultDao = app.database.testResultDao(),
                     deviceInfo = DeviceInfo.summary
-                ).also { it.start() }
+                )
+                built.start()
+                built
             }
             SessionRunnerScreen(orchestrator = orchestrator, onFinished = {
                 nav.popBackStack("home", inclusive = false)
