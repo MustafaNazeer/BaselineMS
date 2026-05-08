@@ -308,3 +308,181 @@ There is no Phase 3 manual emulator walkthrough. Phase 3 is a pure Kotlin DSP mo
 - The `--rerun-tasks` invocation produced `BUILD SUCCESSFUL in 13s` with 30 actionable tasks executed and the full 83 test count. A subsequent cached run produced `BUILD SUCCESSFUL in 827ms` with 1 executed task. Both runs yield 0 failures, 0 errors, 0 skipped. The green result is reproducible.
 - The Code Reviewer's verdict in `docs/qa/code-review-phase-3.md` was generated against commit `b23c287` and recorded 81 tests. The current `HEAD` (`cf81970`) is two commits past that point; the M2 fix in commit `78c14e5` added two `QuaternionTest` cases (`inverse round trip` and `inverse preserves unit norm`) to support the new public `Quaternion.inverse()` method, lifting the count from 81 to 83. The `cf81970` follow up dropped a now redundant private `Quaternion.inverse` extension from the fixtures package without changing the test count. The Phase 3 sign off bar is the current `HEAD` count of 83.
 - I did not modify any application code, tests, or configuration during sign off; only this document was touched.
+
+---
+
+## Phase 4 close, 2026-05-08
+
+**Verdict:** PASS WITH NOTES. Phase 4 is signed off cleanly on the test bar (all 102 unit tests pass, zero failures, zero errors, zero skipped). The notes below are carryover items the PM should track in `STATUS.md` Resume notes for Phase 5 prep and Phase 11 polish, and the user driven multi device sample rate validation task per `docs/observability/sensor-runbook.md` is the one outstanding non code item Phase 4 defers to the user. None of the carryover items block Phase 4 close; they were ruled deferrable by the Code Reviewer's consolidation in `docs/qa/code-review-phase-4.md`.
+
+**Test suite run.**
+
+- Command: `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --rerun-tasks --console=plain`
+- Outcome: `BUILD SUCCESSFUL in 14s`, 30 actionable tasks executed.
+- Total tests run: **102 tests across 31 suites, 0 failures, 0 errors, 0 skipped** (verified by parsing `app/build/test-results/testDebugUnitTest/TEST-*.xml`).
+- Phase 3 close baseline was 83 tests across 25 suites. Phase 4 grew the suite by 19 tests across 6 new suites for a Phase 4 close total of 102 tests across 31 suites. Strict growth confirmed.
+
+**Commit chain on `main` from `4cd0a72..HEAD`.** 15 commits verified via `git log --oneline 4cd0a72..HEAD`. The chain spans Phase 3 close cleanup through Phase 4 plan prep, the eight implementation tasks (Tasks 1 to 8), the four review dispatches (Tasks 9 to 12), and the single Phase 4 cleanup commit (PE M1) the Code Reviewer required before this sign off:
+
+1. `874182a` Phase 3 close: flip STATUS to completed, restructure Resume notes by phase target.
+2. `46641b7` Phase 4 prep: STATUS in progress, detailed Phase 4 plan.
+3. `b8187c8` battery: extend TestResultPayload with optional rawSensorRelativePath (Task 1).
+4. `0cbaafa` signals: AndroidImuSource for SensorManager backed Flow<ImuSample> at 100 Hz (Task 2).
+5. `ea27060` docs(adr): 0003 sensor type choice (Task 3).
+6. `aac52f2` docs(observability): sensor runbook with per device entry template and acceptance budgets (Task 4).
+7. `2f47991` signals: RawSensorWriter gzipped CSV persistence with round trip tests (Task 5).
+8. `c33988f` battery(gait): instructions, countdown, capture, done screens with smoke tests (Task 6).
+9. `34a3174` battery(gait): viewmodel state machine and TestModule integration (Task 7).
+10. `d9b4795` battery(gait): register GaitTest in MSBatteryApp module list (Task 8).
+11. `bf99d79` review(gait): Signal Processing Engineer Phase 4 sensor stream review (Task 9).
+12. `4bc1bec` review(gait): Patient Advocate Phase 4 review (Task 10).
+13. `a8ca3e2` perf(gait): Phase 4 Performance Engineer review of sensor capture path (Task 11).
+14. `377dc00` review(gait): Code Reviewer Phase 4 verdict (Task 12).
+15. `3c514f6` perf(gait): reconcile dropped windows budget wording with sensor runbook (PE M1 cleanup).
+
+The PM handoff note for this sign off named 11 commits from `4cd0a72` exclusive; the actual count on the branch is 15 because the Phase 3 close `STATUS.md` flip (`874182a`) and the Phase 4 plan prep (`46641b7`) both land in the same range alongside the 13 Phase 4 implementation, review, and cleanup commits. The 15 count is the verified count and the one this sign off treats as authoritative.
+
+**File count delta from Phase 3 close.** `git diff --stat 4cd0a72..HEAD` reports 32 files changed, 3,649 insertions, 43 deletions.
+
+**Privacy and architectural rail spot checks.**
+
+- `grep -in 'INTERNET' /home/mustafa/src/MS-Battery/app/src/main/AndroidManifest.xml` returns nothing (exit 1). The carryover invariant from Phase 1, Phase 2, and Phase 3 (no `android.permission.INTERNET`) holds. Security Engineer's hard rail is intact. The Code Reviewer's Task 12 verdict independently verified `git diff 4cd0a72..HEAD -- app/src/main/AndroidManifest.xml` returns nothing; the manifest is byte identical to the Phase 3 close commit `4cd0a72`.
+- `grep -rn "import android" app/src/main/java/com/mustafan4x/msbattery/dsp/` continues to return nothing; the DSP package remains pure Kotlin with zero `android.*` imports per `SPEC.md` Section 5.2 and Phase 3 architectural rail. Phase 4 added `signals/` as a thin adaptation layer above `dsp/`; the dependency direction is `signals/` to `dsp/` only, verified by `grep -rn "import com.mustafan4x.msbattery.signals" app/src/main/java/com/mustafan4x/msbattery/dsp/` returning nothing (recorded in `docs/qa/code-review-phase-4.md` PASS section).
+
+### Falsifiable conditions for Phase 4 (gait test module integration)
+
+Each of the eight conditions below is the regression tripwire taken verbatim from `docs/plans/phase-4-gait-test-module-integration.md` Task 13 spec lines 728 to 736. Each condition is recorded with explicit "verified yes / no" wording plus the failure mode that would invalidate it.
+
+#### Condition 1, AndroidImuSourceTest four cases
+
+- **Verified yes.** `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.signals.AndroidImuSourceTest"` reports `tests=4 failures=0 errors=0 skipped=0` (parsed from `app/build/test-results/testDebugUnitTest/TEST-com.mustafan4x.msbattery.signals.AndroidImuSourceTest.xml`). The four cases cover (a) `start` registers listeners on the system `SensorManager`, (b) `stream` emits an `ImuSample` on each linear acceleration event with held gyro and rotation values via zero order hold, (c) `stop` unregisters all listeners, and (d) when `Sensor.TYPE_ROTATION_VECTOR` is absent the fallback Madgwick fills `ImuSample.rotationVector` with a non null quaternion.
+- **Failure mode that would invalidate this condition.** Any of the four cases regressing (a missing listener registration, a dropped held value, a leaked listener after `stop`, or a null `rotationVector` on the fallback path), or the test class disappearing from the suite. SPE M1 flags a fixture realism caveat on case (d) (the test does not exercise the fallback Madgwick with realistic gravity included input) and is deferred to Phase 5 prep; the case still passes as written and is not invalidated by the SPE finding.
+
+#### Condition 2, RawSensorWriterTest two cases
+
+- **Verified yes.** `tests=2 failures=0 errors=0 skipped=0` on `com.mustafan4x.msbattery.signals.RawSensorWriterTest`. The two cases cover (a) round trip: a known stream of `ImuSample` rows is written to a gzipped CSV, read back, decompressed, parsed, and every field is recovered within floating point precision; (b) exception propagation: a flow that throws after N samples results in the writer closing the file and rethrowing.
+- **Failure mode that would invalidate this condition.** A round trip drift on any of the 14 columns (timestamp, three acceleration channels, three gyro channels, three linear acceleration channels, four rotation vector components), or the writer leaking the file handle after an exception, or the exception being swallowed.
+
+#### Condition 3, GaitTestViewModelTest six cases
+
+- **Verified yes.** `tests=6 failures=0 errors=0 skipped=0` on `com.mustafan4x.msbattery.battery.gait.GaitTestViewModelTest`. The six cases cover (1) Instructions to Countdown(3) on `onStart()`, (2) Countdown(3) to Capturing(0) after three one second ticks, (3) `imuSource.start()` and `RawSensorWriter.write()` invoked once on capture entry with samples accumulated in order, (4) Capturing to Done after 30 seconds with non null `GaitFeatures`, (5) `onCancel()` from Capturing transitions to Cancelled and stops the source, (6) `onContinue` from Done invokes the completion callback with a `TestResultPayload` whose `rawSensorRelativePath` matches the destination file's relative path under `Context.filesDir`.
+- **Failure mode that would invalidate this condition.** Any case regressing, or the state machine accepting a transition the spec forbids (Instructions to Capturing without a Countdown, Capturing to Done before 30 seconds without a cancel, etc.). SPE I1 flags a tail edge sample loss on cancel that is acceptable for Phase 4 and deferred to Phase 5 prep; case (5) still passes as written because the assertion is on state transition and source lifecycle, not on the trailing sample count.
+
+#### Condition 4, Compose smoke tests on the four GaitTest screens
+
+- **Verified yes.** `tests=4 failures=0 errors=0 skipped=0` on `com.mustafan4x.msbattery.battery.gait.GaitTestRenderTest`. The four smoke tests cover Instructions, Countdown, Capture, and Done. Each test asserts the screen renders without crashing in a Robolectric Compose host and that the primary CTA's semantic node exists (Instructions has `I am ready` and `Skip for now`; Countdown exposes the current second via `Modifier.semantics { contentDescription = secondsLabel }` plus the `Get ready to walk` headline endorsed by the Patient Advocate; Capture has a Cancel button; Done has Continue).
+- **Failure mode that would invalidate this condition.** A screen failing to render in the test host (e.g. a Compose runtime exception), the loss of a primary CTA semantic node, or the Cancelled state path failing to reach `GaitDoneScreen` via `GaitTest.kt` lines 61 to 64.
+
+#### Condition 5, BatteryFlowIntegrationTest with the new orchestrator signature
+
+- **Verified yes.** `tests=1 failures=0 errors=0 skipped=0` on `com.mustafan4x.msbattery.battery.BatteryFlowIntegrationTest`. The orchestrator's `recordResult` was migrated in commit `b8187c8` from the three argument `recordResult(testType, qualityScore, features)` form to the two argument `recordResult(testType: TestType, payload: TestResultPayload)` form so the optional `rawSensorRelativePath` flows through to the persisted `TestResultEntity`. `BatteryFlowIntegrationTest.kt` lines 61 to 72 call the new signature with a `MockTestModule.MockResult` payload across all three test types (TAP, GAIT, VISION); the test asserts the orchestrator reaches the `Completed` state, exactly one `SessionEntity` row is written with a non null `completedAtEpochMs`, and three `TestResultEntity` rows are written.
+- **Failure mode that would invalidate this condition.** A regression in the orchestrator's state machine after the signature change, a payload that fails to flow `rawSensorRelativePath` to the persisted entity, or a null `completedAtEpochMs` on a session that should be marked complete.
+
+#### Condition 6, BilateralTapTest tests with the TestResultPayload extension
+
+- **Verified yes.** Across the four BilateralTapTest suites the parsed XML reports `BilateralTapTestMetadataTest` 1 of 1, `BilateralTapTestRenderTest` 1 of 1, `TapFeaturesTest` 12 of 12, `TwoTargetsOffTargetTest` 2 of 2, all with zero failures, errors, and skipped. The `TestResultPayload` interface added the new property as `val rawSensorRelativePath: String? get() = null`, a default getter implementation, so the existing `TapSessionFeatures` payload picks up the default automatically without source level changes; the Code Reviewer's Task 12 verdict and the Phase 4 plan rail 6 both confirm this is a backward compatible extension.
+- **Failure mode that would invalidate this condition.** Any of the 16 tap related tests regressing, or the `TestResultPayload` default getter being removed (which would force every implementation to declare `rawSensorRelativePath` explicitly and break the Phase 2 contract).
+
+#### Condition 7, AndroidManifest.xml contains no INTERNET permission
+
+- **Verified yes.** Direct grep evidence:
+
+```
+$ grep -in 'INTERNET' /home/mustafa/src/MS-Battery/app/src/main/AndroidManifest.xml
+$ echo $?
+1
+```
+
+The grep returns nothing on stdout and exits 1 (no match). The Code Reviewer's Task 12 verdict additionally records `git diff 4cd0a72..HEAD -- app/src/main/AndroidManifest.xml` returns nothing, meaning the manifest is byte identical to the Phase 3 close commit `4cd0a72`. The four sensor types Phase 4 registers (`TYPE_LINEAR_ACCELERATION`, `TYPE_GYROSCOPE`, `TYPE_ROTATION_VECTOR`, `TYPE_ACCELEROMETER` on the fallback path only) do not require any runtime permission per ADR 0003.
+- **Failure mode that would invalidate this condition.** Any future commit that adds `<uses-permission android:name="android.permission.INTERNET" />` (or any other runtime permission) to `app/src/main/AndroidManifest.xml`. The Security Engineer holds veto power on any such change.
+
+#### Condition 8, test count strictly grew from 83 to 102 with zero failures
+
+- **Verified yes.** Phase 3 close baseline was 83 tests; Phase 4 close measured 102 tests (`102 - 83 = 19` net new tests). All 102 pass with zero failures, zero errors, zero skipped, verified by aggregating the `tests`, `failures`, `errors`, and `skipped` attributes across every `<testsuite>` root in `app/build/test-results/testDebugUnitTest/TEST-*.xml`. Strict growth holds.
+- **Failure mode that would invalidate this condition.** A test count below 102, a non zero failures, errors, or skipped aggregate, or a Phase 4 commit landing without a co committed test case for any new production file (which would violate the TDD discipline the Phase 4 plan required and which the Code Reviewer's Task 12 verdict verified across all eight implementation commits).
+
+### Test count breakdown
+
+83 baseline + 19 new = 102 final. The 19 new tests are attributed to six tasks per the Phase 4 plan:
+
+- **Task 1 (TestModuleTest):** 2 cases. Default `rawSensorRelativePath` is null on a payload that does not override; payload can override with a non null relative path.
+- **Task 2 (AndroidImuSourceTest):** 4 cases. `start` registers listeners; `stream` emits with held values; `stop` unregisters; fallback Madgwick fills `rotationVector` when `TYPE_ROTATION_VECTOR` is absent.
+- **Task 5 (RawSensorWriterTest):** 2 cases. Round trip preserves every field within floating point precision; exception propagation closes the file and rethrows.
+- **Task 6 (GaitTestRenderTest):** 4 cases. Compose smoke tests for Instructions, Countdown, Capture, and Done screens.
+- **Task 7 (GaitTestViewModelTest):** 6 cases. State transitions, sensor lifecycle, payload production end to end.
+- **Task 8 (GaitTestRegistrationTest):** 1 case. `MSBatteryApp` constructs the GaitTest module without crashing in a Robolectric environment.
+
+Task by task sum: 2 + 4 + 2 + 4 + 6 + 1 = 19. Per suite XML aggregation independently confirms: `TestModuleTest` 2, `AndroidImuSourceTest` 4, `RawSensorWriterTest` 2, `GaitTestRenderTest` 4, `GaitTestViewModelTest` 6, `GaitTestRegistrationTest` 1.
+
+The two existing test files modified for the orchestrator signature change (`BatteryFlowIntegrationTest.kt`, `BatteryOrchestratorTest.kt`) do not contribute new cases; they are migrations of existing cases to the new `recordResult(testType, payload)` form. Phase 4's net new test contribution is therefore the 19 cases above.
+
+### User driven Phase 4 close task
+
+**Multi device sample rate validation per `docs/observability/sensor-runbook.md`.** This is the one outstanding non code item Phase 4 defers to the user. Headless agents cannot drive a real Android device or an emulator, so the Performance Engineer's Phase 4 deliverable per `agents/18-sensor-integration-engineer.md` Phase 4 Task 3 (actual sample rate stability across at least three real Android devices) is split: the code side methodology landed in this phase (the captured CSV's `timestampNanos` column produced by `AndroidImuSource.emitIfReady` is the source of truth for the measurement, and the runbook's awk pipeline derives mean rate, p99 jitter, and dropped one second sub windows from the CSV) and the multi device measurement itself is the user's task.
+
+The user's procedure per the runbook:
+
+1. Install the app on each available real Android device (Pixel class, Samsung class, and a budget device per `SPEC.md` Section 13 risk mitigation row 2 are the recommended set; the user's actually available device set is acceptable).
+2. Run a gait session on each device with the phone in a front pocket per the in app instructions.
+3. Pull the captured CSV from the device's app private files directory at `sensor_traces/<sessionId>/GAIT.csv.gz` via Android Studio's Device File Explorer or `adb pull` (the application is in debuggable build, which the runbook confirms is sufficient).
+4. Run the runbook's awk pipeline on each captured CSV to produce mean inter sample delta, p50 delta, p99 jitter (`|delta minus 10 ms|`), and the count of dropped one second sub windows where cumulative delta drift exceeds 5 percent of nominal.
+5. Append a per device entry to the runbook's per device entry template recording device model, Android version, observed sample rate, jitter, dropped sub window count, and any observed gotchas.
+
+Acceptance budget per `docs/perf/latency-budgets.md` "Initial budgets" line 7 (reconciled in commit `3c514f6` to match the runbook's stricter sub window framing): mean sample rate within 5 percent of nominal 100 Hz; p99 jitter under 5 ms; zero one second sub windows over the 30 second capture in which the cumulative delta drift exceeds 5 percent of nominal.
+
+Once the runbook holds entries for at least three devices, the Performance Engineer can sign off the Phase 4 multi device deliverable retroactively, or it carries forward into Phase 5 alongside the real walking course recordings. This mirrors the Phase 1 and Phase 2 deferred emulator walkthrough convention; the user runs the walkthrough at their convenience.
+
+### Deferred items
+
+The Code Reviewer's consolidation in `docs/qa/code-review-phase-4.md` is the authoritative list. Each finding is reproduced below with its severity, owner, and target phase. None blocked Phase 4 close.
+
+**MEDIUM, Phase 5 prep:**
+
+1. **PE M3, main thread coroutine scheduling on the capture path.** `GaitTestViewModel.beginCapture` runs `writerJob` (gzip plus IO) on `rememberCoroutineScope()` which dispatches on `Dispatchers.Main.immediate`; `SensorManager.registerListener` is also called without a `Handler` so callbacks fire on Main. Risks UI 60 fps budget and producer side schedule drift. The CSV based `event.timestamp` measurement is robust in the typical case (256 element SharedFlow buffer, 2.56 second headroom), but the design should not rely on it. Fix: pass `Dispatchers.IO` to `writerJob.launch` (or wrap `rawSensorWriter.write` in `withContext(Dispatchers.IO)`) and pass a dedicated `Handler` or `HandlerThread` to `SensorManager.registerListener`. Owner: Android Engineer (view model dispatcher); Sensor Integration Engineer (listener handler). The PM's Phase 5 dispatch brief should highlight this as the single highest priority Phase 5 prep item.
+
+**MINOR, Phase 5 prep:**
+
+2. **SPE M1, fallback Madgwick test fixture realism.** `AndroidImuSourceTest` case (d) feeds `9.81` on `TYPE_LINEAR_ACCELERATION` instead of including `TYPE_ACCELEROMETER` with realistic gravity. The test passes on the current assertion (non null `rotationVector`) but does not exercise production fallback semantics. Fix: add a `TYPE_ACCELEROMETER` shadow sensor and feed gravity included `(0, 0, 9.81)` events on that channel. Owner: Sensor Integration Engineer.
+3. **PE M4, transient Quaternion allocation in `quaternionFromAndroidRotationVector`.** The `Quaternion(w, x, y, z)` constructor result is immediately discarded by the `.normalized()` call, producing about 3000 redundant allocations per 30 second capture on the platform fused path. Fix: compute the normalized components in primitive locals and call the constructor exactly once. Architectural rail 7 is substantially preserved; this is the only literal violation. Owner: Sensor Integration Engineer.
+4. **PE M5 (conditional), per row String allocations in `RawSensorWriter.appendRow`.** `.toString()` on 13 doubles plus the long timestamp per row produces about 42,000 short lived `String` allocations per 30 second capture. Not bound by rail 7 (the writer is not the per sample callback path), but on a thermally throttled budget device this could coincide with a 10 ms hiccup that the producer attributes to the sensor framework. Fix conditional on Phase 4 close measurements showing jitter spikes correlated with the writer thread; if not, drops to Phase 11 polish. Owner: Sensor Integration Engineer.
+
+**MINOR, Phase 11 polish:**
+
+5. **PE M2, no debug only sample rate counter on `AndroidImuSource`.** A `lastDeltaNanos` accessor or windowed mean delta would let the user see the rate live in app without pulling the CSV via adb. Phase 4 close is fully achievable via the captured CSV per the runbook's awk pipeline, so this is a UX win, not a blocker. Owner: Sensor Integration Engineer.
+
+**INFORMATIONAL, Phase 5 prep:**
+
+6. **SPE I1 / PE I1r, tail edge sample loss on capture cancellation.** `MutableSharedFlow` buffered samples not yet pulled by the collector are lost when `writerJob` is cancelled in `finishCapture`. Practical loss is at most a handful of samples at the trailing edge; gait features are robust. Fix: switch `finishCapture` to `cancelAndJoin` after `stop()` so the collector flushes pending elements first. Owner: Android Engineer.
+7. **SPE I2 / PE I2r, first fallback Madgwick step uses gravity removed input.** On the first linear acceleration event after `start()`, `lastAccel` may be null because no `TYPE_ACCELEROMETER` event has fired yet; the fallback substitutes `linear` for `lastAccel` for one sample. Single sample anomalous input is below quality score sensitivity; ADR 0002's `beta = 0.1` makes the filter slow to commit to any one observation. Fix: document in the runbook if Phase 5 fallback recordings show first samples are visibly off. Owner: Sensor Integration Engineer.
+
+**LOW, Phase 11 polish:**
+
+8. **Patient Advocate Finding 1 (medium per PA severity, ruled LOW for Phase 4 by the Code Reviewer's consolidation), Cancel reachability while phone is in front pocket.** Mitigation is a one sentence Instructions screen add ("If you need to stop, you can take the phone out of your pocket and tap Cancel, or just stop walking and the test will end on its own with reduced confidence."). Owner: Android Engineer; UI/UX Designer for tone.
+9. **Patient Advocate Finding 2, Cancelled state Done screen says "Captured but quality is low" rather than acknowledging the cancel.** Conflates a chosen stop with a noisy completion. Fix: a `Cancelled` arm with distinct copy ("Test stopped. No data was saved for this round.") plus a Continue CTA. Owner: Android Engineer.
+10. **Patient Advocate Finding 3, no contextual messaging for mobility aid users on the Instructions screen.** Skip path is present, but a wheelchair, walker, or cane user has no signal that skipping is the correct action for them. Fix: a one sentence add. Owner: Android Engineer; UI/UX Designer for tone.
+11. **Patient Advocate Finding 4, low quality copy on a bad MS day session conflated with first time confused users.** Quality bands applied uniformly. Owner: Android Engineer in coordination with Clinical Outcomes Reviewer; better fitted into Phase 9 reporting work where the per session view can surface a richer narrative.
+12. **Patient Advocate Finding 5, "Your gait test is complete." line is technically accurate but uninformative.** Cross battery warmth consistency with the BilateralTapTest's Done copy. Owner: Android Engineer; UI/UX Designer for tone.
+13. **CR L1, no `GaitFeatures.empty()` companion factory.** `GaitTest.kt` lines 75 to 83 inlines a zero `GaitFeatures` constructor. A future phase synthesizing a zero `GaitFeatures` would either duplicate this or refactor it. Fix: extract `GaitFeatures.empty()` companion factory. Owner: Android Engineer.
+14. **CR L2, anonymous `TestResultPayload` for skipped payload.** `GaitTest.kt` lines 69 to 73 constructs an anonymous payload; the BilateralTapTest's skipped payload follows a similar pattern but uses a named factory. Cross battery shape consistency. Owner: Android Engineer.
+15. **CR L3, swallowed throwable in `GaitTestViewModel` writer job.** Line 77 `catch (other: Throwable)` block swallows non `CancellationException` failures with the comment "process whatever samples we captured." The semantic is intentional but a future Observability Engineer pass should at least log the swallowed throwable for diagnostics. Owner: Observability Engineer (Phase 13 prep) or Phase 11 polish.
+
+**INFORMATIONAL, Phase 11 polish (optional):**
+
+16. **SPE I3 / PE I3r, `RawSensorWriter` virtuality vs interface based pattern.** The class is `open` and `write` is `open` to enable test doubling; the project's pattern for swappable components is a small interface (`ImuSource` is the example). A `RawSensorSink` interface plus a final production class is the more idiomatic shape. Phase 8 voice test can choose the interface pattern if preferred. Owner: Code Reviewer or whoever lands the voice writer.
+
+The complete deferred item list mirrors the Code Reviewer's Task 12 findings count summary: 0 BLOCKING, 0 HIGH, 1 MEDIUM (PE M3, Phase 5 prep), 5 MINOR (1 closed in this phase as PE M1 cleanup commit `3c514f6`, 4 deferred per the table above), 5 LOW (all Phase 11), 3 INFORMATIONAL (2 Phase 5, 1 Phase 11), 3 PA medium severity (all Phase 11). The PM should carry these forward into `STATUS.md` Resume notes when flipping the phase row to `completed`.
+
+### Manual walkthrough note
+
+There is a Phase 4 user surface (the gait test flow: Instructions, Countdown, Capture, Done) but the manual emulator walkthrough remains the user's responsibility because headless QA agents cannot drive an AVD. The four Compose smoke tests (Condition 4 above) verify each screen renders without crashing in a Robolectric host and exposes the primary CTA semantic node, which is the automated coverage available; the visual and interaction confirmation on a Pixel class AVD running Android 12 or later is the user's task. The user driven multi device sample rate validation task above is the more consequential Phase 4 close validation deliverable; the visual walkthrough is a smaller follow up the user can run alongside the device measurements.
+
+### Sign off
+
+**Verdict: PASS WITH NOTES.** All eight falsifiable conditions hold at Phase 4 close. The Phase 4 cleanup commit the Code Reviewer required (PE M1, the dropped windows budget wording reconciliation in `docs/perf/latency-budgets.md`) landed at `3c514f6`. The remaining findings from SPE, Patient Advocate, Performance Engineer, and the Code Reviewer's per file pass are all deferrable to Phase 5 prep or Phase 11 polish per the consolidated table in `docs/qa/code-review-phase-4.md`. The user driven multi device sample rate validation per `docs/observability/sensor-runbook.md` is the one outstanding non code item Phase 4 defers to the user; the runbook documents the procedure and the acceptance budgets.
+
+**Uncertainties and notes.**
+
+- The `--rerun-tasks` invocation produced `BUILD SUCCESSFUL in 14s` with 30 actionable tasks executed and the full 102 test count. The result is reproducible: the same command run twice in a row from the same `HEAD` produces the same 102 tests, 0 failures, 0 errors, 0 skipped totals.
+- The PM handoff note for this sign off named 11 commits from `4cd0a72` exclusive to HEAD. Direct verification with `git log --oneline 4cd0a72..HEAD | wc -l` returns 15. The two extra commits beyond the 13 Phase 4 implementation, review, and cleanup commits are the Phase 3 close STATUS flip (`874182a`) and the Phase 4 plan prep (`46641b7`). The 15 count is the authoritative one for this entry.
+- The one known Gradle warning (`application@android:allowBackup was tagged at AndroidManifest.xml:5 to replace other declarations but no other declaration present`) is unchanged from Phase 1, Phase 2, and Phase 3. It does not affect the application's backup posture (`android:allowBackup="false"` and `android:fullBackupContent="false"` remain in place).
+- I did not modify any application code, tests, or configuration during sign off; only this document was touched.
