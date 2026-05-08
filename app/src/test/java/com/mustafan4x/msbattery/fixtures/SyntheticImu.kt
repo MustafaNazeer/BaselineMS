@@ -70,7 +70,7 @@ class SyntheticImu(
                     accelerometer = noisyAccel,
                     gyroscope = noisyGyro,
                     linearAcceleration = noisyLinear,
-                    rotationVector = orientation.inverse()
+                    rotationVector = orientation
                 )
             )
         }

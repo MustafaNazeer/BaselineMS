@@ -53,8 +53,10 @@ class SyntheticImuTest {
             seed = 42L
         ).generate().toList()
         for (s in samples) {
-            val gravity = s.rotationVector!!.rotate(Vector3(0.0, 0.0, 9.80665))
-            val reconstructed = s.linearAcceleration + gravity
+            val q = s.rotationVector!!
+            val qInv = com.mustafan4x.msbattery.dsp.Quaternion(q.w, -q.x, -q.y, -q.z).normalized()
+            val deviceGravity = qInv.rotate(Vector3(0.0, 0.0, 9.80665))
+            val reconstructed = s.linearAcceleration + deviceGravity
             assertTrue(abs(reconstructed.x - s.accelerometer.x) < 1e-9)
             assertTrue(abs(reconstructed.y - s.accelerometer.y) < 1e-9)
             assertTrue(abs(reconstructed.z - s.accelerometer.z) < 1e-9)
