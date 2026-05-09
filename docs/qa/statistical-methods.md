@@ -44,7 +44,7 @@ Phase 5 Part B is methodologically complete when:
 The test retest experiment per SPEC.md Section 7.2 layer 3 and Section 9 layer 3:
 
 - **Participants.** At least 3 people of varying heights. Each participant is the subject of their own ICC calculation.
-- **Repeated measurements per participant.** 5 repeated weekly sessions within a short window (the SPEC's Section 9 layer 3 specifies a "short time window"; SPEC Section 7.2 layer 3 cites 48 hours for the older within day variant. Phase 5 will use the weekly variant in Section 9 layer 3 because the application's primary use case is a weekly self administered ritual, and test retest reliability across weeks is the reliability the user actually experiences).
+- **Repeated measurements per participant.** 5 repeated weekly sessions, sessions spaced approximately one week apart over a 5 week window, per SPEC.md Section 7.2 layer 3 and Section 9 layer 3. The application's primary use case is a weekly self administered ritual, so test retest reliability across weeks is the reliability the user actually experiences.
 - **Rater.** The application itself, running on the same Android device for the same participant across all 5 sessions. There is one rater (the app), and the rater is held fixed across sessions per participant.
 - **Targets of measurement.** Cadence (steps per minute), stride length (meters), and step time variability (coefficient of variation of step times). These are the three features the SPEC names in Section 7.2 as the ICC targets, and the three the README will publish ICC values for.
 

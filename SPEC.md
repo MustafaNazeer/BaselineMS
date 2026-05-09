@@ -218,7 +218,7 @@ Three layers, each with concrete, defensible numbers:
 
 1. **Synthetic ground truth.** Generated IMU traces with known stride parameters drive the pipeline. Target: stride length recovered within 2 percent on clean synthetic signals.
 2. **Real walking course ground truth.** A 25 meter course marked at 25cm intervals with paper or tape, video recorded, with the participant walking at three self selected paces (slow, normal, brisk). Step count from video and total distance walked provide the ground truth. Target: stride length within 5 percent and cadence within 3 percent of measured ground truth, across at least 20 trials by 3 different people of varying heights.
-3. **Test retest reliability.** 5 repeated runs by the same participant within 48 hours under similar conditions. Target: intraclass correlation coefficient above 0.75 for cadence, stride length, and step time variability.
+3. **Test retest reliability.** 5 repeated weekly sessions by the same participant under similar conditions, with sessions spaced approximately one week apart over a 5 week window. Target: intraclass correlation coefficient above 0.75 for cadence, stride length, and step time variability.
 
 These results are written into the project README and into the in app About screen.
 

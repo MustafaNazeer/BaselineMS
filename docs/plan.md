@@ -101,7 +101,7 @@ The cardinal rule: every phase ends with the mandatory check-in protocol describ
 **Deliverables:**
 - 25 meter walking course experiment: 20 plus trials by 3 plus people of varying heights, video recorded for ground truth, paper marker every 25 cm. Stride length and cadence error vs ground truth computed and reported.
 - Synthetic ground truth test suite expanded; **Test Fixture Engineer reconciles fixture realism against real captured signals.**
-- Test retest reliability: 5 sessions on same person within 48 hours, ICC computed for primary features. **ICC variant selection (1,1 vs 2,1 vs 3,1; absolute agreement vs consistency) is justified in `docs/qa/statistical-methods.md` by the Biostatistics Reviewer.**
+- Test retest reliability: 5 weekly sessions on same person over a 5 week window, ICC computed for primary features. **ICC variant selection (1,1 vs 2,1 vs 3,1; absolute agreement vs consistency) is justified in `docs/qa/statistical-methods.md` by the Biostatistics Reviewer.**
 - `docs/source/validation-report.md` with methodology and full numbers.
 - `README.md` updated with the achieved numbers, no rounding up, no aspirational claims. If a target is missed, the README reports the actual number.
 
