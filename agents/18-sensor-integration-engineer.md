@@ -23,7 +23,7 @@ Provide the rest of the application with clean, typed, reliable, well documented
 
 ## Outputs
 
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/signals/`:
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/signals/`:
   - `ImuSample.kt`, `AudioFrame.kt`, `CameraFrame.kt`: typed sample classes.
   - `ImuSource.kt`: registers `SensorManager` listeners, exposes `Flow<ImuSample>` at the configured sampling rate.
   - `AudioSource.kt`: wraps `AudioRecord`, exposes `Flow<AudioFrame>` at configured PCM format.

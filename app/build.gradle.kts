@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.mustafan4x.baselinems"
+    namespace = "com.mustafanazeer.baselinems"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.mustafan4x.baselinems"
+        applicationId = "com.mustafanazeer.baselinems"
         minSdk = 31
         targetSdk = 34
         versionCode = 1

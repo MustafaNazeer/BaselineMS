@@ -23,7 +23,7 @@ Build the Android application on top of the data layer, the DSP modules, and the
 
 ## Outputs
 
-- All Kotlin source in `app/src/main/java/com/mustafan4x/baselinems/` outside `data/` (owned by Data Engineer) and `dsp/` (owned by Signal Processing Engineer). Specifically:
+- All Kotlin source in `app/src/main/java/com/mustafanazeer/baselinems/` outside `data/` (owned by Data Engineer) and `dsp/` (owned by Signal Processing Engineer). Specifically:
   - `battery/` (TestModule interface implementations, BatteryOrchestrator, MockTestModule replacement per phase).
   - `ui/` (Compose screens, navigation, theming).
   - `signals/` (Sensor capture glue: `SensorManager`, `AudioRecord`, `CameraX`, exposed as `Flow`).

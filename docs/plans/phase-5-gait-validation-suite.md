@@ -10,7 +10,7 @@
 
 **Architecture:** No code architecture changes in Phase 5. Part A's Task A1 adds integration test cases against the existing `GaitPipeline` and `PreCannedFixtures`. Part A's Tasks A2 and A3 are documentation only.
 
-**Tech Stack:** No new runtime or test dependencies. Part A's Task A1 uses the existing JUnit 4 + `kotlinx-coroutines-test` setup; the new test cases follow the pattern in `app/src/test/java/com/mustafan4x/baselinems/dsp/GaitPipelineIntegrationTest.kt`.
+**Tech Stack:** No new runtime or test dependencies. Part A's Task A1 uses the existing JUnit 4 + `kotlinx-coroutines-test` setup; the new test cases follow the pattern in `app/src/test/java/com/mustafanazeer/baselinems/dsp/GaitPipelineIntegrationTest.kt`.
 
 **Related spec:** `~/src/BaselineMS/SPEC.md` Section 7.2 (validation strategy: synthetic ground truth, real walking course, test retest reliability), Section 9 (full validation strategy), Section 16 (success criteria 2: published validation numbers).
 
@@ -54,7 +54,7 @@ Files this plan creates or modifies:
 │   │   └── sensor-runbook.md                            (Part B append: per device entries from user)
 │   └── perf/
 │       └── latency-budgets.md                           (Part B append: Phase 5 PE review if relevant)
-└── app/src/test/java/com/mustafan4x/baselinems/dsp/
+└── app/src/test/java/com/mustafanazeer/baselinems/dsp/
     └── GaitPipelineIntegrationTest.kt                   (Part A Task A1: append three new fixtures' coverage)
 ```
 
@@ -69,7 +69,7 @@ The dsp/ source files are consumed unchanged in Part A. Part B does not modify d
 **Owner:** Test Fixture Engineer.
 
 **Files:**
-- Modify: `app/src/test/java/com/mustafan4x/baselinems/dsp/GaitPipelineIntegrationTest.kt` (append three new test cases for `slowWalk`, `briskWalk`, and `severeAsymmetry`).
+- Modify: `app/src/test/java/com/mustafanazeer/baselinems/dsp/GaitPipelineIntegrationTest.kt` (append three new test cases for `slowWalk`, `briskWalk`, and `severeAsymmetry`).
 - No production code changes.
 
 **Spec:** Phase 3 Code Reviewer LOW finding L1 noted that `PreCannedFixtures.slowWalk`, `briskWalk`, and `severeAsymmetry` had no `GaitPipelineIntegrationTest` coverage. The Test Fixture Engineer adds one test case per fixture that runs the fixture through the production `GaitPipeline.process` pipeline and asserts the recovered features against the fixture's ground truth metadata, mirroring the structure of the existing four cases for `healthyControlNormal`, `msTypicalNormal`, `mildAsymmetry`, and `noisyMsNormal`.

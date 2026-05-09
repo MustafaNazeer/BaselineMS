@@ -16,9 +16,9 @@ Three sourcing options were considered:
 
 ## Decision
 
-Implement the Madgwick filter from scratch in Kotlin under `app/src/main/java/com/mustafan4x/baselinems/dsp/Madgwick.kt`.
+Implement the Madgwick filter from scratch in Kotlin under `app/src/main/java/com/mustafanazeer/baselinems/dsp/Madgwick.kt`.
 
-The implementation is small (under 100 lines), parallels the published paper one to one, and preserves the project's principle of keeping the gait pipeline pure JVM Kotlin with no third party dependencies beyond the Kotlin standard library and `kotlin.math`. Two unit tests in `app/src/test/java/com/mustafan4x/baselinems/dsp/MadgwickTest.kt` exercise the static gravity convergence case and the pure gyro integration case at zero beta.
+The implementation is small (under 100 lines), parallels the published paper one to one, and preserves the project's principle of keeping the gait pipeline pure JVM Kotlin with no third party dependencies beyond the Kotlin standard library and `kotlin.math`. Two unit tests in `app/src/test/java/com/mustafanazeer/baselinems/dsp/MadgwickTest.kt` exercise the static gravity convergence case and the pure gyro integration case at zero beta.
 
 ## Consequences
 

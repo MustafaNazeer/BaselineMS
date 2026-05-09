@@ -22,7 +22,7 @@ Design, implement, and maintain a library of high fidelity synthetic test fixtur
 
 ## Outputs
 
-- `/home/mustafa/src/BaselineMS/app/src/test/java/com/mustafan4x/baselinems/fixtures/`:
+- `/home/mustafa/src/BaselineMS/app/src/test/java/com/mustafanazeer/baselinems/fixtures/`:
   - `SyntheticImu.kt`: parameterized IMU trace generator (stride length, cadence, asymmetry, noise level).
   - `SyntheticAudio.kt`: parameterized audio waveform generator (fundamental frequency, jitter, shimmer, harmonics to noise ratio).
   - Pre canned fixture sets: `slowWalk`, `normalWalk`, `briskWalk`, `asymmetricWalk`, `cleanVoice`, `mildDysarthria`, etc.

@@ -198,7 +198,7 @@ registrations across activity recreations); orchestrator is session scoped.
 
 ### `GaitPipeline` and `process` made `open`
 
-`git show 34a3174 -- app/src/main/java/com/mustafan4x/baselinems/dsp/GaitPipeline.kt`
+`git show 34a3174 -- app/src/main/java/com/mustafanazeer/baselinems/dsp/GaitPipeline.kt`
 shows the only diff is `class GaitPipeline` to `open class GaitPipeline` and
 `fun process` to `open fun process`. No body change, no signature change. The test
 suite uses the override via `FakeGaitPipeline` in `GaitTestViewModelTest.kt` lines 46 to
@@ -356,7 +356,7 @@ permits).
 
 - **Rail 1 (no new permissions):** verified directly under "Manifest audit." PASS.
 - **Rail 2 (`ImuSample`, `Vector3`, `Quaternion` stay in `dsp/`):**
-  `grep -rn "import com.mustafan4x.baselinems.signals" app/src/main/java/com/mustafan4x/baselinems/dsp/`
+  `grep -rn "import com.mustafanazeer.baselinems.signals" app/src/main/java/com/mustafanazeer/baselinems/dsp/`
   returns nothing; the dependency direction is `signals/` to `dsp/` only.
 - **Rail 4 (100 Hz nominal):** `AndroidImuSource.kt` line 37 `samplingPeriodMicros: Int = 10_000`
   matches the rail wording exactly.

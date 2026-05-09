@@ -38,7 +38,7 @@ From the command line:
 
 ```
 ./gradlew :app:installDebug
-adb shell am start -n com.mustafan4x.baselinems/.MainActivity
+adb shell am start -n com.mustafanazeer.baselinems/.MainActivity
 ```
 
 ### Testing

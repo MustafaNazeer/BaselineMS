@@ -143,13 +143,13 @@ The table below is the per screen review log. Entries are appended in Phase 1 an
 
 ### Files reviewed (all read in full at the commit on the branch as of 2026-05-07)
 
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/ui/home/HomeScreen.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/battery/MockTestModule.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/DisclaimerScreen.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/ProfileSetupScreen.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/ui/home/HomeScreen.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/ui/home/SessionRunnerScreen.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/ui/settings/SettingsScreen.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/battery/MockTestModule.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/ui/RootScreen.kt`
 
 ### Verdict
 
@@ -173,9 +173,9 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 1, raw enum names visible to the user, dignity and jargon
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/ProfileSetupScreen.kt`
 - **Lines:** 92, 96 (the `EnumDropdown` composable renders `selected.name` and each option's `option.name` directly)
-- **Also affects:** `app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt` lines 42, 43, 45 (same raw enum `.name` reads)
+- **Also affects:** `app/src/main/java/com/mustafanazeer/baselinems/ui/settings/SettingsScreen.kt` lines 42, 43, 45 (same raw enum `.name` reads)
 - **Severity:** medium
 - **Problem:** the user sees strings like `RRMS`, `PPMS`, `SPMS`, `CIS`, `UNDISCLOSED`, `AMBIDEXTROUS`, `OTHER`, and `FEMALE` rendered in screaming caps because they are raw Kotlin enum names. To a person living with MS, especially one newly diagnosed, seeing your own diagnosis subtype rendered as a four letter all caps acronym next to other four letter all caps acronyms reads like a chart in a clinic, not a personal app. "UNDISCLOSED" reads as a database null sentinel, not as a respectful "prefer not to share." This is the core dignity concern that the standing objection on clinical jargon was written for.
 - **Recommended change:** introduce a per enum display label resolver in the UI layer (no schema change to the Room enums, which can stay as they are). Suggested labels (final wording is the PM's call):
@@ -199,7 +199,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 2, "EnumDropdown" interaction is a two step gesture and reads as a debug control
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/ProfileSetupScreen.kt`
 - **Lines:** 83 to 102
 - **Severity:** medium
 - **Problem:** the current control renders as a static line of text (`label: SELECTED_VALUE`) followed by a separate "Change" button, which then opens a `DropdownMenu`. For a user with cognitive fog this is two cognitive moves to discover and confirm a selection, not one. The user has to read the current state, parse what "Change" applies to, tap Change, find the selection in the dropdown, tap the option, then visually verify the line above updated. A standard Material 3 `ExposedDropdownMenuBox` is one cognitive move (tap the field, pick the option) and is the pattern the user has already been trained on by every other Android app. The current control also has zero affordance that the value can be changed without scrolling to the Change button, which is below the value text.
@@ -207,7 +207,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 3, default profile values are guesses pre filled into the user's record
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/ProfileSetupScreen.kt`
 - **Lines:** 40 (height defaults to "170"), 41 (year of birth defaults to "1995")
 - **Severity:** medium
 - **Problem:** the form pre fills 170 cm and 1995 in the year of birth and height fields. A user with cognitive fog who reads the prompt, sees a filled value, and assumes the app has read it from somewhere may tap Save without correcting it. The result is a profile that records a fabricated date of birth and height for a real person, which then propagates into any normative comparison the application later performs (the gait literature norms in `docs/source/clinical-references.md` are height stratified per Givon 2009). The standing concern on the "bad MS day" mode is that the application must accept genuine user input on bad days; the corollary is that it must not invent input on the user's behalf on any day.
@@ -215,7 +215,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 4, profile setup has no skip path and no progress indication
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/ProfileSetupScreen.kt`
 - **Lines:** 43 (TopAppBar title) to 78 (Save button)
 - **Severity:** medium
 - **Problem:** per standing objection 5 in the Phase 0 framing, onboarding flows that gate activation behind multi screen profile fields have a documented retention cost (Galati 2024, registration to activation gap). The Phase 1 implementation makes year of birth, height, biological sex, dominant hand, and MS type all visible on a single screen, which is correct (one screen is better than five), but it does not let the user defer the profile to Settings. A cognitively fatigued user who opens the app for the first time and sees five fields may close the app before tapping the first test. The screen also has no progress indicator (Step 2 of 2) so the user does not know how close they are to the first test.
@@ -224,7 +224,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 5, disclaimer body uses centered text alignment and a single dense paragraph
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/DisclaimerScreen.kt`
 - **Lines:** 30 to 35
 - **Severity:** medium
 - **Problem:** the disclaimer is rendered as one long centered sentence stitched out of three clauses with `+` concatenation in source. Centered body text is significantly harder to read for users with low contrast sensitivity, mild visual impairment, or reading fatigue, because the eye loses the left margin anchor between lines. This is well established in typographic accessibility practice and is also relevant per Phase 0 standing concern 3 (low contrast vision tolerance). The dense single paragraph also asks the user to hold three clinical concepts in working memory at once: "this is not a medical device," "do not change treatment based on results," and "share with neurologist." Cognitive fog tolerance per Phase 0 framing concern 2 prefers chunked, scannable copy.
@@ -239,7 +239,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 6, "I understand" button is acceptable but not warm; minimum height not asserted
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/DisclaimerScreen.kt`
 - **Lines:** 36 to 42
 - **Severity:** low
 - **Problem:** the button copy "I understand" is acceptable. It is also slightly transactional. A user with mild cognitive fatigue who reads the disclaimer carefully may pause on whether they actually do understand. Material 3's default `Button` is around 40 dp tall, which is below the 48 dp tap target the Phase 0 framing names as a standing dexterity concern. The Material 3 default is what the Accessibility Specialist will measure against; the Patient Advocate flags it here as cross cutting because a user with hand tremor reading the disclaimer is exactly the user this rule is for.
@@ -248,7 +248,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 7, "Start weekly battery" reads as performative and clinical
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/home/HomeScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/home/HomeScreen.kt`
 - **Lines:** 56 to 59 (Button copy)
 - **Severity:** low
 - **Problem:** the home call to action is "Start weekly battery." The word "battery" is technically correct (a battery of tests is the clinical term, and the project name uses it), but in a home context it reads as a noun the patient does not normally use about themselves. Patients tend to talk about a "check in," a "session," a "this week's tests," or "my MS tracking." The Phase 0 framing concern on cognitive fog tolerance and on warmth in retention copy applies. There is no welcoming framing for a first time user beyond the empty history message below the button.
@@ -259,7 +259,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 8, button uses two leading spaces as a visual hack to space the icon
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/home/HomeScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/home/HomeScreen.kt`
 - **Line:** 58 (`Text("  Start weekly battery", ...)`)
 - **Severity:** low
 - **Problem:** the leading double space inside the `Text` call is the Android Engineer's way of nudging the icon and label apart. This is fragile (TalkBack reads it as a leading pause; future Compose updates may collapse the whitespace; the spacing is invisible to the user but the label reads as " Start weekly battery" to a screen reader, with a leading whitespace pause). This is a structural concern, not a copy concern, but it lives at the framing layer because it is the patient facing string.
@@ -267,7 +267,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 9, session row history shows raw timestamp rather than relative date
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/home/HomeScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/home/HomeScreen.kt`
 - **Lines:** 74 to 84 (`SessionRow`)
 - **Severity:** low
 - **Problem:** the row prints `2026-05-07 14:30` and a status of "Completed" or "In progress." For a user with cognitive fog scanning their history, "Today" or "This Tuesday" or "Last week" carries more meaning than a yyyy MM dd HH:mm string. The current format is also internationally generic (good) but locale insensitive (the SimpleDateFormat is initialized with `Locale.getDefault()` but the literal pattern is fixed). For the v1 scope the Patient Advocate is not asking for full i18n; just a friendlier surface for the most recent few rows.
@@ -275,7 +275,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 10, session runner has no progress indication and instructions disappear during the test
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/home/SessionRunnerScreen.kt`
 - **Lines:** 46 to 64 (the `when (val s = state)` block)
 - **Severity:** medium (high once real tests replace the mock; flagged now to land before Phase 2)
 - **Problem:** while a test is running, the user sees only what the `TestModule.Content` composable renders. There is no top level progress indicator like "Test 1 of 5" and the test instructions are not persistently visible. Phase 0 framing concern 2 (cognitive fog tolerance) explicitly names this case: "any test where the instructions are not visible while the test is running." The mock test in Phase 1 does keep its short instruction visible (line 36 of `MockTestModule.kt`), so this is not a Phase 1 close blocker, but the moment the Tap test in Phase 2 hides its instructions during the 30 second tap window, this becomes a real regression.
@@ -283,7 +283,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 11, Cancel button mid session has no confirmation and lives in the TopAppBar action slot
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/home/SessionRunnerScreen.kt`
 - **Lines:** 32 to 38
 - **Severity:** medium
 - **Problem:** while a session is running, the only escape is a "Cancel" button in the TopAppBar actions slot. A tap on Cancel calls `orchestrator.cancel()` and `onFinished()` immediately, with no confirmation dialog. A user with hand tremor or cog fog who taps the wrong area of the TopAppBar can lose all collected results from the session in progress. This is the precise interaction Phase 0 framing concern 4 (dexterity tolerance) was written for. The TopAppBar action area is also closer to the screen edge, which the Phase 0 framing flags as a tremor problem area.
@@ -291,7 +291,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 12, "Session not started" placeholder reads as a debug string
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/home/SessionRunnerScreen.kt`
 - **Line:** 48
 - **Severity:** low
 - **Problem:** the `BatteryOrchestrator.State.Idle` arm renders the literal string "Session not started." In current navigation flow this state is unreachable because `RootScreen.kt` line 80 starts the orchestrator in the same `remember` block that creates it. So the user almost never sees this string. However, if the navigation ever races (configuration change before `start()` is called), the user sees a flat technical string with no recovery action. For the "bad MS day" tone the Patient Advocate prefers a copy that does not feel like the app crashed.
@@ -299,7 +299,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 13, "Session complete" closing screen is terse and does not summarize what was recorded
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/home/SessionRunnerScreen.kt`
 - **Lines:** 59 to 62
 - **Severity:** low
 - **Problem:** when the session completes, the user sees the literal string "Session complete" and a "Done" button. There is no summary of which tests were run, no indication of where the results live, no path into the report. For a user who just spent ten minutes on a battery this is anti climactic. The Phase 0 framing concern 6 (quality score language) is relevant in adjacent: a session that completed at low quality should not feel like a failure.
@@ -307,7 +307,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 14, MockTestModule placeholder copy will silently set Phase 2 expectations if not changed
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/battery/MockTestModule.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/battery/MockTestModule.kt`
 - **Lines:** 25, 26
 - **Severity:** low
 - **Problem:** the mock instructs the user to "Tap Continue" with "This is a mock test used during scaffolding." This is fine for Phase 1 because no real user runs it. However, the patterns are ones the real test modules will inherit by example unless explicitly stopped. Specifically: the instruction is presented above the action and disappears if the user scrolls; the action button label is generic ("Continue"); there is no countdown; there is no indication of what the test is for.
@@ -315,7 +315,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 15, Settings shows "Date of birth" with day precision when only year was collected
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/settings/SettingsScreen.kt`
 - **Line:** 41
 - **Severity:** medium
 - **Problem:** profile setup in `ProfileSetupScreen.kt` line 49 collects only the year of birth, then in line 64 constructs an epoch ms from January 1 of that year. Settings then renders "Date of birth: 1995-01-01." A user reading this in Settings will reasonably believe the application thinks their birthday is January 1. For a user with cognitive fog this can be confusing; for any user this is mildly disrespectful (the application has invented two thirds of a date it never asked for).
@@ -323,7 +323,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 16, Settings About text is rendered at bodySmall and uses spacer hack
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/settings/SettingsScreen.kt`
 - **Lines:** 47 (`Text(" ")` as a spacer), 49 to 52 (`bodySmall` typography on the about text)
 - **Severity:** medium
 - **Problem:** the About text in Settings is the only place the medical device disclaimer appears after onboarding. It is rendered at `MaterialTheme.typography.bodySmall`, the smallest body size in Material 3. For a user with mild visual impairment or low contrast sensitivity, this is the wrong scale for the most regulatorily and clinically important sentence in the application. The Phase 0 framing concern 3 (low contrast vision tolerance) applies. Separately, the `Text(" ")` on line 47 is being used as a vertical spacer; it works visually but reads as an empty announcement to TalkBack and adds nothing for sighted users either.
@@ -332,7 +332,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 17, Settings has no path to edit the profile
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/settings/SettingsScreen.kt`
 - **Lines:** 38 to 46 (the read only profile block)
 - **Severity:** medium
 - **Problem:** the profile fields are display only. A user who entered a value incorrectly during onboarding (because of cog fog, because of a typo, because the height conversion was wrong) cannot fix it from Settings. They have to clear app data or reinstall, both of which destroy their session history. This is a "bad MS day" landmine: the user enters a wrong value one day and is stuck with it forever, and any height stratified gait comparison the application later does is wrong for them. The Phase 0 framing concern 4 (dexterity tolerance) is relevant: a user who fat fingers the height field on day one with mild hand tremor cannot recover.
@@ -340,7 +340,7 @@ Each issue is listed with: file, line range, severity (low or medium or high), t
 
 #### Issue 18, RootScreen race between disclaimer and profile checks
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt`
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/ui/RootScreen.kt`
 - **Lines:** 32 to 45
 - **Severity:** low
 - **Problem:** this is a structural framing observation, not a copy issue. The `startDestination` is computed from `disclaimerAcknowledged` (a synchronous SharedPreferences read) and `hasProfile` (a suspending DAO call wrapped in `LaunchedEffect`). On a slow device, the navigation graph picks `disclaimer` or `profile` before `hasProfile` resolves, which means a returning user with a profile may briefly land on the profile setup screen before the suspending check completes. For a user with cognitive fog who opens the app expecting to see their history, briefly landing on a profile setup screen is disorienting. The actual navigation is brief and self correcting because of the `popUpTo` calls, but the flicker is real.
@@ -375,14 +375,14 @@ The Patient Advocate hands back to the Project Manager. The PM ratifies the reco
 
 ### Files reviewed
 
-- `app/src/main/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTest.kt` (read in full)
-- `app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapFeatures.kt` (skimmed for quality score, miss rate, asymmetry)
-- `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt` (carryover verification)
-- `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt` (carryover verification)
-- `app/src/main/java/com/mustafan4x/baselinems/ui/home/HomeScreen.kt` (carryover verification)
-- `app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt` (carryover verification)
-- `app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt` (carryover verification)
-- `app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafanazeer/baselinems/battery/tap/BilateralTapTest.kt` (read in full)
+- `app/src/main/java/com/mustafanazeer/baselinems/battery/tap/TapFeatures.kt` (skimmed for quality score, miss rate, asymmetry)
+- `app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/DisclaimerScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/ProfileSetupScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafanazeer/baselinems/ui/home/HomeScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafanazeer/baselinems/ui/home/SessionRunnerScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafanazeer/baselinems/ui/settings/SettingsScreen.kt` (carryover verification)
+- `app/src/main/java/com/mustafanazeer/baselinems/ui/RootScreen.kt` (carryover verification)
 
 ### Verdict
 
@@ -455,13 +455,13 @@ Patient Advocate hands back to the Project Manager. Findings 1, 2, and 3 are rec
 
 ### Files reviewed (read in full at HEAD on `main` as of 2026-05-07)
 
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitInstructionsScreen.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitCountdownScreen.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitCaptureScreen.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitDoneScreen.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTestState.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTestViewModel.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTest.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitInstructionsScreen.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitCountdownScreen.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitCaptureScreen.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitDoneScreen.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitTestState.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitTestViewModel.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitTest.kt`
 
 ### Verdict
 
@@ -507,7 +507,7 @@ Patient Advocate hands back to the Project Manager. Findings 1, 2, and 3 are rec
 
 #### Finding 1, Cancel button reachability while the phone is in a front pocket, severity: medium
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitCaptureScreen.kt` lines 62 to 73.
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitCaptureScreen.kt` lines 62 to 73.
 - **Problem:** the Cancel button is rendered on the screen during a capture in which the phone is, by design, in a front pocket. A user who feels unsafe mid walk and wants to abort has to (a) remove the phone from the pocket, (b) wake the screen, (c) locate the Cancel control, and (d) tap it, while still possibly off balance. This is not an ergonomic failure unique to this implementation (it is inherent to the front pocket capture posture), but it is worth surfacing because the Phase 0 framing standing objection 5 named "cancellable without shame" and the practical reachability of the cancel during the test is the load bearing detail. The current screen is also silent on what happens if the user simply stops walking; the capture continues to the 30 second mark and the pipeline produces a low quality score from the missing samples, which is acceptable per the Phase 0 framing concern 7 ("bad MS day" honesty), but the user has no in test signal that simply stopping is also a way out.
 - **File affected:** `GaitCaptureScreen.kt`.
 - **Recommended owner:** Android Engineer; UI/UX Designer for tone.
@@ -515,7 +515,7 @@ Patient Advocate hands back to the Project Manager. Findings 1, 2, and 3 are rec
 
 #### Finding 2, Cancelled state Done screen says "Captured but quality is low" rather than acknowledging the cancel, severity: medium
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTest.kt` lines 61 to 64; `GaitDoneScreen.kt` lines 34 to 38.
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitTest.kt` lines 61 to 64; `GaitDoneScreen.kt` lines 34 to 38.
 - **Problem:** when the user taps Cancel mid capture, the AE renders a zero quality `GaitDoneScreen`. Because the qualityScore is 0.0, the band the screen picks is "Captured but quality is low," which is the same band a heat fatigued user who finished the walk under bad conditions would see. The two cases are not the same: one is a user who chose to stop, the other is a user who completed but produced noisy data. Conflating them in the post test copy is a small dignity miss. The verbatim "Your gait test is complete." line on `GaitDoneScreen.kt` line 53 is also factually misleading after a cancel, because the test is not complete, it was cancelled.
 - **File affected:** `GaitTest.kt` (route the Cancelled state to a different copy variant) or `GaitDoneScreen.kt` (accept a `wasCancelled` flag).
 - **Recommended owner:** Android Engineer.
@@ -523,7 +523,7 @@ Patient Advocate hands back to the Project Manager. Findings 1, 2, and 3 are rec
 
 #### Finding 3, no contextual messaging for mobility aid users on the Instructions screen, severity: medium
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitInstructionsScreen.kt` lines 41 to 52.
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitInstructionsScreen.kt` lines 41 to 52.
 - **Problem:** the Instructions copy assumes a user who can walk 30 seconds in a straight line with the phone in a front pocket. The Skip path is present, which is the right Phase 4 minimum (verified under Concern 2), but a wheelchair user, a walker user, or a cane user has no signal that the Skip path is the correct action for them rather than a personal opt out. The Phase 0 framing standing objection 2 explicitly named this concern, and the verbatim Galati 2024 quote ("I can only proceed so far because I'm in the car. I can't stand and balance.") is the load bearing evidence.
 - **File affected:** `GaitInstructionsScreen.kt`.
 - **Recommended owner:** Android Engineer for the copy change; UI/UX Designer for tone.
@@ -531,7 +531,7 @@ Patient Advocate hands back to the Project Manager. Findings 1, 2, and 3 are rec
 
 #### Finding 4, low quality copy on a bad MS day session conflated with first time confused users, severity: low
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitDoneScreen.kt` lines 34 to 38.
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitDoneScreen.kt` lines 34 to 38.
 - **Problem:** the three quality bands are applied uniformly. A patient who walks well but produces noisy data because the phone shifted in their pocket gets the same "Captured but quality is low" message as a patient on a flare day. The Phase 0 framing concern 7 ("bad MS day" mode and quality score honesty) calls for the application to not punish bad day data; the current copy does not punish, but it also does not contextualize. This is properly Phase 9 or Phase 10 work where the per session view can surface a richer narrative; for Phase 4 the simple band copy is acceptable.
 - **File affected:** `GaitDoneScreen.kt`.
 - **Recommended owner:** Android Engineer in coordination with Clinical Outcomes Reviewer.
@@ -539,7 +539,7 @@ Patient Advocate hands back to the Project Manager. Findings 1, 2, and 3 are rec
 
 #### Finding 5, "Your gait test is complete." line is technically accurate on Done but uninformative, severity: low
 
-- **File:** `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitDoneScreen.kt` line 53.
+- **File:** `app/src/main/java/com/mustafanazeer/baselinems/battery/gait/GaitDoneScreen.kt` line 53.
 - **Problem:** the body line is purely transitional. A patient who finished a 30 second walk has earned a slightly warmer acknowledgment than "Your gait test is complete." compared with the BilateralTapTest's Phase 2 review Finding 5 which the Patient Advocate already flagged at the same low severity. For consistency across the battery, both modules' post test screens should land on similar warmth. The Phase 0 framing concern on warmth in retention copy applies here too.
 - **File affected:** `GaitDoneScreen.kt`.
 - **Recommended owner:** Android Engineer; UI/UX Designer for tone.

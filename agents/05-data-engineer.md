@@ -18,7 +18,7 @@ Define and ship a clean, append only Room data layer that holds longitudinal ses
 
 ## Outputs
 
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/` containing:
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/` containing:
   - `Enums.kt` (TestType, Sex, Hand, MSType).
   - `Converters.kt` (Room TypeConverters for the enums and any other non primitive types).
   - `UserProfileEntity.kt`, `SessionEntity.kt`, `TestResultEntity.kt`.

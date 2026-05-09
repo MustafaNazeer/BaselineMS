@@ -19,14 +19,14 @@ Implement, test, and validate every DSP module in the application: gait pipeline
 
 ## Outputs
 
-- `app/src/main/java/com/mustafan4x/baselinems/dsp/` package containing pure Kotlin DSP modules with no Android sensor or UI dependencies, including:
+- `app/src/main/java/com/mustafanazeer/baselinems/dsp/` package containing pure Kotlin DSP modules with no Android sensor or UI dependencies, including:
   - Butterworth low pass filter.
   - Madgwick orientation filter.
   - Step detection (peak finder with prominence and inter peak distance constraints).
   - Stride pairing and segmentation.
   - Zero velocity update (ZUPT) stride length integrator.
   - Feature extractor producing cadence, stride length, step time CV, stride asymmetry, double support time.
-- `app/src/test/java/com/mustafan4x/baselinems/dsp/` directory with tests using synthetic IMU traces with known parameters. Target: 90 percent line coverage on the DSP module; stride length within 2 percent on clean synthetic signals.
+- `app/src/test/java/com/mustafanazeer/baselinems/dsp/` directory with tests using synthetic IMU traces with known parameters. Target: 90 percent line coverage on the DSP module; stride length within 2 percent on clean synthetic signals.
 - For voice: pure Kotlin acoustic feature extractor (or, per the ADR in Phase 8, a thin wrapper around TarsosDSP).
 - ADRs for non obvious DSP choices (Madgwick from scratch vs library, TarsosDSP vs roll our own).
 - Validation report sections in `docs/source/validation-report.md` documenting Phase 5 numbers.

@@ -26,7 +26,7 @@ The following assets live inside the app sandbox. Sensitivity ratings reflect th
 
 | Asset | Where it lives | Sensitivity | Notes |
 |-------|---------------|-------------|-------|
-| User profile (`UserProfileEntity`: date of birth, biological sex, dominant hand, MS type, height) | Room database in `/data/data/com.mustafan4x.baselinems/databases/` | High. Health condition disclosure. | MS type field can be `UNDISCLOSED`; the app does not require it. |
+| User profile (`UserProfileEntity`: date of birth, biological sex, dominant hand, MS type, height) | Room database in `/data/data/com.mustafanazeer.baselinems/databases/` | High. Health condition disclosure. | MS type field can be `UNDISCLOSED`; the app does not require it. |
 | Session metadata (`SessionEntity`) | Same Room database | Low to medium | Timestamps and device info; not personally identifying on its own, but linkable to the profile. |
 | Test results (`TestResultEntity`: feature JSON, quality scores, foreign keys to sessions) | Same Room database | High | The longitudinal record of motor, cognitive, vision, and voice metrics is the most sensitive asset because it is the clinical signal itself. |
 | Raw IMU traces (gait test, gzipped CSV) | App private files dir, referenced from `TestResultEntity.rawSensorRelativePath` | Medium to high | Raw 100 Hz accelerometer and gyroscope traces over a 30 second walk. Could in principle be re identifying through gait biometrics if exfiltrated alongside the profile. |
@@ -53,7 +53,7 @@ The STRIDE categories are evaluated against the threat actors named in the agent
 | Threat | Likelihood | Impact | Mitigation |
 |--------|-----------|--------|-----------|
 | A roommate with the unlocked phone deletes or edits sessions through the app's UI. | Medium for shared devices | Medium (loss of longitudinal record) | The data model is append only at the `Session` level (`SPEC.md` Section 8). Corrections produce a new session. Bulk deletion through the app UI is the user's prerogative as the data owner. Out of band tampering with the Room database file is blocked by app sandboxing on a non rooted device. |
-| A malicious app on the same non rooted device modifies BaselineMS's database. | Very low | High | Android per app UID isolation prevents it. App private storage at `/data/data/com.mustafan4x.baselinems/` is not readable or writable by other apps without root. |
+| A malicious app on the same non rooted device modifies BaselineMS's database. | Very low | High | Android per app UID isolation prevents it. App private storage at `/data/data/com.mustafanazeer.baselinems/` is not readable or writable by other apps without root. |
 | A forensic adversary on a rooted device modifies the database or raw sensor traces. | Low (requires physical possession plus root) | Medium | Out of scope as a primary attack model. Documented as a residual risk in Section 5. The user is the data owner; if their device is rooted by an adversary they have already lost the integrity battle for the device. |
 | An attacker tampers with the exported PDF after it leaves the device. | Medium (file in transit through email, messaging, cloud drive) | Medium (could mislead a neurologist) | Out of the application's control once the user shares the file. The PDF includes a generated date, app version, and the disclaimer text. Cryptographic signing of exports is not in scope for v1; flagged for `future-ideas.md` if demand emerges. |
 

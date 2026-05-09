@@ -4,7 +4,7 @@
 
 **Goal:** Build the gait digital signal processing pipeline as a pure Kotlin module that takes IMU samples in and returns gait features (cadence, stride length, step time CV, stride asymmetry, double support time) out, with no Android sensor or UI dependencies. Heavily TDD'd against a parameterized synthetic IMU generator.
 
-**Architecture:** The pipeline is a layered pure Kotlin module under `app/src/main/java/com/mustafan4x/baselinems/dsp/`. It consumes a `Flow<ImuSample>` produced upstream (the Sensor Integration Engineer wires that up in Phase 4) and emits a `GaitFeatures` value at the end of a 30 second window. Internally it runs: Butterworth low pass, Madgwick orientation, gravity removal into world frame, step detection (peak finder on vertical linear acceleration), left or right stride pairing, ZUPT stride length integration, and feature extraction. Test fixtures live under `app/src/test/java/com/mustafan4x/baselinems/fixtures/`, owned by the Test Fixture Engineer. The DSP package and the fixtures package together define the contract that Phase 4 will integrate against.
+**Architecture:** The pipeline is a layered pure Kotlin module under `app/src/main/java/com/mustafanazeer/baselinems/dsp/`. It consumes a `Flow<ImuSample>` produced upstream (the Sensor Integration Engineer wires that up in Phase 4) and emits a `GaitFeatures` value at the end of a 30 second window. Internally it runs: Butterworth low pass, Madgwick orientation, gravity removal into world frame, step detection (peak finder on vertical linear acceleration), left or right stride pairing, ZUPT stride length integration, and feature extraction. Test fixtures live under `app/src/test/java/com/mustafanazeer/baselinems/fixtures/`, owned by the Test Fixture Engineer. The DSP package and the fixtures package together define the contract that Phase 4 will integrate against.
 
 **Tech Stack:** Kotlin 1.9 (already on the project), pure JVM library code (no Android SDK calls in DSP code, no Robolectric requirement), JUnit 4 for the tests (already on the project), kotlin.math for trigonometry. No new third party dependencies are added in Phase 3 unless the Madgwick ADR concludes otherwise (see Task 14). The fixtures package depends on `kotlin.math` only.
 
@@ -43,7 +43,7 @@ Files this plan creates or modifies:
 │   └── source/
 │       └── citation-audit-log.md                  (APPEND: CA Phase 3 audits)
 └── app/src/
-    ├── main/java/com/mustafan4x/baselinems/
+    ├── main/java/com/mustafanazeer/baselinems/
     │   └── dsp/
     │       ├── ImuSample.kt                       (data class shared with fixtures)
     │       ├── Vector3.kt                         (3D vector value type)
@@ -57,7 +57,7 @@ Files this plan creates or modifies:
     │       ├── FeatureExtractor.kt                (cadence, stride length, CV, asymmetry, DST)
     │       ├── GaitFeatures.kt                    (output value class)
     │       └── GaitPipeline.kt                    (composes everything; public entry point)
-    └── test/java/com/mustafan4x/baselinems/
+    └── test/java/com/mustafanazeer/baselinems/
         ├── fixtures/
         │   ├── SyntheticImu.kt                    (parameterized generator)
         │   ├── PreCannedFixtures.kt               (slowWalk, normalWalk, briskWalk, etc.)
@@ -133,16 +133,16 @@ If any of the three checks fails, the PM addresses the gap before dispatching TF
 **Owner:** Test Fixture Engineer (lead, because the fixtures package owns the synthetic generator that consumes `ImuSample`; the DSP package will import `ImuSample` from the shared location).
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/Vector3.kt`
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/Quaternion.kt`
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/ImuSample.kt`
-- Create: `app/src/test/java/com/mustafan4x/baselinems/fixtures/.gitkeep` (placeholder so the package directory exists before SyntheticImu.kt lands)
-- Create: `app/src/test/java/com/mustafan4x/baselinems/dsp/.gitkeep` (same reason for the DSP test package)
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/Vector3.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/Quaternion.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/ImuSample.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/fixtures/.gitkeep` (placeholder so the package directory exists before SyntheticImu.kt lands)
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/dsp/.gitkeep` (same reason for the DSP test package)
 
 - [ ] **Step 1: Write `Vector3.kt`**
 
 ```kotlin
-package com.mustafan4x.baselinems.dsp
+package com.mustafanazeer.baselinems.dsp
 
 import kotlin.math.sqrt
 
@@ -162,7 +162,7 @@ data class Vector3(val x: Double, val y: Double, val z: Double) {
 - [ ] **Step 2: Write `Quaternion.kt`**
 
 ```kotlin
-package com.mustafan4x.baselinems.dsp
+package com.mustafanazeer.baselinems.dsp
 
 import kotlin.math.sqrt
 
@@ -193,7 +193,7 @@ data class Quaternion(val w: Double, val x: Double, val y: Double, val z: Double
 - [ ] **Step 3: Write `ImuSample.kt`**
 
 ```kotlin
-package com.mustafan4x.baselinems.dsp
+package com.mustafanazeer.baselinems.dsp
 
 /**
  * One IMU sample produced by the Sensor Integration Engineer's signals layer (Phase 4).
@@ -217,10 +217,10 @@ The fields map directly to Android sensor types: `accelerometer` to `Sensor.TYPE
 - [ ] **Step 4: Add empty `.gitkeep` files so the test package directories are tracked**
 
 ```bash
-mkdir -p app/src/test/java/com/mustafan4x/baselinems/fixtures
-mkdir -p app/src/test/java/com/mustafan4x/baselinems/dsp
-touch app/src/test/java/com/mustafan4x/baselinems/fixtures/.gitkeep
-touch app/src/test/java/com/mustafan4x/baselinems/dsp/.gitkeep
+mkdir -p app/src/test/java/com/mustafanazeer/baselinems/fixtures
+mkdir -p app/src/test/java/com/mustafanazeer/baselinems/dsp
+touch app/src/test/java/com/mustafanazeer/baselinems/fixtures/.gitkeep
+touch app/src/test/java/com/mustafanazeer/baselinems/dsp/.gitkeep
 ```
 
 - [ ] **Step 5: Verify the build compiles**
@@ -231,11 +231,11 @@ Expected: BUILD SUCCESSFUL.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/baselinems/dsp/Vector3.kt \
-        app/src/main/java/com/mustafan4x/baselinems/dsp/Quaternion.kt \
-        app/src/main/java/com/mustafan4x/baselinems/dsp/ImuSample.kt \
-        app/src/test/java/com/mustafan4x/baselinems/fixtures/.gitkeep \
-        app/src/test/java/com/mustafan4x/baselinems/dsp/.gitkeep
+git add app/src/main/java/com/mustafanazeer/baselinems/dsp/Vector3.kt \
+        app/src/main/java/com/mustafanazeer/baselinems/dsp/Quaternion.kt \
+        app/src/main/java/com/mustafanazeer/baselinems/dsp/ImuSample.kt \
+        app/src/test/java/com/mustafanazeer/baselinems/fixtures/.gitkeep \
+        app/src/test/java/com/mustafanazeer/baselinems/dsp/.gitkeep
 git commit -m "dsp: introduce Vector3, Quaternion, ImuSample value types"
 ```
 
@@ -246,8 +246,8 @@ git commit -m "dsp: introduce Vector3, Quaternion, ImuSample value types"
 **Owner:** Test Fixture Engineer.
 
 **Files:**
-- Create: `app/src/test/java/com/mustafan4x/baselinems/fixtures/SyntheticImu.kt`
-- Create: `app/src/test/java/com/mustafan4x/baselinems/fixtures/SyntheticImuTest.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/fixtures/SyntheticImu.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/fixtures/SyntheticImuTest.kt`
 
 **Spec:** A parameterized generator that, given gait parameters (cadence, stride length, asymmetry, step time CV, trial duration, noise level), produces a deterministic stream of `ImuSample` records whose ground truth (number of steps, total distance, mean stride length, mean step time, asymmetry index) is derivable directly from the input parameters. The phone is modeled as fixed in the front pocket (constant world-to-device orientation in the absence of leg swing), with three superposed signals: vertical heel-strike spikes at the cadence, lateral sway alternating at half the cadence (one full cycle per stride pair), and forward propulsion as a near sinusoidal acceleration. Gravity is added back into the `accelerometer` field; the `linearAcceleration` field carries the gravity removed signal. Gyroscope is the time derivative of the orientation quaternion. Noise is additive white Gaussian on each axis.
 
@@ -256,9 +256,9 @@ git commit -m "dsp: introduce Vector3, Quaternion, ImuSample value types"
 Create `SyntheticImuTest.kt`:
 
 ```kotlin
-package com.mustafan4x.baselinems.fixtures
+package com.mustafanazeer.baselinems.fixtures
 
-import com.mustafan4x.baselinems.dsp.Vector3
+import com.mustafanazeer.baselinems.dsp.Vector3
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -356,17 +356,17 @@ class SyntheticImuTest {
 
 - [ ] **Step 2: Run the test to verify it fails because `SyntheticImu` does not exist yet**
 
-Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests com.mustafan4x.baselinems.fixtures.SyntheticImuTest`
+Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests com.mustafanazeer.baselinems.fixtures.SyntheticImuTest`
 Expected: compilation failure on the missing `SyntheticImu` class.
 
 - [ ] **Step 3: Implement `SyntheticImu.kt`**
 
 ```kotlin
-package com.mustafan4x.baselinems.fixtures
+package com.mustafanazeer.baselinems.fixtures
 
-import com.mustafan4x.baselinems.dsp.ImuSample
-import com.mustafan4x.baselinems.dsp.Quaternion
-import com.mustafan4x.baselinems.dsp.Vector3
+import com.mustafanazeer.baselinems.dsp.ImuSample
+import com.mustafanazeer.baselinems.dsp.Quaternion
+import com.mustafanazeer.baselinems.dsp.Vector3
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.exp
@@ -492,7 +492,7 @@ class SyntheticImu(
 
 - [ ] **Step 4: Run the tests to verify all four pass**
 
-Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests com.mustafan4x.baselinems.fixtures.SyntheticImuTest`
+Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests com.mustafanazeer.baselinems.fixtures.SyntheticImuTest`
 Expected: 4 tests, 0 failures.
 
 If the peak count test fails by more than the tolerance, the issue is either the heel strike Gaussian width (`sigma = 0.04`) producing peaks that merge at high cadence, or the world frame to device frame rotation losing the vertical signal. Investigate before proceeding; do not loosen the tolerance.
@@ -500,9 +500,9 @@ If the peak count test fails by more than the tolerance, the issue is either the
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/test/java/com/mustafan4x/baselinems/fixtures/SyntheticImu.kt \
-        app/src/test/java/com/mustafan4x/baselinems/fixtures/SyntheticImuTest.kt
-git rm app/src/test/java/com/mustafan4x/baselinems/fixtures/.gitkeep
+git add app/src/test/java/com/mustafanazeer/baselinems/fixtures/SyntheticImu.kt \
+        app/src/test/java/com/mustafanazeer/baselinems/fixtures/SyntheticImuTest.kt
+git rm app/src/test/java/com/mustafanazeer/baselinems/fixtures/.gitkeep
 git commit -m "fixtures(gait): parameterized synthetic IMU generator with round trip tests"
 ```
 
@@ -513,14 +513,14 @@ git commit -m "fixtures(gait): parameterized synthetic IMU generator with round 
 **Owner:** Test Fixture Engineer.
 
 **Files:**
-- Create: `app/src/test/java/com/mustafan4x/baselinems/fixtures/PreCannedFixtures.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/fixtures/PreCannedFixtures.kt`
 
 **Spec:** A library of named fixture configurations covering the published MS gait reference values and adjacent ranges. Each fixture is a frozen `SyntheticImu` configuration. Per `docs/source/clinical-references.md` and the Clinical Validator's Phase 0 sign off (`docs/source/clinical-references.md` Gait Test sign off): MS reference cadence is 94.4 steps per minute and step length 45.3 cm (Givon et al. 2009); healthy control cadence is 115.2 steps per minute and step length 72.1 cm. Fixtures map MS literature reference values to synthetic generator parameters.
 
 - [ ] **Step 1: Write `PreCannedFixtures.kt`**
 
 ```kotlin
-package com.mustafan4x.baselinems.fixtures
+package com.mustafanazeer.baselinems.fixtures
 
 object PreCannedFixtures {
 
@@ -607,13 +607,13 @@ The cadence numbers are the Givon et al. 2009 values (cited in `docs/source/clin
 
 - [ ] **Step 2: Verify the fixtures compile and the existing `SyntheticImuTest` still passes**
 
-Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.fixtures.*"`
+Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafanazeer.baselinems.fixtures.*"`
 Expected: 4 tests, 0 failures.
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add app/src/test/java/com/mustafan4x/baselinems/fixtures/PreCannedFixtures.kt
+git add app/src/test/java/com/mustafanazeer/baselinems/fixtures/PreCannedFixtures.kt
 git commit -m "fixtures(gait): pre canned configurations from Givon 2009 MS reference values"
 ```
 
@@ -671,15 +671,15 @@ Expected: BUILD SUCCESSFUL with 0 failures.
 **Owner:** Signal Processing Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/ButterworthLowPass.kt`
-- Create: `app/src/test/java/com/mustafan4x/baselinems/dsp/ButterworthLowPassTest.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/ButterworthLowPass.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/dsp/ButterworthLowPassTest.kt`
 
 **Spec:** A 4th order Butterworth low pass filter with a 20 Hz cutoff at 100 Hz sample rate, applied as a forward then reverse pass to achieve zero phase distortion (filtfilt). The forward pass uses a stateful biquad in direct form II transposed; the reverse pass mirrors the operation on the buffered output. The implementation is allocation free in the per sample callback path (the user supplies a `DoubleArray` and the filter mutates it in place during the reverse pass; the forward pass uses fixed-size mutable state).
 
 - [ ] **Step 1: Write the failing test**
 
 ```kotlin
-package com.mustafan4x.baselinems.dsp
+package com.mustafanazeer.baselinems.dsp
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -732,7 +732,7 @@ class ButterworthLowPassTest {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests com.mustafan4x.baselinems.dsp.ButterworthLowPassTest`
+Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests com.mustafanazeer.baselinems.dsp.ButterworthLowPassTest`
 Expected: compilation failure on missing `ButterworthLowPass`.
 
 - [ ] **Step 3: Implement `ButterworthLowPass.kt`**
@@ -743,14 +743,14 @@ The SPE writes the implementation. The plan does not pre commit the SPE to a spe
 
 - [ ] **Step 4: Run the test to verify it passes**
 
-Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests com.mustafan4x.baselinems.dsp.ButterworthLowPassTest`
+Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests com.mustafanazeer.baselinems.dsp.ButterworthLowPassTest`
 Expected: 3 tests, 0 failures.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/baselinems/dsp/ButterworthLowPass.kt \
-        app/src/test/java/com/mustafan4x/baselinems/dsp/ButterworthLowPassTest.kt
+git add app/src/main/java/com/mustafanazeer/baselinems/dsp/ButterworthLowPass.kt \
+        app/src/test/java/com/mustafanazeer/baselinems/dsp/ButterworthLowPassTest.kt
 git commit -m "dsp(gait): 4th order zero phase Butterworth low pass at 20 Hz"
 ```
 
@@ -761,15 +761,15 @@ git commit -m "dsp(gait): 4th order zero phase Butterworth low pass at 20 Hz"
 **Owner:** Signal Processing Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/Madgwick.kt`
-- Create: `app/src/test/java/com/mustafan4x/baselinems/dsp/MadgwickTest.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/Madgwick.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/dsp/MadgwickTest.kt`
 
 **Spec:** A Madgwick (2010) orientation filter that consumes per sample gyroscope (rad per second) and accelerometer (m per second squared) and outputs an estimated world to device quaternion. The filter is stateful per instance: the quaternion field is initialized to identity and updated on each `update(gyro, accel, dtSeconds)` call. The default beta gain is 0.1, configurable per instance. The filter is allocation free per update.
 
 - [ ] **Step 1: Write the failing test**
 
 ```kotlin
-package com.mustafan4x.baselinems.dsp
+package com.mustafanazeer.baselinems.dsp
 
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -826,8 +826,8 @@ The standard Madgwick (2010) IMU update rule is in the SPE's role brief and in t
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/baselinems/dsp/Madgwick.kt \
-        app/src/test/java/com/mustafan4x/baselinems/dsp/MadgwickTest.kt
+git add app/src/main/java/com/mustafanazeer/baselinems/dsp/Madgwick.kt \
+        app/src/test/java/com/mustafanazeer/baselinems/dsp/MadgwickTest.kt
 git commit -m "dsp(gait): Madgwick orientation filter from scratch"
 ```
 
@@ -838,15 +838,15 @@ git commit -m "dsp(gait): Madgwick orientation filter from scratch"
 **Owner:** Signal Processing Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/WorldFrame.kt`
-- Create: `app/src/test/java/com/mustafan4x/baselinems/dsp/WorldFrameTest.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/WorldFrame.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/dsp/WorldFrameTest.kt`
 
 **Spec:** A pure function that, given a per sample orientation quaternion (from Task 7's Madgwick or from `ImuSample.rotationVector` if present) and the per sample linear acceleration in the device frame, returns the linear acceleration in the world frame (Z up). When the project consumes `ImuSample.linearAcceleration` directly (which is already gravity removed by the platform), the world frame transform is `q.rotate(linearAcceleration)`. The module additionally exposes a sanity check helper that recovers an estimate of the gravity vector from a static window of raw accelerometer samples; this is used in Task 13 quality scoring to confirm orientation tracking did not drift.
 
 - [ ] **Step 1: Write the failing test**
 
 ```kotlin
-package com.mustafan4x.baselinems.dsp
+package com.mustafanazeer.baselinems.dsp
 
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -875,8 +875,8 @@ class WorldFrameTest {
 - [ ] **Step 2 to 5:** TDD per the Task 6 pattern. Implement, verify, commit.
 
 ```bash
-git add app/src/main/java/com/mustafan4x/baselinems/dsp/WorldFrame.kt \
-        app/src/test/java/com/mustafan4x/baselinems/dsp/WorldFrameTest.kt
+git add app/src/main/java/com/mustafanazeer/baselinems/dsp/WorldFrame.kt \
+        app/src/test/java/com/mustafanazeer/baselinems/dsp/WorldFrameTest.kt
 git commit -m "dsp(gait): world frame transform and gravity sanity check"
 ```
 
@@ -887,17 +887,17 @@ git commit -m "dsp(gait): world frame transform and gravity sanity check"
 **Owner:** Signal Processing Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/StepDetector.kt`
-- Create: `app/src/test/java/com/mustafan4x/baselinems/dsp/StepDetectorTest.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/StepDetector.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/dsp/StepDetectorTest.kt`
 
 **Spec:** A peak finder over the world frame vertical (Z) component of linear acceleration after Butterworth low pass. Returns a list of step events with timestamp (in seconds) and peak amplitude. Constraints from `SPEC.md` Section 7.1 step 5: minimum peak prominence (a positive threshold the SPE chooses, defaults to 1.0 m per second squared), minimum inter peak distance 250 ms, maximum inter peak distance 800 ms (peaks separated by more than 800 ms are still emitted but the inter peak gap is recorded so the quality score can downgrade the trial).
 
 - [ ] **Step 1: Write the failing test using a `PreCannedFixtures.healthyControlNormal()` trace**
 
 ```kotlin
-package com.mustafan4x.baselinems.dsp
+package com.mustafanazeer.baselinems.dsp
 
-import com.mustafan4x.baselinems.fixtures.PreCannedFixtures
+import com.mustafanazeer.baselinems.fixtures.PreCannedFixtures
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.abs
@@ -941,8 +941,8 @@ class StepDetectorTest {
 - [ ] **Step 2 to 5:** TDD. Implement, verify, commit.
 
 ```bash
-git add app/src/main/java/com/mustafan4x/baselinems/dsp/StepDetector.kt \
-        app/src/test/java/com/mustafan4x/baselinems/dsp/StepDetectorTest.kt
+git add app/src/main/java/com/mustafanazeer/baselinems/dsp/StepDetector.kt \
+        app/src/test/java/com/mustafanazeer/baselinems/dsp/StepDetectorTest.kt
 git commit -m "dsp(gait): peak finder step detector with prominence and interval constraints"
 ```
 
@@ -953,16 +953,16 @@ git commit -m "dsp(gait): peak finder step detector with prominence and interval
 **Owner:** Signal Processing Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/StridePairing.kt`
-- Create: `app/src/test/java/com/mustafan4x/baselinems/dsp/StridePairingTest.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/StridePairing.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/dsp/StridePairingTest.kt`
 
 **Spec:** Given a list of step events plus the world frame lateral (X) acceleration sampled at the step times, assign each step to "left" or "right" based on the sign of the lateral acceleration at the step. Group successive same foot steps into strides. Returns a list of strides with foot label, start time, end time, and the lateral acceleration sign at start. The left or right convention is arbitrary at the API level; the integration test in Task 13 confirms alternating assignment on the synthetic generator.
 
 - [ ] **Steps 1 to 5:** TDD per the Task 6 pattern.
 
 ```bash
-git add app/src/main/java/com/mustafan4x/baselinems/dsp/StridePairing.kt \
-        app/src/test/java/com/mustafan4x/baselinems/dsp/StridePairingTest.kt
+git add app/src/main/java/com/mustafanazeer/baselinems/dsp/StridePairing.kt \
+        app/src/test/java/com/mustafanazeer/baselinems/dsp/StridePairingTest.kt
 git commit -m "dsp(gait): left right stride pairing from lateral acceleration sign"
 ```
 
@@ -973,8 +973,8 @@ git commit -m "dsp(gait): left right stride pairing from lateral acceleration si
 **Owner:** Signal Processing Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/Zupt.kt`
-- Create: `app/src/test/java/com/mustafan4x/baselinems/dsp/ZuptTest.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/Zupt.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/dsp/ZuptTest.kt`
 
 **Spec:** Zero velocity update integrator. Given world frame linear acceleration time series and a list of mid stance instants (local minima of acceleration magnitude near each step time), compute stride length as the integral of forward (Y) acceleration between successive mid stance instants of the same foot, with velocity reset to zero at each mid stance to bound integration drift. Returns one stride length per stride. Per `SPEC.md` Section 7.2 target 1: stride length recovered within 2 percent on clean synthetic signals.
 
@@ -983,9 +983,9 @@ git commit -m "dsp(gait): left right stride pairing from lateral acceleration si
 The expected stride length is the input parameter (1.442 m). The test asserts the recovered mean stride length is within 2 percent of 1.442 m.
 
 ```kotlin
-package com.mustafan4x.baselinems.dsp
+package com.mustafanazeer.baselinems.dsp
 
-import com.mustafan4x.baselinems.fixtures.PreCannedFixtures
+import com.mustafanazeer.baselinems.fixtures.PreCannedFixtures
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.abs
@@ -999,7 +999,7 @@ class ZuptTest {
         assertTrue("percent error $percentError exceeded 2", percentError <= 2.0)
     }
 
-    private fun pipelineRecoveredMeanStrideLength(fixture: com.mustafan4x.baselinems.fixtures.SyntheticImu): Double {
+    private fun pipelineRecoveredMeanStrideLength(fixture: com.mustafanazeer.baselinems.fixtures.SyntheticImu): Double {
         TODO("Wire through StepDetector + StridePairing + Zupt as in GaitPipeline once that exists; see Task 13")
     }
 }
@@ -1010,8 +1010,8 @@ The `pipelineRecoveredMeanStrideLength` helper is a placeholder until Task 13 la
 - [ ] **Step 2 to 5:** TDD. Implement, verify, commit.
 
 ```bash
-git add app/src/main/java/com/mustafan4x/baselinems/dsp/Zupt.kt \
-        app/src/test/java/com/mustafan4x/baselinems/dsp/ZuptTest.kt
+git add app/src/main/java/com/mustafanazeer/baselinems/dsp/Zupt.kt \
+        app/src/test/java/com/mustafanazeer/baselinems/dsp/ZuptTest.kt
 git commit -m "dsp(gait): ZUPT stride length integrator with mid stance velocity reset"
 ```
 
@@ -1022,16 +1022,16 @@ git commit -m "dsp(gait): ZUPT stride length integrator with mid stance velocity
 **Owner:** Signal Processing Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/FeatureExtractor.kt`
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/GaitFeatures.kt`
-- Create: `app/src/test/java/com/mustafan4x/baselinems/dsp/FeatureExtractorTest.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/FeatureExtractor.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/GaitFeatures.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/dsp/FeatureExtractorTest.kt`
 
 **Spec:** Given the outputs of Step Detector, Stride Pairing, and Zupt, compute the five gait features named in `SPEC.md` Section 7.1 step 8 plus the quality score named in step 9.
 
 `GaitFeatures.kt`:
 
 ```kotlin
-package com.mustafan4x.baselinems.dsp
+package com.mustafanazeer.baselinems.dsp
 
 data class GaitFeatures(
     val cadenceStepsPerMinute: Double,
@@ -1061,9 +1061,9 @@ Tests cover: cadence math, stride length math, step time CV math, asymmetry math
 - [ ] **Steps 1 to 5:** TDD.
 
 ```bash
-git add app/src/main/java/com/mustafan4x/baselinems/dsp/FeatureExtractor.kt \
-        app/src/main/java/com/mustafan4x/baselinems/dsp/GaitFeatures.kt \
-        app/src/test/java/com/mustafan4x/baselinems/dsp/FeatureExtractorTest.kt
+git add app/src/main/java/com/mustafanazeer/baselinems/dsp/FeatureExtractor.kt \
+        app/src/main/java/com/mustafanazeer/baselinems/dsp/GaitFeatures.kt \
+        app/src/test/java/com/mustafanazeer/baselinems/dsp/FeatureExtractorTest.kt
 git commit -m "dsp(gait): feature extractor for cadence, stride length, CV, asymmetry, DST"
 ```
 
@@ -1074,17 +1074,17 @@ git commit -m "dsp(gait): feature extractor for cadence, stride length, CV, asym
 **Owner:** Signal Processing Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/baselinems/dsp/GaitPipeline.kt`
-- Create: `app/src/test/java/com/mustafan4x/baselinems/dsp/GaitPipelineIntegrationTest.kt`
+- Create: `app/src/main/java/com/mustafanazeer/baselinems/dsp/GaitPipeline.kt`
+- Create: `app/src/test/java/com/mustafanazeer/baselinems/dsp/GaitPipelineIntegrationTest.kt`
 
 **Spec:** The public entry point of the DSP module. Composes Butterworth low pass, Madgwick (with the platform `rotationVector` consumed as a parallel reference for the quality score residual), world frame transform, step detection, stride pairing, ZUPT, and feature extraction. Accepts a `List<ImuSample>` input (collected over a 30 second window by Phase 4) and returns `GaitFeatures`. The pipeline is a class with a single `process(samples: List<ImuSample>): GaitFeatures` method; per stage state is allocated once per pipeline instance, not per sample.
 
 The integration test covers every pre canned fixture from Task 3:
 
 ```kotlin
-package com.mustafan4x.baselinems.dsp
+package com.mustafanazeer.baselinems.dsp
 
-import com.mustafan4x.baselinems.fixtures.PreCannedFixtures
+import com.mustafanazeer.baselinems.fixtures.PreCannedFixtures
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.abs
@@ -1141,8 +1141,8 @@ The 2 percent stride length target is the `SPEC.md` Section 7.2 layer 1 target. 
 - [ ] **Step 1 to 5:** TDD. The failing form of this test is the SPE's red bar; the implementation is then iterated until every fixture's recovery passes.
 
 ```bash
-git add app/src/main/java/com/mustafan4x/baselinems/dsp/GaitPipeline.kt \
-        app/src/test/java/com/mustafan4x/baselinems/dsp/GaitPipelineIntegrationTest.kt
+git add app/src/main/java/com/mustafanazeer/baselinems/dsp/GaitPipeline.kt \
+        app/src/test/java/com/mustafanazeer/baselinems/dsp/GaitPipelineIntegrationTest.kt
 git commit -m "dsp(gait): end to end GaitPipeline with integration tests across pre canned fixtures"
 ```
 

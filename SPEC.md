@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-06
 **Status:** Draft, approved by user. Updated 2026-05-06 to switch platform from iOS native to Android native.
-**Author:** Mustafan4x (with Claude as design partner)
+**Author:** Mustafa Nazeer (with Claude as design partner)
 **Related documents:** ~/src/project_ideas.md
 
 ## 1. Vision
@@ -149,7 +149,7 @@ Each module is grounded in a clinically validated MS assessment. Selection crite
 - **User experience.** 30 seconds of alternating taps on two on screen targets, performed once with the dominant hand and once with the non dominant hand.
 - **Sensors.** Touchscreen only.
 - **Outputs.** Tap rate (taps per second), inter tap interval coefficient of variation, dominant versus non dominant asymmetry, miss rate (operationally defined below).
-- **Miss rate operational definition.** A tap is classified into one of three buckets: (1) **valid**, the tap lands inside one of the two on screen target hit regions and alternates from the previously valid tap; (2) **non alternating**, the tap lands inside a target hit region but inside the same target as the previous valid tap; (3) **off target**, the tap lands outside both target hit regions. The two failure buckets are persisted as separate integer counts (`non_alternating_taps`, `off_target_taps`) per round, so the Phase 9 Reporting layer can present the two failure modes either separately or rolled up. The single rolled up `miss_rate` reported at the session level is computed across both rounds combined as `(non_alternating_taps + off_target_taps) / (valid_taps + non_alternating_taps + off_target_taps)`. This operational definition is the Option A variant ratified in the Clinical Validator's 2026-05-07 Phase 2 sign off (`docs/source/clinical-references.md`, "Phase 2 sign off, Bilateral Tap Test", Revision 1). The implementation lives in `app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapFeatures.kt`.
+- **Miss rate operational definition.** A tap is classified into one of three buckets: (1) **valid**, the tap lands inside one of the two on screen target hit regions and alternates from the previously valid tap; (2) **non alternating**, the tap lands inside a target hit region but inside the same target as the previous valid tap; (3) **off target**, the tap lands outside both target hit regions. The two failure buckets are persisted as separate integer counts (`non_alternating_taps`, `off_target_taps`) per round, so the Phase 9 Reporting layer can present the two failure modes either separately or rolled up. The single rolled up `miss_rate` reported at the session level is computed across both rounds combined as `(non_alternating_taps + off_target_taps) / (valid_taps + non_alternating_taps + off_target_taps)`. This operational definition is the Option A variant ratified in the Clinical Validator's 2026-05-07 Phase 2 sign off (`docs/source/clinical-references.md`, "Phase 2 sign off, Bilateral Tap Test", Revision 1). The implementation lives in `app/src/main/java/com/mustafanazeer/baselinems/battery/tap/TapFeatures.kt`.
 - **Quality score factors.** Sufficient number of taps recorded, sustained engagement across the full window, taps actually landing within target bounds.
 
 ### 6.2 Gait Test (deep module)

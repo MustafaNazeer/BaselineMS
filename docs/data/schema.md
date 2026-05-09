@@ -10,15 +10,15 @@ The contract is append only at the `Session` level: completed sessions are immut
 
 **Source files (absolute paths):**
 
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/Enums.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/Converters.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/UserProfileEntity.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/UserProfileDao.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/SessionEntity.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/SessionDao.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/TestResultEntity.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/TestResultDao.kt`
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/AppDatabase.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/Enums.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/Converters.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/UserProfileEntity.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/UserProfileDao.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/SessionEntity.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/SessionDao.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/TestResultEntity.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/TestResultDao.kt`
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/AppDatabase.kt`
 
 ### Entity table
 
@@ -78,13 +78,13 @@ Primary keys (`id` on every table) are indexed implicitly by SQLite. No addition
 |-------------|--------------|--------------|---------------|--------|
 | `test_result` | `session_id` | `session` | `id` | `ON DELETE CASCADE` |
 
-The cascade is verified end to end by `SessionDaoTest.deletingSessionCascadesToResults` (`/home/mustafa/src/BaselineMS/app/src/test/java/com/mustafan4x/baselinems/data/SessionDaoTest.kt` lines 50 to 68). Room enables SQLite foreign key enforcement by default, so `pragma foreign_keys = ON` is implicit.
+The cascade is verified end to end by `SessionDaoTest.deletingSessionCascadesToResults` (`/home/mustafa/src/BaselineMS/app/src/test/java/com/mustafanazeer/baselinems/data/SessionDaoTest.kt` lines 50 to 68). Room enables SQLite foreign key enforcement by default, so `pragma foreign_keys = ON` is implicit.
 
 There is intentionally no foreign key from `session` to `user_profile`. The product is single user; `user_profile` exists as a singleton row fetched by `UserProfileDao.getFirst()`.
 
 ### Conversion rules
 
-`Converters` (`/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/Converters.kt`) registers four pairs of `@TypeConverter` methods, one pair per enum:
+`Converters` (`/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/Converters.kt`) registers four pairs of `@TypeConverter` methods, one pair per enum:
 
 | Kotlin enum | Storage | Method pair |
 |-------------|---------|-------------|
@@ -113,7 +113,7 @@ There are no N+1 patterns in the Phase 1 query set: the orchestrator inserts at 
 
 ### Database configuration
 
-`AppDatabase` (`/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/AppDatabase.kt`):
+`AppDatabase` (`/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/AppDatabase.kt`):
 
 - `version = 1`.
 - `exportSchema = false` for Phase 1.
@@ -175,8 +175,8 @@ There are two implementation paths and they have different risk profiles. The DB
 **Path A migration code, ready for the Android Engineer to apply in Phase 2B Task 5:**
 
 ```kotlin
-// /home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/Migrations.kt
-package com.mustafan4x.baselinems.data
+// /home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/Migrations.kt
+package com.mustafanazeer.baselinems.data
 
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -244,7 +244,7 @@ The `Room.databaseBuilder(...)` call site (in the Hilt module or wherever the da
 **Robolectric migration test that the Android Engineer or DBA writes alongside Path A:**
 
 ```kotlin
-// app/src/test/java/com/mustafan4x/baselinems/data/Migration1To2Test.kt
+// app/src/test/java/com/mustafanazeer/baselinems/data/Migration1To2Test.kt
 @RunWith(RobolectricTestRunner::class)
 class Migration1To2Test {
     @get:Rule
@@ -319,7 +319,7 @@ ksp {
 
 The Data Engineer flags an alternative path explicitly: Room 2.6.0 and later support a dedicated `androidx.room` Gradle plugin that exposes a `room { schemaDirectory("$projectDir/schemas") }` block. This plugin is more idiomatic than passing the schema location as a KSP argument, and it is what the Room documentation now recommends. Adopting the plugin requires adding `id("androidx.room") version "2.6.1"` to the plugins block and the corresponding entry to `gradle/libs.versions.toml` if version catalogs are in use. The DBA picks between the KSP arg form and the Room plugin form; both produce the same on disk artifact (a `schemas/` directory with one JSON per database version).
 
-In `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/AppDatabase.kt`, change:
+In `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/data/AppDatabase.kt`, change:
 
 ```kotlin
 exportSchema = false
@@ -331,7 +331,7 @@ to
 exportSchema = true
 ```
 
-The first build after this change emits `app/schemas/com.mustafan4x.baselinems.data.AppDatabase/1.json` (the v1 snapshot). That file must be committed before the `version = 2` change lands, in a separate commit or at least a separate file change reviewed independently. The migration test (Decision 1, Path A) then runs against that snapshot. The second build, after the `version = 2` change, emits the v2 snapshot; both snapshots stay committed.
+The first build after this change emits `app/schemas/com.mustafanazeer.baselinems.data.AppDatabase/1.json` (the v1 snapshot). That file must be committed before the `version = 2` change lands, in a separate commit or at least a separate file change reviewed independently. The migration test (Decision 1, Path A) then runs against that snapshot. The second build, after the `version = 2` change, emits the v2 snapshot; both snapshots stay committed.
 
 The Data Engineer flags the commit ordering as load bearing for the DBA and PM: if the v1 snapshot is captured after the v2 schema lands, the snapshot is wrong (it captures v2 metadata under filename `1.json`). The safe ordering is:
 
@@ -411,7 +411,7 @@ The DBA flags this as an Android Engineer constraint, not a schema change. If th
 
 ### Item 4, KSP arg form vs Room Gradle plugin form for `exportSchema`: VERDICT KSP arg form
 
-The DBA picks the KSP arg form. Both produce the same `app/schemas/com.mustafan4x.baselinems.data.AppDatabase/<version>.json` artifact; the choice is stylistic and operational.
+The DBA picks the KSP arg form. Both produce the same `app/schemas/com.mustafanazeer.baselinems.data.AppDatabase/<version>.json` artifact; the choice is stylistic and operational.
 
 **Reasoning:**
 
@@ -437,7 +437,7 @@ The DBA ratifies the Data Engineer's three patch ordering. The v1 snapshot must 
 
 **Ratified ordering:**
 
-1. **Patch 1, "capture v1 schema."** Flip `exportSchema = true` in `AppDatabase.kt`. Add the `ksp { arg("room.schemaLocation", "$projectDir/schemas") }` block in `app/build.gradle.kts`. Run `./gradlew :app:compileDebugKotlin` (or any build target that triggers KSP) to emit `app/schemas/com.mustafan4x.baselinems.data.AppDatabase/1.json`. Commit the source changes plus the generated `1.json` in one commit. Verify that `version = 1` is unchanged in this patch.
+1. **Patch 1, "capture v1 schema."** Flip `exportSchema = true` in `AppDatabase.kt`. Add the `ksp { arg("room.schemaLocation", "$projectDir/schemas") }` block in `app/build.gradle.kts`. Run `./gradlew :app:compileDebugKotlin` (or any build target that triggers KSP) to emit `app/schemas/com.mustafanazeer.baselinems.data.AppDatabase/1.json`. Commit the source changes plus the generated `1.json` in one commit. Verify that `version = 1` is unchanged in this patch.
 2. **Patch 2, "land the v2 migration."** In a separate commit: bump `version = 1` to `version = 2` in `AppDatabase.kt`, change `heightCm: Double` to `heightCm: Double? = null` in `UserProfileEntity.kt`, create `Migrations.kt` with the `MIGRATION_1_2` object as written in Decision 1, and add `.addMigrations(MIGRATION_1_2)` to the `Room.databaseBuilder(...)` call site. Run the build to emit `2.json`. Commit the source changes plus `2.json` in one commit.
 3. **Patch 3, "exercise the migration."** In a separate commit: add `Migration1To2Test.kt` with the changes from Item 2 of this audit applied (full row assertion, empty table case, correct constructor, JUnit assertions, post migration null read back). Run `./gradlew :app:testDebugUnitTest` to confirm green. Commit the test plus any small fixes the test surfaces.
 

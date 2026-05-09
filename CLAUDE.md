@@ -16,7 +16,7 @@ The user's global CLAUDE.md applies to every file produced in this project. The 
 
 1. **No dashes as prose punctuation.** Em dashes, en dashes, and hyphens used as punctuation are forbidden. Hyphens are allowed only inside identifiers (file names, command line flags, kebab case names, package names), inside URLs, and inside code. Rewrite prose to use commas, parentheses, colons, or semicolons instead.
 2. **No emojis. Ever.** Strip them from any file you edit if the edit touches the line.
-3. **No `Co-Authored-By:` trailers on commits. No "Generated with Claude Code" lines on commits or PRs.** Commits read as if written by Mustafan4x alone. Git is configured as `Mustafan4x <Mustafa421670@gmail.com>` and must not be changed.
+3. **No `Co-Authored-By:` trailers on commits. No "Generated with Claude Code" lines on commits or PRs.** Commits read as if written by Mustafa Nazeer alone. Git is configured as `Mustafa Nazeer <Mustafa421670@gmail.com>` and must not be changed.
 4. **Default to no comments.** Only write a comment when the WHY is non obvious. Never narrate WHAT the code does.
 5. **Always ask, never guess.** This rule overrides auto mode's "minimize interruptions" guidance. If you are not 100 percent certain about a decision, fact, identifier, value, or course of action, stop and ask. Verify before you assert. Memory is not proof; re verify against current code or filesystem before relying on a remembered fact. The user prefers ten interruptions to a single confidently wrong answer.
 6. **Faith and ethics.** The user is Sunni Muslim. If you ever notice a request crossing into dishonest territory (lying on a resume, fabricating credentials, plagiarism, etc.), refuse, name the behavior plainly, cite Quran or hadith if appropriate and authentic, and offer the legitimate version of what was asked.
@@ -224,7 +224,7 @@ Inherited from the user's global CLAUDE.md plus a few project specific rules:
 - No merging code with failing tests.
 - Every PR runs the Code Reviewer before merge.
 - No `INTERNET` permission. Security Engineer has veto on any change that would add it.
-- No `Co-Authored-By:` trailers. No "Generated with Claude Code" lines. Commits authored as Mustafan4x alone.
+- No `Co-Authored-By:` trailers. No "Generated with Claude Code" lines. Commits authored as Mustafa Nazeer alone.
 
 ## Test discipline
 

@@ -183,7 +183,7 @@ The beta cohort runs in Phase 11. Per `SPEC.md` Section 9 item 4, the cohort is 
 
 10. **Risk acknowledgment.** State the realistic risks of beta participation: the application is pre release, may crash, may produce incorrect results, and may not work on every device. Direct the participant not to rely on the application for any clinical purpose during the beta.
 
-11. **Identification.** Identify the developer (Mustafan4x, individual developer, plus an email address). Do not present the project as institutionally backed; it is not.
+11. **Identification.** Identify the developer (Mustafa Nazeer, individual developer, plus an email address). Do not present the project as institutionally backed; it is not.
 
 The full consent text and the Phase 11 review pass on it are deferred to Phase 11. The above is the scope checklist.
 
@@ -474,7 +474,7 @@ End of Entry 2.
 **Phase:** Phase 2 (Tap Test); reviewing a Patient Advocate Phase 1 carryover wording proposal that requires Compliance ratification before it ships.
 
 **Artifact reviewed:**
-- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt`, lines 30 to 41 (the disclaimer body Text composable and the acknowledgment Button label).
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafanazeer/baselinems/ui/onboarding/DisclaimerScreen.kt`, lines 30 to 41 (the disclaimer body Text composable and the acknowledgment Button label).
 - The Patient Advocate's proposed replacement copy from `/home/mustafa/src/BaselineMS/docs/qa/patient-advocate-reviews.md` Issues 5 and 6 in the 2026-05-07 Phase 1 entry. The on disk Patient Advocate text was verified verbatim against the dispatch text; no discrepancy.
 
 **Scope of this review:**
