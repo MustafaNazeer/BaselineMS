@@ -1,4 +1,4 @@
-# Compliance Review, MS Neuro Battery
+# Compliance Review, BaselineMS
 
 This is a living document maintained by the Compliance Reviewer (agent 21). Every entry records the date, the regulatory regime considered, the artifact reviewed, the specific wording or behavior reviewed, the relevant regulatory text with citation, and a verdict of COMPLIANT, NON COMPLIANT (with recommended remediation), or AMBIGUOUS (needs legal counsel beyond what this agent can decide).
 
@@ -34,9 +34,9 @@ The Compliance Reviewer holds veto power on regulatory drift. The veto can only 
 
 **The 21st Century Cures Act, codified at section 520(o)(1)(B) of the FD&C Act,** statutorily excludes from the medical device definition software functions that are "intended for maintaining or encouraging a healthy lifestyle and is unrelated to the diagnosis, cure, mitigation, prevention, or treatment of a disease or condition."
 
-**Application to MS Battery:**
+**Application to BaselineMS:**
 
-| Factor | MS Battery position |
+| Factor | BaselineMS position |
 |--------|---------------------|
 | Invasive? | No. Touchscreen, IMU, microphone, camera. |
 | Lasers, radiation, implants? | No. |
@@ -46,9 +46,9 @@ The Compliance Reviewer holds veto power on regulatory drift. The veto can only 
 
 **Verdict: COMPLIANT, with specific wording fixes recommended in Section 4 of this review.** The application as designed sits within the General Wellness framework provided certain phrases in `SPEC.md` and `README.md` are tightened. The application does not diagnose, does not treat, does not prescribe, does not replace clinical assessment, does not declare the `INTERNET` permission, does not transmit data off device, and explicitly defers FDA clearance as a non goal. The five tests are positioned as an objective, self administered record that the user can share with a neurologist.
 
-**Floodlight MS (Roche)** ships in 17 countries on iOS and Android without FDA clearance, classifying as wellness, with similar test composition (gait, cognition, vision, hand function). MS Battery's positioning is strictly more conservative than Floodlight's because (a) it does no cloud sync, (b) it does not aggregate population data, and (c) it does not run as a Roche-supervised study. **MS Sherpa (Orikami, Netherlands)** is a CE Class I medical device prescribed by a doctor; MS Battery deliberately avoids that path and `SPEC.md` Section 4 non goal 3 ("Earn FDA clearance in this initial scope") confirms this.
+**Floodlight MS (Roche)** ships in 17 countries on iOS and Android without FDA clearance, classifying as wellness, with similar test composition (gait, cognition, vision, hand function). BaselineMS's positioning is strictly more conservative than Floodlight's because (a) it does no cloud sync, (b) it does not aggregate population data, and (c) it does not run as a Roche-supervised study. **MS Sherpa (Orikami, Netherlands)** is a CE Class I medical device prescribed by a doctor; BaselineMS deliberately avoids that path and `SPEC.md` Section 4 non goal 3 ("Earn FDA clearance in this initial scope") confirms this.
 
-**Note on the 2026-01-06 FDA reissue.** The General Wellness guidance was reissued by FDA on January 6, 2026. Per industry summaries (Faegre Drinker, January 2026; Kendall PC, 2026), the 2026 reissue takes "a broader approach of what constitutes nondevice wellness products than the previous guidance," explicitly extending the framework to "noninvasive wearable products that measure activity, recovery, sleep, pulse, or fitness related biomarkers" when "intended solely for wellness use." The two factor test from the 2016 and 2019 versions remains in force. MS Battery's positioning continues to clear the 2026 framework.
+**Note on the 2026-01-06 FDA reissue.** The General Wellness guidance was reissued by FDA on January 6, 2026. Per industry summaries (Faegre Drinker, January 2026; Kendall PC, 2026), the 2026 reissue takes "a broader approach of what constitutes nondevice wellness products than the previous guidance," explicitly extending the framework to "noninvasive wearable products that measure activity, recovery, sleep, pulse, or fitness related biomarkers" when "intended solely for wellness use." The two factor test from the 2016 and 2019 versions remains in force. BaselineMS's positioning continues to clear the 2026 framework.
 
 ### 1.2 HIPAA scope
 
@@ -58,14 +58,14 @@ The Compliance Reviewer holds veto power on regulatory drift. The veto can only 
 
 > "Business associate means, with respect to a covered entity, a person who: (i) On behalf of such covered entity ... creates, receives, maintains, or transmits protected health information for a function or activity regulated by this subchapter."
 
-**Application to MS Battery:**
+**Application to BaselineMS:**
 
-- MS Battery is not a health plan.
-- MS Battery is not a health care clearinghouse.
-- MS Battery is not a health care provider. It does not deliver care, does not bill, does not transmit health information in electronic form in connection with a HIPAA transaction (claims, eligibility, payment, etc.).
-- MS Battery is not a business associate. There is no covered entity on whose behalf MS Battery creates, receives, maintains, or transmits protected health information. The application stores test results on the user's own device. The user, acting on their own initiative, may export a PDF and share it with their neurologist; that exchange is between two natural persons, the patient and the patient's clinician, and does not put the application or its developer into HIPAA scope.
+- BaselineMS is not a health plan.
+- BaselineMS is not a health care clearinghouse.
+- BaselineMS is not a health care provider. It does not deliver care, does not bill, does not transmit health information in electronic form in connection with a HIPAA transaction (claims, eligibility, payment, etc.).
+- BaselineMS is not a business associate. There is no covered entity on whose behalf BaselineMS creates, receives, maintains, or transmits protected health information. The application stores test results on the user's own device. The user, acting on their own initiative, may export a PDF and share it with their neurologist; that exchange is between two natural persons, the patient and the patient's clinician, and does not put the application or its developer into HIPAA scope.
 
-**Verdict: COMPLIANT.** MS Battery is outside HIPAA scope as currently designed. This conclusion holds as long as: (a) no backend is added that receives data from the application, (b) no contractual arrangement with a covered entity is entered into where MS Battery would receive PHI on the entity's behalf, (c) no functionality is added that transmits health information electronically in connection with a HIPAA transaction.
+**Verdict: COMPLIANT.** BaselineMS is outside HIPAA scope as currently designed. This conclusion holds as long as: (a) no backend is added that receives data from the application, (b) no contractual arrangement with a covered entity is entered into where BaselineMS would receive PHI on the entity's behalf, (c) no functionality is added that transmits health information electronically in connection with a HIPAA transaction.
 
 `SPEC.md` Section 10's claim, "This shape avoids HIPAA scope (the application is not a covered entity or business associate, and never receives data on a server)," is accurate.
 
@@ -81,7 +81,7 @@ The Compliance Reviewer holds veto power on regulatory drift. The veto can only 
 >
 > "'controller' means the natural or legal person, public authority, agency or other body which, alone or jointly with others, determines the purposes and means of the processing of personal data"
 
-**Application to MS Battery:**
+**Application to BaselineMS:**
 
 - The application processes special category data within the meaning of Article 9(1) (data concerning health) when it computes and stores test features such as cadence, stride length, jitter, shimmer, SDMT correct count, and Sloan score. That processing happens locally on the data subject's own device.
 - Recital 18 of the GDPR ("This Regulation does not apply to the processing of personal data by a natural person in the course of a purely personal or household activity") and Article 2(2)(c) of the GDPR exempt processing carried out by a natural person in the course of a purely personal or household activity from GDPR scope. Self administered tests recorded on the user's own device for the user's own benefit fit that exemption from the data subject's perspective.
@@ -108,9 +108,9 @@ The Compliance Reviewer holds veto power on regulatory drift. The veto can only 
 >
 > Medical Apps: "Apps that provide medical information, resources, or tools to users to enhance medical care, facilitate diagnosis and treatment, and improve overall health outcomes." This category includes "Software as a Medical Device (SaMD) apps regulated by entities like the FDA."
 
-**Application to MS Battery:**
+**Application to BaselineMS:**
 
-- MS Battery is a Health and Fitness app per Play's category definitions, not a Medical app. It tracks self administered objective test results for the user's personal benefit. It does not provide medical information, does not facilitate diagnosis, and does not facilitate treatment.
+- BaselineMS is a Health and Fitness app per Play's category definitions, not a Medical app. It tracks self administered objective test results for the user's personal benefit. It does not provide medical information, does not facilitate diagnosis, and does not facilitate treatment.
 - The disclaimer required by Play Health Content and Services policy is already specified in `SPEC.md` Section 10: "This is not a medical device. It does not diagnose or treat any condition. Do not change your treatment based on these results. Share with your neurologist for clinical decisions." This is verbatim within the policy's expected disclaimer language.
 - The Play Console listing copy, drafted in Phase 11, must mirror this disclaimer text and must not contain any clinical claim. Final Play Console review by the Compliance Reviewer is scheduled for Phase 11.
 - The Health apps declaration form on the App content page in Play Console must be completed accurately by the DevOps Engineer in Phase 11. The Compliance Reviewer reviews the declaration before submission.
@@ -205,7 +205,7 @@ The Compliance Reviewer reviewed `SPEC.md` and `README.md` line by line for word
 
 > "lets people living with Multiple Sclerosis self administer a short, sensor backed set of five tests once a week"
 
-The phrase "sensor backed" is honest about what the application actually does (uses phone sensors), and "set of five tests" avoids the term of art "battery" if the Documentation Engineer wants the strictest possible wording. If "battery" is retained for brand and project name purposes, prefer "wellness battery" or "self administered battery" over "neurological battery" in user facing prose. The internal `SPEC.md` Section 1 and the project name "MS Neuro Battery" can keep the neuro framing because the spec is an internal document; the user facing README is what a Play reviewer or a regulator would read.
+The phrase "sensor backed" is honest about what the application actually does (uses phone sensors), and "set of five tests" avoids the term of art "battery" if the Documentation Engineer wants the strictest possible wording. If "battery" is retained for brand and project name purposes, prefer "wellness battery" or "self administered battery" over "neurological battery" in user facing prose. The internal `SPEC.md` Section 1 and the project name "BaselineMS" can keep the neuro framing because the spec is an internal document; the user facing README is what a Play reviewer or a regulator would read.
 
 ### Drift 4.2, README.md line 5, "validated gait analysis pipeline"
 
@@ -252,13 +252,13 @@ The internal SPEC.md is allowed to be more direct about its motivation than the 
 
 **Why it drifts:**
 
-"Self administered clinical tool" implies that MS Battery is a clinical tool. A clinical tool is a tool used in clinical decision making. The application is positioned as wellness, not as a clinical tool.
+"Self administered clinical tool" implies that BaselineMS is a clinical tool. A clinical tool is a tool used in clinical decision making. The application is positioned as wellness, not as a clinical tool.
 
 **Recommended replacement (for the SPEC.md):**
 
 > "There are research apps in this space, most notably Roche's FLOODLIGHT, but they are study only, locked to specific protocols, and not available to the broader MS community as a self administered self tracking application."
 
-Substituting "self tracking application" for "clinical tool" preserves the comparison to Floodlight without claiming MS Battery is a clinical instrument.
+Substituting "self tracking application" for "clinical tool" preserves the comparison to Floodlight without claiming BaselineMS is a clinical instrument.
 
 ### Drift 4.5, README.md line 9, "Phase 0 (project scaffold) is the next phase"
 
@@ -282,7 +282,7 @@ This is not a compliance issue but is worth flagging in the same pass: per `STAT
 
 **Why it drifts:**
 
-This phrase describes the **clinical literature on the Sloan chart**, not a claim about MS Battery's app. Read in context (Section 6.3 is the clinical basis subsection of the test description), it is accurate: Sloan is in fact validated in MS literature for that purpose. **No change required to `SPEC.md`.** This sentence must not be lifted verbatim into the README without context, because in user facing copy it would read as a claim that the application tracks optic neuritis recovery and progression. The Documentation Engineer should describe what the test does ("a low contrast letter chart") in the README and reserve the clinical pedigree language for the SPEC and the docs/source/clinical-references.md.
+This phrase describes the **clinical literature on the Sloan chart**, not a claim about BaselineMS's app. Read in context (Section 6.3 is the clinical basis subsection of the test description), it is accurate: Sloan is in fact validated in MS literature for that purpose. **No change required to `SPEC.md`.** This sentence must not be lifted verbatim into the README without context, because in user facing copy it would read as a claim that the application tracks optic neuritis recovery and progression. The Documentation Engineer should describe what the test does ("a low contrast letter chart") in the README and reserve the clinical pedigree language for the SPEC and the docs/source/clinical-references.md.
 
 ### Drift 4.7, SPEC.md Section 6.4 line 167, "sensitivity to MS related cognitive change"
 
@@ -292,7 +292,7 @@ This phrase describes the **clinical literature on the Sloan chart**, not a clai
 
 **Why it drifts:**
 
-Same pattern as 4.6: this is a description of the SDMT's clinical pedigree, accurate in context, not a claim that MS Battery detects cognitive change. **No change required to `SPEC.md`.** Same caveat: this language should not be lifted into user facing copy without rephrasing.
+Same pattern as 4.6: this is a description of the SDMT's clinical pedigree, accurate in context, not a claim that BaselineMS detects cognitive change. **No change required to `SPEC.md`.** Same caveat: this language should not be lifted into user facing copy without rephrasing.
 
 ### Drift 4.8, SPEC.md Section 7.1.1 line 211, "highly discriminating in the MS literature"
 
@@ -356,7 +356,7 @@ The PM (agent 00) should consider whether to also dispatch the Compliance Review
 
 The Compliance Reviewer flags the following items where certainty was not reached and judgment is deferred to the user or to Phase 11:
 
-1. **The 2026-01-06 FDA General Wellness reissue.** The FDA's own page returned a 404 to the WebFetch tool during this review session. The two factor test and the chronic disease language quoted in Section 1.1 of this review are taken from the FDA guidance text as historically published and from secondary summaries that quote it verbatim. The 2026 reissue is reported by industry summaries (Faegre Drinker, Kendall PC) to broaden the wellness scope rather than narrow it, which strengthens MS Battery's position rather than weakening it. The Compliance Reviewer recommends a re fetch of the FDA page before the Phase 5 sign off and again before the Phase 11 sign off, in case the reissue contains specific examples or new restrictions that affect MS Battery's positioning. Stale recollection is not an acceptable basis for a Phase 11 sign off.
+1. **The 2026-01-06 FDA General Wellness reissue.** The FDA's own page returned a 404 to the WebFetch tool during this review session. The two factor test and the chronic disease language quoted in Section 1.1 of this review are taken from the FDA guidance text as historically published and from secondary summaries that quote it verbatim. The 2026 reissue is reported by industry summaries (Faegre Drinker, Kendall PC) to broaden the wellness scope rather than narrow it, which strengthens BaselineMS's position rather than weakening it. The Compliance Reviewer recommends a re fetch of the FDA page before the Phase 5 sign off and again before the Phase 11 sign off, in case the reissue contains specific examples or new restrictions that affect BaselineMS's positioning. Stale recollection is not an acceptable basis for a Phase 11 sign off.
 
 2. **EU residency of beta participants.** The Phase 11 beta cohort plan in `SPEC.md` Section 9 does not specify recruitment geography. If the MS support community used for recruitment is global, EU participants are likely. The full GDPR consent obligations in Section 3 item 9 of this review activate as soon as one EU participant joins. The PM should decide ahead of Phase 11 whether to (a) restrict beta recruitment to non EU participants and document that restriction, (b) prepare the GDPR compliant consent text for any participant, or (c) have the Compliance Reviewer flag any specific recruitment channel before it is used.
 
@@ -364,7 +364,7 @@ The Compliance Reviewer flags the following items where certainty was not reache
 
 4. **The PDF export and the user's neurologist.** When the user shares the PDF with a neurologist, the neurologist may be a HIPAA covered entity. The neurologist's receipt of the PDF is not a HIPAA covered transaction (it is a patient providing the patient's own information to the patient's own provider). The application is not in the loop. This is the conventional analysis and the Compliance Reviewer is confident in it. Flagging it here for the record so that future reviewers do not raise it as a new question.
 
-5. **The "Clinical basis" subsection in each Section 6 test description.** These are accurate descriptions of the published clinical literature for each test, not claims about MS Battery. They are appropriate in `SPEC.md` (an internal design document) and would also be appropriate in a "References" or "Test design rationale" section of the README that is clearly framed as referencing the literature, not as making a claim about the application. If the Documentation Engineer wants to include this material in the README, the framing must be: "these tests are designed to mirror the following published clinical instruments," not: "this application detects what the following clinical instruments detect."
+5. **The "Clinical basis" subsection in each Section 6 test description.** These are accurate descriptions of the published clinical literature for each test, not claims about BaselineMS. They are appropriate in `SPEC.md` (an internal design document) and would also be appropriate in a "References" or "Test design rationale" section of the README that is clearly framed as referencing the literature, not as making a claim about the application. If the Documentation Engineer wants to include this material in the README, the framing must be: "these tests are designed to mirror the following published clinical instruments," not: "this application detects what the following clinical instruments detect."
 
 ## 8. Verdict for Phase 0 close
 
@@ -387,7 +387,7 @@ End of Entry 1.
 **Date:** 2026-05-07
 **Reviewer:** Compliance Reviewer (agent 21)
 **Artifact reviewed:**
-- `/home/mustafa/src/MS-Battery/README.md` (current finalized state, post Wave 2 Documentation Engineer pass).
+- `/home/mustafa/src/BaselineMS/README.md` (current finalized state, post Wave 2 Documentation Engineer pass).
 
 **Authoritative sources consulted in this session:**
 - Entry 1 of this document (the prior Phase 0 review, in particular Section 4 wording drift items and Section 8 Phase 0 close verdict).
@@ -399,7 +399,7 @@ The following items from Entry 1 Section 4 were tracked into the finalized READM
 
 | Drift item | Entry 1 verdict | Finalized README state | Verification |
 |------------|-----------------|------------------------|--------------|
-| 4.1 "neurological battery" in user facing copy | NON COMPLIANT for Phase 0 final README | Line 3 reads "self administer a short, sensor backed set of five tests once a week," matching the recommended replacement. The phrase "neurological battery" no longer appears in the README. The project name "MS Neuro Battery" remains in the title (allowed: project name, not a clinical claim). | FIXED |
+| 4.1 "neurological battery" in user facing copy | NON COMPLIANT for Phase 0 final README | Line 3 reads "self administer a short, sensor backed set of five tests once a week," matching the recommended replacement. The phrase "neurological battery" no longer appears in the README. The project name "BaselineMS" remains in the title (allowed: project name, not a clinical claim). | FIXED |
 | 4.2 "validated gait analysis pipeline" | NON COMPLIANT for Phase 0 final README | Line 5 reads "The technical centerpiece is a gait analysis pipeline ... Pipeline accuracy is validated against a measured walking course; methodology and error numbers documented in the project's Validation section." "Validated" appears once, qualified as engineering validation against a measured ground truth, with a signpost to the Validation section. | FIXED |
 | 4.3 "deteriorate silently," "detected late," "monitor disease activity" must not propagate to README | Allowed in SPEC.md, must not appear in README | None of these phrases appear in the README. The Problem section frames the gap in patient experience terms ("a simple, self directed way to keep an objective record ... so that they can bring something concrete to their next neurology appointment") without claiming the application detects what is otherwise missed. | FIXED |
 | 4.5 "Phase 0 ... is the next phase" status line | Inaccurate, not regulatory | Line 21 reads "Phase 0 (bootstrap setup) is complete; Phase 1 (Foundation) is the next phase," matching `STATUS.md`. | FIXED |
@@ -409,14 +409,14 @@ The following items from Entry 1 Section 4 were tracked into the finalized READM
 
 The Compliance Reviewer re read every section of the README looking for any new drift introduced during Wave 2 finalization that was not anticipated in Entry 1.
 
-**Title and header (line 1).** "MS Neuro Battery" is the project name. Acceptable per Entry 1 Section 4.1.
+**Title and header (line 1).** "BaselineMS" is the project name. Acceptable per Entry 1 Section 4.1.
 
 **Lead paragraphs (lines 3 to 5).**
 - "track results longitudinally on device" uses "track" as in tracking the user's own data points over time, parallel to "track your steps" or "track your sleep," not as in "tracking your MS" or "tracking disease activity." Acceptable wellness framing under FDA General Wellness guidance and Google Play Health and Fitness category.
 - "share a clinician facing PDF report" describes the format and intended reader of the export (a PDF that a neurologist can read), not a clinical instrument claim. The PDF is the same artifact that `SPEC.md` Section 8.3 describes; the Compliance Reviewer's veto in Entry 1 Section 5 item 7 applies to PDF *content* (no diagnostic interpretation, no treatment recommendation), not to the framing that the PDF is designed to be readable by a clinician. Acceptable.
 - "Pipeline accuracy is validated against a measured walking course; methodology and error numbers documented in the project's Validation section" is the recommended replacement for the prior "validated gait analysis pipeline" phrasing.
 
-**Problem section (lines 7 to 9).** The Problem section reframes the gap as "people living with MS often want a simple, self directed way to keep an objective record of how their walking, hand dexterity, vision, cognition, and speech are changing, so that they can bring something concrete to their next neurology appointment." This is patient experience framing, not disease detection framing. The closing sentence, "MS Neuro Battery aims to fill that gap as a personal record keeping tool, not as a diagnostic instrument," explicitly disclaims diagnostic status. Acceptable, in fact stronger than the minimum required.
+**Problem section (lines 7 to 9).** The Problem section reframes the gap as "people living with MS often want a simple, self directed way to keep an objective record of how their walking, hand dexterity, vision, cognition, and speech are changing, so that they can bring something concrete to their next neurology appointment." This is patient experience framing, not disease detection framing. The closing sentence, "BaselineMS aims to fill that gap as a personal record keeping tool, not as a diagnostic instrument," explicitly disclaims diagnostic status. Acceptable, in fact stronger than the minimum required.
 
 **Solution section (lines 11 to 13).** "Each test design mirrors a published clinical instrument; the application is not a substitute for any of those instruments and does not produce clinical interpretations." This is the framing pattern endorsed in Entry 1 Section 7 item 5: "these tests are designed to mirror the following published clinical instruments," not "this application detects what those instruments detect." Acceptable.
 
@@ -474,8 +474,8 @@ End of Entry 2.
 **Phase:** Phase 2 (Tap Test); reviewing a Patient Advocate Phase 1 carryover wording proposal that requires Compliance ratification before it ships.
 
 **Artifact reviewed:**
-- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt`, lines 30 to 41 (the disclaimer body Text composable and the acknowledgment Button label).
-- The Patient Advocate's proposed replacement copy from `/home/mustafa/src/MS-Battery/docs/qa/patient-advocate-reviews.md` Issues 5 and 6 in the 2026-05-07 Phase 1 entry. The on disk Patient Advocate text was verified verbatim against the dispatch text; no discrepancy.
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt`, lines 30 to 41 (the disclaimer body Text composable and the acknowledgment Button label).
+- The Patient Advocate's proposed replacement copy from `/home/mustafa/src/BaselineMS/docs/qa/patient-advocate-reviews.md` Issues 5 and 6 in the 2026-05-07 Phase 1 entry. The on disk Patient Advocate text was verified verbatim against the dispatch text; no discrepancy.
 
 **Scope of this review:**
 

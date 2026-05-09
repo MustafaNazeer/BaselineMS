@@ -23,13 +23,13 @@ Provide the rest of the application with clean, typed, reliable, well documented
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/signals/`:
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/signals/`:
   - `ImuSample.kt`, `AudioFrame.kt`, `CameraFrame.kt`: typed sample classes.
   - `ImuSource.kt`: registers `SensorManager` listeners, exposes `Flow<ImuSample>` at the configured sampling rate.
   - `AudioSource.kt`: wraps `AudioRecord`, exposes `Flow<AudioFrame>` at configured PCM format.
   - `CameraSource.kt`: wraps `CameraX`, exposes `Flow<CameraFrame>` for ambient brightness analysis (Phase 6).
   - Permission helpers and runtime permission flow utilities.
-- `/home/mustafa/src/MS-Battery/docs/observability/sensor-runbook.md`: documents per device sensor characteristics observed (sample rate stability, gotchas).
+- `/home/mustafa/src/BaselineMS/docs/observability/sensor-runbook.md`: documents per device sensor characteristics observed (sample rate stability, gotchas).
 - ADRs in `docs/adr/` for non obvious sensor choices (e.g., `Sensor.TYPE_LINEAR_ACCELERATION` vs `Sensor.TYPE_ACCELEROMETER` plus manual gravity removal; `SENSOR_DELAY_GAME` vs custom interval).
 - Robolectric and instrumented tests for sensor source classes where the sensor framework can be mocked.
 

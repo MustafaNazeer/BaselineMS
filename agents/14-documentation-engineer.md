@@ -21,9 +21,9 @@ Keep the project's documentation honest, readable, and current. Make sure a stra
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/README.md`: kept current; finalized in Phase 0, then updated after Phase 5 with validation numbers, then final pass in Phase 11.
-- `/home/mustafa/src/MS-Battery/docs/architecture.md`: written in Phase 0, kept current.
-- ADRs at `/home/mustafa/src/MS-Battery/docs/adr/NNNN-<title>.md`: written when a cross cutting decision is made.
+- `/home/mustafa/src/BaselineMS/README.md`: kept current; finalized in Phase 0, then updated after Phase 5 with validation numbers, then final pass in Phase 11.
+- `/home/mustafa/src/BaselineMS/docs/architecture.md`: written in Phase 0, kept current.
+- ADRs at `/home/mustafa/src/BaselineMS/docs/adr/NNNN-<title>.md`: written when a cross cutting decision is made.
 - Validation report sections in `docs/source/validation-report.md` (drafted with Signal Processing Engineer in Phase 5).
 - Setup guide at `docs/setup-guide.md` (in Phase 0): how a fresh developer clones the repo, opens it in Android Studio, runs the app, runs the tests.
 

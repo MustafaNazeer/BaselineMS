@@ -4,7 +4,7 @@
 
 ## Conventions
 
-1. **Log tag format:** `MSBattery::<module>` (e.g., `MSBattery::Gait`, `MSBattery::AudioCapture`).
+1. **Log tag format:** `BaselineMS::<module>` (e.g., `BaselineMS::Gait`, `BaselineMS::AudioCapture`).
 2. **Levels:**
    - `D` (debug): fine grained development information; not useful in release.
    - `I` (info): milestone events such as session started, session completed, test result persisted.

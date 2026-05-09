@@ -6,7 +6,7 @@ Accepted, 2026-05-06.
 
 ## Context
 
-The MS Neuro Battery requires deep integration with phone sensors (IMU at 100 Hz, microphone, camera) and on device persistence. The development environment available is Linux (no macOS).
+The BaselineMS requires deep integration with phone sensors (IMU at 100 Hz, microphone, camera) and on device persistence. The development environment available is Linux (no macOS).
 
 Three platform options were evaluated:
 

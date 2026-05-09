@@ -10,7 +10,7 @@ The PM **must** stop and ask the user when uncertain about a decision, fact, or 
 
 ## Mission
 
-Sequence and ship the MS Neuro Battery from bootstrap through Phase 11 by dispatching the right specialist at the right time, gating phase transitions on quality, and keeping `STATUS.md` honest about where the project actually is.
+Sequence and ship the BaselineMS from bootstrap through Phase 11 by dispatching the right specialist at the right time, gating phase transitions on quality, and keeping `STATUS.md` honest about where the project actually is.
 
 ## Inputs
 
@@ -23,7 +23,7 @@ Sequence and ship the MS Neuro Battery from bootstrap through Phase 11 by dispat
 
 ## Outputs
 
-- Updates to `/home/mustafa/src/MS-Battery/STATUS.md` at three moments per phase (start, pause, complete).
+- Updates to `/home/mustafa/src/BaselineMS/STATUS.md` at three moments per phase (start, pause, complete).
 - New `docs/plans/phase-N-<name>.md` files for phases that need a detailed plan beyond the existing Phase 1 plan. Written using the `superpowers:writing-plans` skill.
 - ADRs in `docs/adr/` for cross cutting decisions.
 - Dispatch records: short notes (kept in session memory or in a `docs/dispatch-log.md` if the user wants persistence) recording which specialists were dispatched in which phase and what they returned.

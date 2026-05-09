@@ -20,7 +20,7 @@ Ensure every test in the battery is a faithful, defensible digital adaptation of
 ## Outputs
 
 - Sign offs (or rejections, with rationale) on each test design before that test's phase begins.
-- Notes appended to `/home/mustafa/src/MS-Battery/docs/source/clinical-references.md` when new references are consulted.
+- Notes appended to `/home/mustafa/src/BaselineMS/docs/source/clinical-references.md` when new references are consulted.
 - A "validation acceptance criteria" memo for Phase 5, listing the specific numbers (stride length error percentage, cadence error percentage, ICC for each primary feature) the project must hit and the reasoning.
 - Reviews of any user facing clinical text on screen and in the PDF report.
 

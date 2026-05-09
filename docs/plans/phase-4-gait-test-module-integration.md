@@ -1,4 +1,4 @@
-# MS Neuro Battery Phase 4: Gait Test Module Integration Implementation Plan
+# BaselineMS Phase 4: Gait Test Module Integration Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Phase 4 wires the Phase 3 DSP module to real Android sensors and exposes a `GaitTest` Compose flow; TDD discipline applies to every signals layer module and to every screen unit test, but the real-device sample rate sign-off is a user-driven task that defers to Phase 4 close.
 
@@ -8,16 +8,16 @@
 
 **Tech Stack:** Kotlin 1.9 (already on the project), Jetpack Compose Material 3, `androidx.lifecycle.viewmodel.compose`, Room with KSP (already wired), kotlinx-coroutines (already wired). New runtime dependencies: nothing. New test dependencies: nothing beyond Robolectric (already wired). Android sensor APIs used: `Sensor.TYPE_LINEAR_ACCELERATION`, `Sensor.TYPE_GYROSCOPE`, `Sensor.TYPE_ROTATION_VECTOR`, registered via `SensorManager.registerListener` with a custom 100 Hz sampling period in microseconds.
 
-**Related spec:** `~/src/MS-Battery/SPEC.md` Section 6.2 (gait test summary), Section 7 (gait module deep dive), Section 5 (architecture and signals layer responsibilities), Section 10 (privacy: no `INTERNET` permission, raw sensor trace stored only locally).
+**Related spec:** `~/src/BaselineMS/SPEC.md` Section 6.2 (gait test summary), Section 7 (gait module deep dive), Section 5 (architecture and signals layer responsibilities), Section 10 (privacy: no `INTERNET` permission, raw sensor trace stored only locally).
 
 **Related agent briefs:**
-- `~/src/MS-Battery/agents/18-sensor-integration-engineer.md` (lead on `signals/` layer).
-- `~/src/MS-Battery/agents/03-android-engineer.md` (lead on `GaitTest` Compose flow and orchestrator wiring).
-- `~/src/MS-Battery/agents/02-signal-processing-engineer.md` (Phase 4 reviewer; verifies sensor stream contract is unmolested).
-- `~/src/MS-Battery/agents/19-patient-advocate.md` (reviews gait test from the MS patient perspective; safety language, instructions clarity, contextual skip).
-- `~/src/MS-Battery/agents/11-performance-engineer.md` (Phase 4 reviewer; allocation discipline plus the deferred multi-device sign-off coordination).
-- `~/src/MS-Battery/agents/10-code-reviewer.md` (PR review at phase close).
-- `~/src/MS-Battery/agents/09-qa-engineer.md` (regression checklist and phase sign off).
+- `~/src/BaselineMS/agents/18-sensor-integration-engineer.md` (lead on `signals/` layer).
+- `~/src/BaselineMS/agents/03-android-engineer.md` (lead on `GaitTest` Compose flow and orchestrator wiring).
+- `~/src/BaselineMS/agents/02-signal-processing-engineer.md` (Phase 4 reviewer; verifies sensor stream contract is unmolested).
+- `~/src/BaselineMS/agents/19-patient-advocate.md` (reviews gait test from the MS patient perspective; safety language, instructions clarity, contextual skip).
+- `~/src/BaselineMS/agents/11-performance-engineer.md` (Phase 4 reviewer; allocation discipline plus the deferred multi-device sign-off coordination).
+- `~/src/BaselineMS/agents/10-code-reviewer.md` (PR review at phase close).
+- `~/src/BaselineMS/agents/09-qa-engineer.md` (regression checklist and phase sign off).
 
 **Platform note:** Local builds run with `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest`. The CI workflow uses Temurin JDK 17. No Phase 4 task requires a real device for compile or unit-test verification; the only deliverable that requires a real device is the multi-device sample rate sign-off, which is deferred to a user-driven validation task at Phase 4 close.
 
@@ -28,7 +28,7 @@
 Files this plan creates or modifies:
 
 ```
-~/src/MS-Battery/
+~/src/BaselineMS/
 ├── SPEC.md                                              (no change)
 ├── STATUS.md                                            (PM updates: Phase 4 in progress -> completed)
 ├── docs/
@@ -47,7 +47,7 @@ Files this plan creates or modifies:
 └── app/src/
     ├── main/
     │   ├── AndroidManifest.xml                          (no permission additions; verified by Code Reviewer)
-    │   └── java/com/mustafan4x/msbattery/
+    │   └── java/com/mustafan4x/baselinems/
     │       ├── battery/
     │       │   ├── TestModule.kt                        (MODIFY: add optional rawSensorRelativePath to TestResultPayload)
     │       │   ├── BatteryOrchestrator.kt               (MODIFY: persist rawSensorRelativePath when payload provides it)
@@ -63,8 +63,8 @@ Files this plan creates or modifies:
     │       │   ├── ImuSource.kt                         (interface; allows mocking in tests)
     │       │   ├── AndroidImuSource.kt                  (SensorManager-backed implementation)
     │       │   └── RawSensorWriter.kt                   (gzipped CSV writer)
-    │       └── MSBatteryApp.kt                          (MODIFY: register GaitTest in TestModule list)
-    └── test/java/com/mustafan4x/msbattery/
+    │       └── BaselineMSApp.kt                          (MODIFY: register GaitTest in TestModule list)
+    └── test/java/com/mustafan4x/baselinems/
         ├── battery/
         │   └── TestModuleTest.kt                        (NEW: TestResultPayload backward compat)
         ├── battery/gait/
@@ -82,7 +82,7 @@ Phase 3's `dsp/` package is consumed unchanged by Phase 4; the `signals/` packag
 ## Coordination notes for the dispatching PM
 
 - **Sensor Integration Engineer (SIE) owns Tasks 2 to 5.** They land the `signals/` package, the ADR, the runbook, and the rawSensorWriter. SIE does not write Compose UI.
-- **Android Engineer (AE) owns Tasks 1, 6, 7, 8.** They land the `TestResultPayload` extension, the `GaitTest` Compose flow, the orchestrator wiring, and the registration in `MSBatteryApp`. AE does not write `signals/` code.
+- **Android Engineer (AE) owns Tasks 1, 6, 7, 8.** They land the `TestResultPayload` extension, the `GaitTest` Compose flow, the orchestrator wiring, and the registration in `BaselineMSApp`. AE does not write `signals/` code.
 - **Reviewers run after AE Task 8 lands:** SPE Task 9 (sensor stream contract), Patient Advocate Task 10 (gait test patient perspective), Performance Engineer Task 11 (allocation discipline within Phase 4 scope).
 - **Code Reviewer Task 12 runs after the three reviewers; QA Engineer Task 13 runs last.** Phase close follows Task 13.
 - **Real-device sample rate sign-off** is the SIE's Phase 4 deliverable per `agents/18-sensor-integration-engineer.md` Phase 4 Task 3, but headless agents cannot drive an AVD or measure a real device. The plan delivers the code that is needed for the measurement (a debug-only sample rate counter exposed in the runbook) and defers the multi-device measurement to a user-driven validation task at phase close. This mirrors the Phase 1 / Phase 2 deferred emulator walkthrough convention.
@@ -113,17 +113,17 @@ These follow from `SPEC.md` Section 7 plus existing project conventions; they ar
 
 - [ ] **Step 1: PM verifies STATUS.md row 4 is in progress**
 
-Run: `grep "^| 4 " /home/mustafa/src/MS-Battery/STATUS.md`
+Run: `grep "^| 4 " /home/mustafa/src/BaselineMS/STATUS.md`
 Expected: row contains `| in progress |`.
 
 - [ ] **Step 2: PM verifies clean tree**
 
-Run: `cd ~/src/MS-Battery && git status --short`
+Run: `cd ~/src/BaselineMS && git status --short`
 Expected: empty (all Phase 3 close commits landed).
 
 - [ ] **Step 3: PM verifies test suite is green at Phase 3 baseline**
 
-Run: `cd ~/src/MS-Battery && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest`
+Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest`
 Expected: BUILD SUCCESSFUL, 83 tests, 0 failures.
 
 If any check fails, the PM addresses the gap before dispatching the AE.
@@ -135,16 +135,16 @@ If any check fails, the PM addresses the gap before dispatching the AE.
 **Owner:** Android Engineer.
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/battery/TestModule.kt` (add the new property to the interface).
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/battery/BatteryOrchestrator.kt` (extend `recordResult` signature or read the property directly).
-- Create: `app/src/test/java/com/mustafan4x/msbattery/battery/TestModuleTest.kt` (verify the default value is null and that BilateralTapTest's payload has the default).
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/battery/TestModule.kt` (add the new property to the interface).
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/battery/BatteryOrchestrator.kt` (extend `recordResult` signature or read the property directly).
+- Create: `app/src/test/java/com/mustafan4x/baselinems/battery/TestModuleTest.kt` (verify the default value is null and that BilateralTapTest's payload has the default).
 
 - [ ] **Step 1: Write the failing test (TDD)**
 
 ```kotlin
-package com.mustafan4x.msbattery.battery
+package com.mustafan4x.baselinems.battery
 
-import com.mustafan4x.msbattery.data.TestType
+import com.mustafan4x.baselinems.data.TestType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -198,20 +198,20 @@ Update the persisted `TestResultEntity` insert to set `rawSensorRelativePath = p
 
 - [ ] **Step 5: Run the test to verify it passes**
 
-Run: `cd ~/src/MS-Battery && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.TestModuleTest"`
+Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.TestModuleTest"`
 Expected: 2 tests, 0 failures.
 
 - [ ] **Step 6: Run the full test suite to confirm BilateralTapTest still passes**
 
-Run: `cd ~/src/MS-Battery && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest`
+Run: `cd ~/src/BaselineMS && JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest`
 Expected: 85 tests (83 prior + 2 new), 0 failures. If `BilateralTapTest` regressed, the AE rolled the call site change incorrectly; fix before commit.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/battery/TestModule.kt \
-        app/src/main/java/com/mustafan4x/msbattery/battery/BatteryOrchestrator.kt \
-        app/src/test/java/com/mustafan4x/msbattery/battery/TestModuleTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/battery/TestModule.kt \
+        app/src/main/java/com/mustafan4x/baselinems/battery/BatteryOrchestrator.kt \
+        app/src/test/java/com/mustafan4x/baselinems/battery/TestModuleTest.kt
 git commit -m "battery: extend TestResultPayload with optional rawSensorRelativePath"
 ```
 
@@ -224,9 +224,9 @@ If the AE chose option (a) above, also include the BilateralTapTest call site up
 **Owner:** Sensor Integration Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/signals/ImuSource.kt` (interface).
-- Create: `app/src/main/java/com/mustafan4x/msbattery/signals/AndroidImuSource.kt` (SensorManager-backed implementation).
-- Create: `app/src/test/java/com/mustafan4x/msbattery/signals/AndroidImuSourceTest.kt` (Robolectric tests with mock SensorManager).
+- Create: `app/src/main/java/com/mustafan4x/baselinems/signals/ImuSource.kt` (interface).
+- Create: `app/src/main/java/com/mustafan4x/baselinems/signals/AndroidImuSource.kt` (SensorManager-backed implementation).
+- Create: `app/src/test/java/com/mustafan4x/baselinems/signals/AndroidImuSourceTest.kt` (Robolectric tests with mock SensorManager).
 
 **Spec:** The `ImuSource` interface exposes `fun stream(): Flow<ImuSample>` plus `fun start()` and `fun stop()` lifecycle methods. The Android implementation registers a `SensorEventListener` for `Sensor.TYPE_LINEAR_ACCELERATION`, `Sensor.TYPE_GYROSCOPE`, and `Sensor.TYPE_ROTATION_VECTOR` at `samplingPeriodUs = 10_000` (100 Hz target). The implementation maintains the most-recent sample for each sensor type and emits an `ImuSample` whenever the linear-acceleration sensor fires (which is the primary clock for the gait pipeline). Gyro and rotation samples are interpolated to the linear acceleration timestamp by zero-order hold (use the most recent reading); this is the standard pattern for fused-sensor consumption when the Android sensor framework does not synchronize triggers across types.
 
@@ -235,9 +235,9 @@ If `Sensor.TYPE_ROTATION_VECTOR` is not available on the device (the SIE checks 
 - [ ] **Step 1: Write `ImuSource.kt`**
 
 ```kotlin
-package com.mustafan4x.msbattery.signals
+package com.mustafan4x.baselinems.signals
 
-import com.mustafan4x.msbattery.dsp.ImuSample
+import com.mustafan4x.baselinems.dsp.ImuSample
 import kotlinx.coroutines.flow.Flow
 
 interface ImuSource {
@@ -258,12 +258,12 @@ The Robolectric pattern uses a `ShadowSensorManager` to inject synthetic sensor 
 Test code template (the SIE expands the bodies):
 
 ```kotlin
-package com.mustafan4x.msbattery.signals
+package com.mustafan4x.baselinems.signals
 
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import androidx.test.core.app.ApplicationProvider
-import com.mustafan4x.msbattery.dsp.ImuSample
+import com.mustafan4x.baselinems.dsp.ImuSample
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -309,17 +309,17 @@ The TODOs are placeholders the SIE fills in. The plan deliberately does not pre-
 The implementation skeleton:
 
 ```kotlin
-package com.mustafan4x.msbattery.signals
+package com.mustafan4x.baselinems.signals
 
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import com.mustafan4x.msbattery.dsp.ImuSample
-import com.mustafan4x.msbattery.dsp.Madgwick
-import com.mustafan4x.msbattery.dsp.Quaternion
-import com.mustafan4x.msbattery.dsp.Vector3
+import com.mustafan4x.baselinems.dsp.ImuSample
+import com.mustafan4x.baselinems.dsp.Madgwick
+import com.mustafan4x.baselinems.dsp.Quaternion
+import com.mustafan4x.baselinems.dsp.Vector3
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -417,9 +417,9 @@ The skeleton has two TODOs the SIE fills in: the `lastLinearTimestampNanos`-deri
 - [ ] **Step 6: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/signals/ImuSource.kt \
-        app/src/main/java/com/mustafan4x/msbattery/signals/AndroidImuSource.kt \
-        app/src/test/java/com/mustafan4x/msbattery/signals/AndroidImuSourceTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/signals/ImuSource.kt \
+        app/src/main/java/com/mustafan4x/baselinems/signals/AndroidImuSource.kt \
+        app/src/test/java/com/mustafan4x/baselinems/signals/AndroidImuSourceTest.kt
 git commit -m "signals: AndroidImuSource for SensorManager-backed Flow<ImuSample> at 100 Hz"
 ```
 
@@ -491,8 +491,8 @@ git commit -m "docs(observability): sensor runbook with per device entry templat
 **Owner:** Sensor Integration Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/signals/RawSensorWriter.kt`.
-- Create: `app/src/test/java/com/mustafan4x/msbattery/signals/RawSensorWriterTest.kt`.
+- Create: `app/src/main/java/com/mustafan4x/baselinems/signals/RawSensorWriter.kt`.
+- Create: `app/src/test/java/com/mustafan4x/baselinems/signals/RawSensorWriterTest.kt`.
 
 **Spec:** A small writer that takes a `Flow<ImuSample>` plus a target `File` and writes a gzipped CSV of the captured samples. Format from the architectural rails: header line plus one row per sample, all 14 columns. The writer is constructed with the target file and exposes `suspend fun write(samples: Flow<ImuSample>): Long` returning the number of samples written. `GZIPOutputStream` wraps a `BufferedOutputStream` wraps a `FileOutputStream`. The writer flushes and closes on completion; if the flow throws, the writer closes the file and rethrows.
 
@@ -503,8 +503,8 @@ Tests:
 - [ ] **Steps 1 to 5:** TDD.
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/signals/RawSensorWriter.kt \
-        app/src/test/java/com/mustafan4x/msbattery/signals/RawSensorWriterTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/signals/RawSensorWriter.kt \
+        app/src/test/java/com/mustafan4x/baselinems/signals/RawSensorWriterTest.kt
 git commit -m "signals: RawSensorWriter gzipped CSV persistence with round trip tests"
 ```
 
@@ -515,12 +515,12 @@ git commit -m "signals: RawSensorWriter gzipped CSV persistence with round trip 
 **Owner:** Android Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTestState.kt` (sealed-class state machine: `Instructions`, `Countdown(secondsRemaining: Int)`, `Capturing(progressMillis: Int)`, `Done(features: GaitFeatures)`, `Cancelled`).
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitInstructionsScreen.kt`.
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitCountdownScreen.kt`.
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitCaptureScreen.kt`.
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitDoneScreen.kt`.
-- Create: `app/src/test/java/com/mustafan4x/msbattery/battery/gait/GaitTestRenderTest.kt` (Compose smoke tests; one per screen, asserting the screen renders without crashing and exposing semantic nodes for the primary CTA).
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTestState.kt` (sealed-class state machine: `Instructions`, `Countdown(secondsRemaining: Int)`, `Capturing(progressMillis: Int)`, `Done(features: GaitFeatures)`, `Cancelled`).
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitInstructionsScreen.kt`.
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitCountdownScreen.kt`.
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitCaptureScreen.kt`.
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitDoneScreen.kt`.
+- Create: `app/src/test/java/com/mustafan4x/baselinems/battery/gait/GaitTestRenderTest.kt` (Compose smoke tests; one per screen, asserting the screen renders without crashing and exposing semantic nodes for the primary CTA).
 
 **Spec:** Each screen is a stateless `@Composable` that takes the relevant state and a callback (e.g., `onStart: () -> Unit` for the instructions screen, `onCancel` for the capture screen). The screens follow the Material 3 baseline already established by the BilateralTapTest's screens; tap targets are at least 48 dp; primary CTAs use `FilledButton`.
 
@@ -538,12 +538,12 @@ The state machine and the screens compose via a `GaitTest` `TestModule` (Task 7)
 - [ ] **Step 6: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTestState.kt \
-        app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitInstructionsScreen.kt \
-        app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitCountdownScreen.kt \
-        app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitCaptureScreen.kt \
-        app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitDoneScreen.kt \
-        app/src/test/java/com/mustafan4x/msbattery/battery/gait/GaitTestRenderTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTestState.kt \
+        app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitInstructionsScreen.kt \
+        app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitCountdownScreen.kt \
+        app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitCaptureScreen.kt \
+        app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitDoneScreen.kt \
+        app/src/test/java/com/mustafan4x/baselinems/battery/gait/GaitTestRenderTest.kt
 git commit -m "battery(gait): instructions, countdown, capture, done screens with smoke tests"
 ```
 
@@ -554,13 +554,13 @@ git commit -m "battery(gait): instructions, countdown, capture, done screens wit
 **Owner:** Android Engineer.
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTestViewModel.kt`.
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTest.kt` (the `TestModule` implementation).
-- Create: `app/src/test/java/com/mustafan4x/msbattery/battery/gait/GaitTestViewModelTest.kt`.
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTestViewModel.kt`.
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTest.kt` (the `TestModule` implementation).
+- Create: `app/src/test/java/com/mustafan4x/baselinems/battery/gait/GaitTestViewModelTest.kt`.
 
 **Spec:** The `GaitTestViewModel` is constructed with an `ImuSource`, a `GaitPipeline`, a `RawSensorWriter`, and the destination `File`. It exposes a `StateFlow<GaitTestState>`, an `onStart()`, an `onCancel()`, and an `onContinue()` callback that hands a `TestResultPayload` (with `rawSensorRelativePath` populated) back via a callback parameter. The view model owns the state machine: Instructions -> Countdown (3 s) -> Capturing (30 s, with `progressMillis` ticking) -> Done. During Capturing, the `ImuSource` is started, the samples are tee'd to both the `RawSensorWriter` and an in-memory list, and at 30 s the in-memory list is fed into `GaitPipeline.process` to compute `GaitFeatures`. The Done state holds the features; on `onContinue` the view model produces a `TestResultPayload` and invokes the callback.
 
-The `GaitTest` class implements `TestModule`. Its `Content(onComplete)` function builds a `GaitTestViewModel` (via `viewModel()` if available, or a hand-instantiated DI per `MSBatteryApp`'s pattern), observes its state, and renders the appropriate screen for that state. On Done -> Continue, it calls `onComplete(payload)`.
+The `GaitTest` class implements `TestModule`. Its `Content(onComplete)` function builds a `GaitTestViewModel` (via `viewModel()` if available, or a hand-instantiated DI per `BaselineMSApp`'s pattern), observes its state, and renders the appropriate screen for that state. On Done -> Continue, it calls `onComplete(payload)`.
 
 Tests cover:
 1. `onStart()` transitions from Instructions to Countdown(3).
@@ -577,32 +577,32 @@ Use `kotlinx-coroutines-test`'s `TestScope` and `runTest` plus a `TestDispatcher
 - [ ] **Step 6: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTestViewModel.kt \
-        app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTest.kt \
-        app/src/test/java/com/mustafan4x/msbattery/battery/gait/GaitTestViewModelTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTestViewModel.kt \
+        app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTest.kt \
+        app/src/test/java/com/mustafan4x/baselinems/battery/gait/GaitTestViewModelTest.kt
 git commit -m "battery(gait): viewmodel state machine and TestModule integration"
 ```
 
 ---
 
-## Task 8: Wire `GaitTest` into `MSBatteryApp`'s `TestModule` list
+## Task 8: Wire `GaitTest` into `BaselineMSApp`'s `TestModule` list
 
 **Owner:** Android Engineer.
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/MSBatteryApp.kt` (add `GaitTest` to the modules list, instantiating with the application's `Context.filesDir`-based output directory and the singleton `AndroidImuSource`).
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/BaselineMSApp.kt` (add `GaitTest` to the modules list, instantiating with the application's `Context.filesDir`-based output directory and the singleton `AndroidImuSource`).
 
-**Spec:** `MSBatteryApp` already constructs the `BatteryOrchestrator` with a `List<TestModule>`. After Phase 4, this list contains `BilateralTapTest` and `GaitTest`. The order is BilateralTapTest first, GaitTest second; the user can iterate the order in Phase 11 polish.
+**Spec:** `BaselineMSApp` already constructs the `BatteryOrchestrator` with a `List<TestModule>`. After Phase 4, this list contains `BilateralTapTest` and `GaitTest`. The order is BilateralTapTest first, GaitTest second; the user can iterate the order in Phase 11 polish.
 
-Tests: existing `BatteryFlowIntegrationTest` continues to pass (it uses a mock module list, so adding GaitTest does not affect it). A new lightweight test asserts `MSBatteryApp` constructs the GaitTest module without crashing in a Robolectric environment.
+Tests: existing `BatteryFlowIntegrationTest` continues to pass (it uses a mock module list, so adding GaitTest does not affect it). A new lightweight test asserts `BaselineMSApp` constructs the GaitTest module without crashing in a Robolectric environment.
 
 - [ ] **Steps 1 to 4:** TDD.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/MSBatteryApp.kt
-git commit -m "battery(gait): register GaitTest in MSBatteryApp module list"
+git add app/src/main/java/com/mustafan4x/baselinems/BaselineMSApp.kt
+git commit -m "battery(gait): register GaitTest in BaselineMSApp module list"
 ```
 
 ---

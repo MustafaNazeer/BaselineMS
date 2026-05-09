@@ -2,7 +2,7 @@
 
 Owner: Test Fixture Engineer (`agents/20-test-fixture-engineer.md`).
 Phase introduced: Phase 3.
-Source code: `app/src/test/java/com/mustafan4x/msbattery/fixtures/`.
+Source code: `app/src/test/java/com/mustafan4x/baselinems/fixtures/`.
 
 ## 1. Purpose and scope
 
@@ -18,7 +18,7 @@ The scope of this document is the gait fixtures only. The audio fixture library 
 
 ## 2. Generator API summary
 
-The parameterized generator is `SyntheticImu` in package `com.mustafan4x.msbattery.fixtures`. It is a value class whose constructor accepts the gait parameters listed below, and whose `generate()` method returns a `Sequence<ImuSample>` representing the deterministic IMU trace that those parameters produce.
+The parameterized generator is `SyntheticImu` in package `com.mustafan4x.baselinems.fixtures`. It is a value class whose constructor accepts the gait parameters listed below, and whose `generate()` method returns a `Sequence<ImuSample>` representing the deterministic IMU trace that those parameters produce.
 
 | Parameter | Type | Units | Meaning |
 |---|---|---|---|
@@ -256,7 +256,7 @@ When a future phase needs a fixture configuration not covered above, the Test Fi
 3. Derive the ground truth values by hand or by formula from the parameters, in the same form as the entries above. The ground truth must be reproducible by inspection; it must not be observed by running the generator and reading the output.
 4. Add the new function to `PreCannedFixtures.kt` using the same call shape as the existing fixtures. Choose a seed that does not collide with any existing fixture's default seed (1L through 7L are taken).
 5. Add a corresponding entry to this document under section 3, including parameters, ground truth, realism rationale, and caveats.
-6. Run `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.fixtures.*"` to confirm the existing test suite still passes.
+6. Run `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.fixtures.*"` to confirm the existing test suite still passes.
 7. If the new fixture exercises a part of the parameter space the existing `SyntheticImuTest.kt` does not cover (for example, a noise level much higher than 0.5, or a duration not equal to 30 seconds), add a round trip test in `SyntheticImuTest.kt` that verifies the parameter set produces the expected ground truth. Do not assert the round trip by reading the output of the generator; assert it against the closed form ground truth derived in step 3.
 8. Commit the new fixture and the documentation update in a single commit named `fixtures(gait): add <fixture-name>`.
 

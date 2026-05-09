@@ -18,13 +18,13 @@ Define and ship a clean, append only Room data layer that holds longitudinal ses
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/data/` containing:
+- `/home/mustafa/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/data/` containing:
   - `Enums.kt` (TestType, Sex, Hand, MSType).
   - `Converters.kt` (Room TypeConverters for the enums and any other non primitive types).
   - `UserProfileEntity.kt`, `SessionEntity.kt`, `TestResultEntity.kt`.
   - `UserProfileDao.kt`, `SessionDao.kt`, `TestResultDao.kt`.
   - `AppDatabase.kt` (`@Database` with all entities and `@TypeConverters`).
-- Feature JSON contract documented at `/home/mustafa/src/MS-Battery/docs/data/schema.md`: per test, the canonical key names, types, and units. Reporting and PDF export consume this contract.
+- Feature JSON contract documented at `/home/mustafa/src/BaselineMS/docs/data/schema.md`: per test, the canonical key names, types, and units. Reporting and PDF export consume this contract.
 - Room migrations once the schema starts evolving (in coordination with the DBA).
 
 ## Tasks

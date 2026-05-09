@@ -1,4 +1,4 @@
-# MS Neuro Battery
+# BaselineMS
 
 A native Android application that lets people living with Multiple Sclerosis self administer a short, sensor backed set of five tests once a week, track results longitudinally on device, and share a clinician facing PDF report.
 
@@ -6,7 +6,7 @@ The technical centerpiece is a gait analysis pipeline that turns 30 seconds of p
 
 ## Problem
 
-MS clinic visits typically happen every three to six months. Between visits, people living with MS often want a simple, self directed way to keep an objective record of how their walking, hand dexterity, vision, cognition, and speech are changing, so that they can bring something concrete to their next neurology appointment. Existing research apps in this space are study only and not available as a self administered self tracking application for the broader community. MS Neuro Battery aims to fill that gap as a personal record keeping tool, not as a diagnostic instrument. The full problem statement is in `SPEC.md` Section 2.
+MS clinic visits typically happen every three to six months. Between visits, people living with MS often want a simple, self directed way to keep an objective record of how their walking, hand dexterity, vision, cognition, and speech are changing, so that they can bring something concrete to their next neurology appointment. Existing research apps in this space are study only and not available as a self administered self tracking application for the broader community. BaselineMS aims to fill that gap as a personal record keeping tool, not as a diagnostic instrument. The full problem statement is in `SPEC.md` Section 2.
 
 ## Solution
 
@@ -32,13 +32,13 @@ The application is a native Android codebase in Kotlin and Jetpack Compose, orga
 
 ### Running
 
-Open `~/src/MS-Battery` in Android Studio Iguana or later, select an Android 12 or later emulator (or attach a physical device with USB debugging enabled), and press Run.
+Open `~/src/BaselineMS` in Android Studio Iguana or later, select an Android 12 or later emulator (or attach a physical device with USB debugging enabled), and press Run.
 
 From the command line:
 
 ```
 ./gradlew :app:installDebug
-adb shell am start -n com.mustafan4x.msbattery/.MainActivity
+adb shell am start -n com.mustafan4x.baselinems/.MainActivity
 ```
 
 ### Testing
@@ -72,4 +72,4 @@ Full citations and the specific findings the project relies on are in `docs/sour
 
 ## Repository
 
-https://github.com/Mustafan4x/MS-Battery
+https://github.com/Mustafan4x/BaselineMS

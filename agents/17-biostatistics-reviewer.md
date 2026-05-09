@@ -24,7 +24,7 @@ Ensure every statistic computed and reported in the project is the correct metho
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/docs/qa/statistical-methods.md`: a document specifying, for each metric reported in the project, the method used, the reason for that method, the assumption checks that justify it, and the formula. This is the single source of truth for "how do we compute the numbers."
+- `/home/mustafa/src/BaselineMS/docs/qa/statistical-methods.md`: a document specifying, for each metric reported in the project, the method used, the reason for that method, the assumption checks that justify it, and the formula. This is the single source of truth for "how do we compute the numbers."
 - Statistical review reports posted back to the PM at every phase that produces quantitative claims. Each report lists:
   - Method used.
   - Whether it is correct for the question.

@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.mustafan4x.msbattery"
+    namespace = "com.mustafan4x.baselinems"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.mustafan4x.msbattery"
+        applicationId = "com.mustafan4x.baselinems"
         minSdk = 31
         targetSdk = 34
         versionCode = 1

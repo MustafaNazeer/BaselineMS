@@ -23,7 +23,7 @@ Ensure every screen in the application meets WCAG 2.1 AA for color contrast, sup
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/docs/a11y/checklist.md`: the WCAG criteria the application is held to, plus a screen by screen audit log.
+- `/home/mustafa/src/BaselineMS/docs/a11y/checklist.md`: the WCAG criteria the application is held to, plus a screen by screen audit log.
 - Accessibility review reports posted back to the PM at every phase that introduces a screen.
 - Recommendations for `contentDescription` on every interactive element, semantic groupings via Compose `semantics {}` modifiers, and focus order.
 

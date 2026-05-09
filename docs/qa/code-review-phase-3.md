@@ -44,7 +44,7 @@ plus the 6 fixture round trip tests plus the 4 GaitPipeline integration tests).
 
 ### MINOR M1: Unverified paper content claim repeats in `GaitPipeline.kt` outside the Citation Auditor's audit scope
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/dsp/GaitPipeline.kt`
+**File:** `app/src/main/java/com/mustafan4x/baselinems/dsp/GaitPipeline.kt`
 **Line:** 214 (KDoc on `orientationQualitySignals`).
 
 The Citation Auditor's Phase 3 verdict P3.2 (`docs/source/citation-audit-log.md` line 431
@@ -81,7 +81,7 @@ to fully resolve the CA's P3.2 PARTIAL finding while the file is being touched.
 
 ### MINOR M2: `Quaternion` API has no `inverse()` method but the `ImuSample.kt` KDoc references one
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/dsp/ImuSample.kt`
+**File:** `app/src/main/java/com/mustafan4x/baselinems/dsp/ImuSample.kt`
 **Lines:** 13 to 14.
 
 The KDoc states "`rotationVector.inverse().rotate(worldVec)` produces the device frame
@@ -112,7 +112,7 @@ term fix.
 
 ### MINOR M3: `rotateToWorld` falls back to identity when `rotationVector` is null instead of using the from scratch Madgwick
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/dsp/GaitPipeline.kt`
+**File:** `app/src/main/java/com/mustafan4x/baselinems/dsp/GaitPipeline.kt`
 **Lines:** 95 to 109 (`rotateToWorld`).
 
 `SPEC.md` Section 7.1 step 1 states the rotation vector "may be null on devices that do
@@ -149,7 +149,7 @@ PM can include it in the Phase 4 dispatch brief.
 
 ### MINOR M4: `medianStepInterval` is recomputed once per step inside the lateral at step loop
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/dsp/GaitPipeline.kt`
+**File:** `app/src/main/java/com/mustafan4x/baselinems/dsp/GaitPipeline.kt`
 **Lines:** 75 to 77 (the `DoubleArray(steps.size) { i -> lateralAtStepIndex(...) }`
 initializer) and 120 to 138 (`lateralAtStepIndex` which calls `medianStepInterval(steps)`
 per invocation).
@@ -175,7 +175,7 @@ that the SPE can pick up before Phase 4 dispatch.
 
 ### LOW L1: Three pre canned fixtures (`slowWalk`, `briskWalk`, `severeAsymmetry`) have no integration test coverage
 
-**File:** `app/src/test/java/com/mustafan4x/msbattery/dsp/GaitPipelineIntegrationTest.kt`
+**File:** `app/src/test/java/com/mustafan4x/baselinems/dsp/GaitPipelineIntegrationTest.kt`
 
 The Phase 3 plan Task 13 spec says "The integration test covers every pre canned fixture
 from Task 3" (`docs/plans/phase-3-gait-signal-processing.md` line 1082). The current
@@ -213,7 +213,7 @@ segment error at the envelope tails. Phase 5 calibration may tighten these.
 
 ### LOW L2: Unused `kotlin.math.sin` import in `ButterworthLowPass.kt`
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/dsp/ButterworthLowPass.kt`
+**File:** `app/src/main/java/com/mustafan4x/baselinems/dsp/ButterworthLowPass.kt`
 **Line:** 5.
 
 `import kotlin.math.sin` is declared but `sin` is not referenced anywhere in the file
@@ -229,8 +229,8 @@ used `sin` in the bilinear transform formula and switched to `tan(w0 / 2.0)`.
 ### LOW L3: `java.lang.Math.PI` used where `kotlin.math.PI` is the project idiom
 
 **Files:**
-- `app/src/main/java/com/mustafan4x/msbattery/dsp/GaitPipeline.kt` lines 279, 286.
-- `app/src/test/java/com/mustafan4x/msbattery/dsp/ZuptTest.kt` lines 16, 21, 38, 44.
+- `app/src/main/java/com/mustafan4x/baselinems/dsp/GaitPipeline.kt` lines 279, 286.
+- `app/src/test/java/com/mustafan4x/baselinems/dsp/ZuptTest.kt` lines 16, 21, 38, 44.
 
 Every other file in the DSP package and in the fixtures package uses `kotlin.math.PI`
 (via `import kotlin.math.PI`). `Math.PI` is functionally identical (it resolves to the
@@ -248,7 +248,7 @@ and replace `Math.PI` with `PI` in the affected lines.
 
 ### LOW L4: Internal docstring in `FeatureExtractor.kt` is internally inconsistent on double support time formula
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/dsp/FeatureExtractor.kt`
+**File:** `app/src/main/java/com/mustafan4x/baselinems/dsp/FeatureExtractor.kt`
 **Lines:** 19 to 22.
 
 The KDoc says "this feature is computed as half the mean step interval, which approximates
@@ -289,9 +289,9 @@ permits hyphens). No emojis. No co author or AI attribution lines.
 
 ### PASS: Architectural rails (no `android.*` under `dsp/`, parallel from scratch Madgwick exists, allocation discipline)
 
-- `grep -rn "import android" app/src/main/java/com/mustafan4x/msbattery/dsp/
-  app/src/test/java/com/mustafan4x/msbattery/dsp/
-  app/src/test/java/com/mustafan4x/msbattery/fixtures/` returns nothing.
+- `grep -rn "import android" app/src/main/java/com/mustafan4x/baselinems/dsp/
+  app/src/test/java/com/mustafan4x/baselinems/dsp/
+  app/src/test/java/com/mustafan4x/baselinems/fixtures/` returns nothing.
 - `Madgwick.kt` is the from scratch IMU only filter, instantiated in `GaitPipeline.kt`
   line 51 and consumed in `orientationQualitySignals` lines 226 to 271 to compute the
   per sample residual against `s.rotationVector` (line 257, `angleBetween(madgwick.orientation(),

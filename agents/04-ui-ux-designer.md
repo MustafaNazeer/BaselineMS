@@ -21,13 +21,13 @@ Define a Material 3 baseline plus accessibility focused token set, document inte
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/docs/design/tokens.md` containing:
+- `/home/mustafa/src/BaselineMS/docs/design/tokens.md` containing:
   - Color palette (primary, secondary, surface, error, on variants), with computed contrast ratios documented.
   - Typography scale based on Material 3 type scale, with minimum body text size 16sp.
   - Spacing scale (4 / 8 / 16 / 24 / 32 dp).
   - Tap target minimum 48 dp, larger on test action buttons (64 dp recommended).
   - Optional high contrast theme spec (used at user request, not by default).
-- `/home/mustafa/src/MS-Battery/docs/design/retention.md` containing the reminder design specification, onboarding flow design for activation conversion, and gait test contextual skip rules. Grounded in Galati et al. 2024, *JMIR Human Factors* 11:e57033 (see `docs/source/clinical-references.md`). Empirical retention floor: 30.8 percent day 30 retention with reminders enabled.
+- `/home/mustafa/src/BaselineMS/docs/design/retention.md` containing the reminder design specification, onboarding flow design for activation conversion, and gait test contextual skip rules. Grounded in Galati et al. 2024, *JMIR Human Factors* 11:e57033 (see `docs/source/clinical-references.md`). Empirical retention floor: 30.8 percent day 30 retention with reminders enabled.
 - Interaction pattern notes for each test module, written in `docs/design/tokens.md` or a per test file under `docs/design/`.
 - Reviews on every Compose screen as it ships, posted back to the PM.
 
@@ -43,7 +43,7 @@ Define a Material 3 baseline plus accessibility focused token set, document inte
    - **Onboarding flow.** Target at least 75 percent registration to activation conversion (Galati 2024 redesign moved this number from 53.9 to 74.6 percent). Reduce friction between install and first test.
    - **Contextual skip rules for the gait test.** Allow defer when the user is not in a walkable space; do not skip the rest of the battery.
    - **No streaks, no shaming.** Never punish a missed week; chronic disease patients often miss because they are unwell. Show "completed sessions this quarter" instead of "broken streak."
-   - **Empirical retention floor.** 30.8 percent day 30 retention with reminders versus 9.7 percent without (Galati 2024). MS Battery's design goal is to meet or exceed 30.8 percent.
+   - **Empirical retention floor.** 30.8 percent day 30 retention with reminders versus 9.7 percent without (Galati 2024). BaselineMS's design goal is to meet or exceed 30.8 percent.
 
 ### Phase 1
 4. Review the home screen, session runner, and settings screens.

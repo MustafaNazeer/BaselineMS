@@ -1,14 +1,14 @@
-# MS Neuro Battery Phase 1: Foundation Implementation Plan (Android)
+# BaselineMS Phase 1: Foundation Implementation Plan (Android)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Stand up the foundation of the MS Neuro Battery Android app: Android Studio project, Room data layer, the `TestModule` interface with a mock implementation, the `BatteryOrchestrator` `ViewModel`, and the Compose UI shell (onboarding, profile creation, home screen, settings). End state is a runnable app where the weekly battery flow runs end to end against a mock test, results persist in Room, and history shows completed sessions.
+**Goal:** Stand up the foundation of the BaselineMS Android app: Android Studio project, Room data layer, the `TestModule` interface with a mock implementation, the `BatteryOrchestrator` `ViewModel`, and the Compose UI shell (onboarding, profile creation, home screen, settings). End state is a runnable app where the weekly battery flow runs end to end against a mock test, results persist in Room, and history shows completed sessions.
 
 **Architecture:** Native Android, Kotlin and Jetpack Compose, layered. The `TestModule` interface is the seam between the orchestrator and any concrete test, so adding real tests (tap, gait, vision, SDMT, voice) in later phases requires no changes to the orchestrator. Room provides on device persistence with no cloud sync. The app does not declare the `INTERNET` permission.
 
 **Tech Stack:** Kotlin 1.9, Jetpack Compose (Material 3), Navigation Compose, Room with KSP, Kotlin Coroutines and Flow, JUnit 4, Robolectric, kotlinx-coroutines-test, Android Studio Iguana or later, min SDK 31, target SDK 34.
 
-**Related spec:** `~/src/MS-Battery/SPEC.md`
+**Related spec:** `~/src/BaselineMS/SPEC.md`
 
 **Platform note:** Every command in this plan runs on Linux. No macOS required.
 
@@ -19,7 +19,7 @@
 Files this plan creates or modifies:
 
 ```
-~/src/MS-Battery/                                  (Android Studio project root)
+~/src/BaselineMS/                                  (Android Studio project root)
 ├── build.gradle.kts                              (project)
 ├── settings.gradle.kts
 ├── gradle/wrapper/...
@@ -29,8 +29,8 @@ Files this plan creates or modifies:
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
-│       │   ├── java/com/mustafan4x/msbattery/
-│       │   │   ├── MSBatteryApp.kt               (Application + manual DI)
+│       │   ├── java/com/mustafan4x/baselinems/
+│       │   │   ├── BaselineMSApp.kt               (Application + manual DI)
 │       │   │   ├── MainActivity.kt
 │       │   │   ├── data/
 │       │   │   │   ├── Enums.kt                  (TestType, Sex, Hand, MSType)
@@ -61,7 +61,7 @@ Files this plan creates or modifies:
 │       │   │   └── util/
 │       │   │       └── DeviceInfo.kt
 │       │   └── res/                              (default + strings)
-│       └── test/java/com/mustafan4x/msbattery/
+│       └── test/java/com/mustafan4x/baselinems/
 │           ├── data/
 │           │   ├── ConvertersTest.kt
 │           │   ├── UserProfileDaoTest.kt
@@ -83,7 +83,7 @@ After this plan ships, every concrete test in later phases adds a new file under
 ## Task 1: Create the Android Studio project
 
 **Files:**
-- Create: `~/src/MS-Battery/` (Android Studio project tree)
+- Create: `~/src/BaselineMS/` (Android Studio project tree)
 
 This task is partially manual because Android Studio's project wizard is GUI driven. Capture the final state in git so subsequent tasks have a clean starting point.
 
@@ -92,9 +92,9 @@ This task is partially manual because Android Studio's project wizard is GUI dri
 In Android Studio Iguana or later: File > New > New Project > Empty Activity (the Compose template).
 
 Set:
-- Name: `MSBattery`
-- Package name: `com.mustafan4x.msbattery`
-- Save location: `~/src/MS-Battery`
+- Name: `BaselineMS`
+- Package name: `com.mustafan4x.baselinems`
+- Save location: `~/src/BaselineMS`
 - Language: Kotlin
 - Minimum SDK: API 31 ("Android 12.0 (S)")
 - Build configuration language: Kotlin DSL (`build.gradle.kts`)
@@ -103,7 +103,7 @@ Click Finish and let Gradle sync.
 
 - [ ] **Step 2: Update `app/build.gradle.kts` with the dependencies the rest of the plan needs**
 
-File: `~/src/MS-Battery/app/build.gradle.kts`
+File: `~/src/BaselineMS/app/build.gradle.kts`
 
 Replace the file with:
 
@@ -115,11 +115,11 @@ plugins {
 }
 
 android {
-    namespace = "com.mustafan4x.msbattery"
+    namespace = "com.mustafan4x.baselinems"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.mustafan4x.msbattery"
+        applicationId = "com.mustafan4x.baselinems"
         minSdk = 31
         targetSdk = 34
         versionCode = 1
@@ -187,13 +187,13 @@ dependencies {
 
 Confirm `gradle/libs.versions.toml` already declares the `android.application` and `jetbrains.kotlin.android` plugin aliases (the Empty Activity template ships with these in Android Studio Iguana). If your version of Android Studio scaffolded a `compose.compiler` plugin alias instead of `composeOptions`, you can either keep it (and remove the `composeOptions` block from `app/build.gradle.kts`) or remove the alias and keep the `composeOptions` block this plan uses. Either path works; the plan chooses the `composeOptions` route to stay compatible with Kotlin 1.9.24.
 
-Add the `kotlinx.serialization` Gradle plugin if you plan to use `kotlinx-serialization-json` (we will). In `~/src/MS-Battery/build.gradle.kts` (the project level file), add to the `plugins` block:
+Add the `kotlinx.serialization` Gradle plugin if you plan to use `kotlinx-serialization-json` (we will). In `~/src/BaselineMS/build.gradle.kts` (the project level file), add to the `plugins` block:
 
 ```kotlin
 id("org.jetbrains.kotlin.plugin.serialization") version "1.9.24" apply false
 ```
 
-And in `~/src/MS-Battery/app/build.gradle.kts`, add to the module level `plugins` block:
+And in `~/src/BaselineMS/app/build.gradle.kts`, add to the module level `plugins` block:
 
 ```kotlin
 id("org.jetbrains.kotlin.plugin.serialization")
@@ -204,7 +204,7 @@ id("org.jetbrains.kotlin.plugin.serialization")
 In the terminal:
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 ./gradlew assembleDebug
 ```
 
@@ -215,7 +215,7 @@ If `./gradlew` is not yet present (Android Studio sometimes generates it on firs
 - [ ] **Step 4: Initialise git in the project root and commit the initial scaffold**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git init
 echo ".gradle/" > .gitignore
 echo "build/" >> .gitignore
@@ -227,15 +227,15 @@ echo "*.aab" >> .gitignore
 echo "/captures" >> .gitignore
 echo "*.iml" >> .gitignore
 git add .
-git commit -m "chore: initial Android scaffold for MSBattery"
+git commit -m "chore: initial Android scaffold for BaselineMS"
 ```
 
 - [ ] **Step 5: Replace the auto generated `MainActivity` and theme files with a minimal placeholder so we own the code from here**
 
-File: `~/src/MS-Battery/app/src/main/java/com/mustafan4x/msbattery/MainActivity.kt`
+File: `~/src/BaselineMS/app/src/main/java/com/mustafan4x/baselinems/MainActivity.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery
+package com.mustafan4x.baselinems
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -250,21 +250,21 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Surface { Text("MSBattery placeholder") }
+                Surface { Text("BaselineMS placeholder") }
             }
         }
     }
 }
 ```
 
-Delete any other auto generated files in `com.mustafan4x.msbattery` (such as `ui/theme/Theme.kt`, `Color.kt`, `Type.kt`) that the template scaffolded; we will recreate the theme properly in Task 10 if needed.
+Delete any other auto generated files in `com.mustafan4x.baselinems` (such as `ui/theme/Theme.kt`, `Color.kt`, `Type.kt`) that the template scaffolded; we will recreate the theme properly in Task 10 if needed.
 
 Confirm `AndroidManifest.xml` does not include `<uses-permission android:name="android.permission.INTERNET" />`. If it does, remove it.
 
 - [ ] **Step 6: Build and confirm**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 ./gradlew assembleDebug
 ```
 
@@ -273,7 +273,7 @@ Expected: BUILD SUCCESSFUL.
 - [ ] **Step 7: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
 git commit -m "chore: trim Android template down to placeholder MainActivity"
 ```
@@ -283,15 +283,15 @@ git commit -m "chore: trim Android template down to placeholder MainActivity"
 ## Task 2: Add `Enums.kt`
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/data/Enums.kt`
-- Test: `app/src/test/java/com/mustafan4x/msbattery/data/EnumsTest.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/data/Enums.kt`
+- Test: `app/src/test/java/com/mustafan4x/baselinems/data/EnumsTest.kt`
 
 - [ ] **Step 1: Write the failing test**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/data/EnumsTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/data/EnumsTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -326,18 +326,18 @@ class EnumsTest {
 - [ ] **Step 2: Run the test to verify it fails**
 
 ```bash
-cd ~/src/MS-Battery
-./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.data.EnumsTest"
+cd ~/src/BaselineMS
+./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.data.EnumsTest"
 ```
 
 Expected: FAILURE with "unresolved reference: TestType" and similar.
 
 - [ ] **Step 3: Implement `Enums.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/data/Enums.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/data/Enums.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 enum class TestType { TAP, GAIT, VISION, SDMT, VOICE }
 enum class Sex { FEMALE, MALE, OTHER, UNDISCLOSED }
@@ -348,8 +348,8 @@ enum class MSType { RRMS, PPMS, SPMS, CIS, UNDISCLOSED }
 - [ ] **Step 4: Run the test to verify it passes**
 
 ```bash
-cd ~/src/MS-Battery
-./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.data.EnumsTest"
+cd ~/src/BaselineMS
+./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.data.EnumsTest"
 ```
 
 Expected: BUILD SUCCESSFUL, all five tests pass.
@@ -357,7 +357,7 @@ Expected: BUILD SUCCESSFUL, all five tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
 git commit -m "feat(data): add TestType, Sex, Hand, MSType enums"
 ```
@@ -367,21 +367,21 @@ git commit -m "feat(data): add TestType, Sex, Hand, MSType enums"
 ## Task 3: Add Room `Converters` and `UserProfileEntity` plus `UserProfileDao`
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/data/Converters.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/data/UserProfileEntity.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/data/UserProfileDao.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/data/AppDatabase.kt` (skeleton only, expanded in Task 4)
-- Test: `app/src/test/java/com/mustafan4x/msbattery/data/ConvertersTest.kt`
-- Test: `app/src/test/java/com/mustafan4x/msbattery/data/UserProfileDaoTest.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/data/Converters.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/data/UserProfileEntity.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/data/UserProfileDao.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/data/AppDatabase.kt` (skeleton only, expanded in Task 4)
+- Test: `app/src/test/java/com/mustafan4x/baselinems/data/ConvertersTest.kt`
+- Test: `app/src/test/java/com/mustafan4x/baselinems/data/UserProfileDaoTest.kt`
 
 The Room `Converters` are needed because we are storing enum types and `UUID` strings.
 
 - [ ] **Step 1: Write failing tests**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/data/ConvertersTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/data/ConvertersTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -418,10 +418,10 @@ class ConvertersTest {
 }
 ```
 
-File: `app/src/test/java/com/mustafan4x/msbattery/data/UserProfileDaoTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/data/UserProfileDaoTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -482,18 +482,18 @@ class UserProfileDaoTest {
 - [ ] **Step 2: Run the tests to verify they fail**
 
 ```bash
-cd ~/src/MS-Battery
-./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.data.ConvertersTest" --tests "com.mustafan4x.msbattery.data.UserProfileDaoTest"
+cd ~/src/BaselineMS
+./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.data.ConvertersTest" --tests "com.mustafan4x.baselinems.data.UserProfileDaoTest"
 ```
 
 Expected: BUILD FAILED with unresolved references.
 
 - [ ] **Step 3: Implement `Converters.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/data/Converters.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/data/Converters.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.TypeConverter
 
@@ -514,10 +514,10 @@ class Converters {
 
 - [ ] **Step 4: Implement `UserProfileEntity.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/data/UserProfileEntity.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/data/UserProfileEntity.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -537,10 +537,10 @@ data class UserProfileEntity(
 
 - [ ] **Step 5: Implement `UserProfileDao.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/data/UserProfileDao.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/data/UserProfileDao.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -560,10 +560,10 @@ interface UserProfileDao {
 
 - [ ] **Step 6: Implement `AppDatabase.kt` (skeleton with one entity for now)**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/data/AppDatabase.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/data/AppDatabase.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -583,8 +583,8 @@ abstract class AppDatabase : RoomDatabase() {
 - [ ] **Step 7: Run the tests to verify they pass**
 
 ```bash
-cd ~/src/MS-Battery
-./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.data.ConvertersTest" --tests "com.mustafan4x.msbattery.data.UserProfileDaoTest"
+cd ~/src/BaselineMS
+./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.data.ConvertersTest" --tests "com.mustafan4x.baselinems.data.UserProfileDaoTest"
 ```
 
 Expected: BUILD SUCCESSFUL, all seven tests pass.
@@ -592,7 +592,7 @@ Expected: BUILD SUCCESSFUL, all seven tests pass.
 - [ ] **Step 8: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
 git commit -m "feat(data): add Room Converters, UserProfileEntity, DAO, and AppDatabase skeleton"
 ```
@@ -602,20 +602,20 @@ git commit -m "feat(data): add Room Converters, UserProfileEntity, DAO, and AppD
 ## Task 4: Add `SessionEntity`, `TestResultEntity`, their DAOs, and expand `AppDatabase`
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/data/SessionEntity.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/data/TestResultEntity.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/data/SessionDao.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/data/TestResultDao.kt`
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/data/AppDatabase.kt`
-- Test: `app/src/test/java/com/mustafan4x/msbattery/data/SessionDaoTest.kt`
-- Test: `app/src/test/java/com/mustafan4x/msbattery/data/TestResultDaoTest.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/data/SessionEntity.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/data/TestResultEntity.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/data/SessionDao.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/data/TestResultDao.kt`
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/data/AppDatabase.kt`
+- Test: `app/src/test/java/com/mustafan4x/baselinems/data/SessionDaoTest.kt`
+- Test: `app/src/test/java/com/mustafan4x/baselinems/data/TestResultDaoTest.kt`
 
 - [ ] **Step 1: Write failing tests**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/data/SessionDaoTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/data/SessionDaoTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -697,10 +697,10 @@ class SessionDaoTest {
 }
 ```
 
-File: `app/src/test/java/com/mustafan4x/msbattery/data/TestResultDaoTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/data/TestResultDaoTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -763,18 +763,18 @@ class TestResultDaoTest {
 - [ ] **Step 2: Run the tests to verify they fail**
 
 ```bash
-cd ~/src/MS-Battery
-./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.data.SessionDaoTest" --tests "com.mustafan4x.msbattery.data.TestResultDaoTest"
+cd ~/src/BaselineMS
+./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.data.SessionDaoTest" --tests "com.mustafan4x.baselinems.data.TestResultDaoTest"
 ```
 
 Expected: BUILD FAILED with unresolved references.
 
 - [ ] **Step 3: Implement `SessionEntity.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/data/SessionEntity.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/data/SessionEntity.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -791,10 +791,10 @@ data class SessionEntity(
 
 - [ ] **Step 4: Implement `TestResultEntity.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/data/TestResultEntity.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/data/TestResultEntity.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -829,10 +829,10 @@ data class TestResultEntity(
 
 - [ ] **Step 5: Implement `SessionDao.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/data/SessionDao.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/data/SessionDao.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -863,10 +863,10 @@ interface SessionDao {
 
 - [ ] **Step 6: Implement `TestResultDao.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/data/TestResultDao.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/data/TestResultDao.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -885,12 +885,12 @@ interface TestResultDao {
 
 - [ ] **Step 7: Update `AppDatabase.kt` to register the new entities and DAOs**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/data/AppDatabase.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/data/AppDatabase.kt`
 
 Replace the file with:
 
 ```kotlin
-package com.mustafan4x.msbattery.data
+package com.mustafan4x.baselinems.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -916,7 +916,7 @@ abstract class AppDatabase : RoomDatabase() {
 - [ ] **Step 8: Run the tests to verify they pass**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 ./gradlew :app:testDebugUnitTest
 ```
 
@@ -925,7 +925,7 @@ Expected: BUILD SUCCESSFUL, every test added so far passes.
 - [ ] **Step 9: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
 git commit -m "feat(data): add Session and TestResult entities with cascade delete"
 ```
@@ -935,19 +935,19 @@ git commit -m "feat(data): add Session and TestResult entities with cascade dele
 ## Task 5: Define `TestModule` interface and `TestResultPayload`
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/TestModule.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/TestModule.kt`
 
 There is no test for this task on its own; the interface is exercised by `MockTestModule` and `BatteryOrchestrator` tests in the next two tasks.
 
 - [ ] **Step 1: Implement `TestModule.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/battery/TestModule.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/battery/TestModule.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery
+package com.mustafan4x.baselinems.battery
 
 import androidx.compose.runtime.Composable
-import com.mustafan4x.msbattery.data.TestType
+import com.mustafan4x.baselinems.data.TestType
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -974,7 +974,7 @@ fun TestResultPayload.featuresAsJson(): String {
 - [ ] **Step 2: Build to confirm it compiles**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 ./gradlew :app:assembleDebug
 ```
 
@@ -983,7 +983,7 @@ Expected: BUILD SUCCESSFUL.
 - [ ] **Step 3: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
 git commit -m "feat(battery): define TestModule interface and TestResultPayload"
 ```
@@ -993,19 +993,19 @@ git commit -m "feat(battery): define TestModule interface and TestResultPayload"
 ## Task 6: Add `MockTestModule`
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/MockTestModule.kt`
-- Test: `app/src/test/java/com/mustafan4x/msbattery/battery/MockTestModuleTest.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/MockTestModule.kt`
+- Test: `app/src/test/java/com/mustafan4x/baselinems/battery/MockTestModuleTest.kt`
 
 The mock module is what lets us run the full battery flow end to end before any concrete sensor based test exists.
 
 - [ ] **Step 1: Write the failing test**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/battery/MockTestModuleTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/battery/MockTestModuleTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery
+package com.mustafan4x.baselinems.battery
 
-import com.mustafan4x.msbattery.data.TestType
+import com.mustafan4x.baselinems.data.TestType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -1035,18 +1035,18 @@ class MockTestModuleTest {
 - [ ] **Step 2: Run the test to verify it fails**
 
 ```bash
-cd ~/src/MS-Battery
-./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.MockTestModuleTest"
+cd ~/src/BaselineMS
+./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.MockTestModuleTest"
 ```
 
 Expected: FAILURE with unresolved reference `MockTestModule`.
 
 - [ ] **Step 3: Implement `MockTestModule.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/battery/MockTestModule.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/battery/MockTestModule.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery
+package com.mustafan4x.baselinems.battery
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -1059,7 +1059,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.mustafan4x.msbattery.data.TestType
+import com.mustafan4x.baselinems.data.TestType
 
 class MockTestModule : TestModule {
 
@@ -1095,8 +1095,8 @@ class MockTestModule : TestModule {
 - [ ] **Step 4: Run the test to verify it passes**
 
 ```bash
-cd ~/src/MS-Battery
-./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.MockTestModuleTest"
+cd ~/src/BaselineMS
+./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.MockTestModuleTest"
 ```
 
 Expected: BUILD SUCCESSFUL, both tests pass.
@@ -1104,7 +1104,7 @@ Expected: BUILD SUCCESSFUL, both tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
 git commit -m "feat(battery): add MockTestModule for scaffolding"
 ```
@@ -1114,19 +1114,19 @@ git commit -m "feat(battery): add MockTestModule for scaffolding"
 ## Task 7: Implement `BatteryOrchestrator`
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/BatteryOrchestrator.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/util/DeviceInfo.kt`
-- Create: `app/src/test/java/com/mustafan4x/msbattery/util/MainDispatcherRule.kt`
-- Test: `app/src/test/java/com/mustafan4x/msbattery/battery/BatteryOrchestratorTest.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/BatteryOrchestrator.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/util/DeviceInfo.kt`
+- Create: `app/src/test/java/com/mustafan4x/baselinems/util/MainDispatcherRule.kt`
+- Test: `app/src/test/java/com/mustafan4x/baselinems/battery/BatteryOrchestratorTest.kt`
 
 The orchestrator is a `ViewModel` that walks through a list of `TestModule` instances, persists each completed `TestResultEntity`, and exposes a `StateFlow` to the UI.
 
 - [ ] **Step 1: Add the test dispatcher rule**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/util/MainDispatcherRule.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/util/MainDispatcherRule.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.util
+package com.mustafan4x.baselinems.util
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -1148,17 +1148,17 @@ class MainDispatcherRule(
 
 - [ ] **Step 2: Write the failing orchestrator test**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/battery/BatteryOrchestratorTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/battery/BatteryOrchestratorTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery
+package com.mustafan4x.baselinems.battery
 
-import com.mustafan4x.msbattery.data.SessionDao
-import com.mustafan4x.msbattery.data.SessionEntity
-import com.mustafan4x.msbattery.data.TestResultDao
-import com.mustafan4x.msbattery.data.TestResultEntity
-import com.mustafan4x.msbattery.data.TestType
-import com.mustafan4x.msbattery.util.MainDispatcherRule
+import com.mustafan4x.baselinems.data.SessionDao
+import com.mustafan4x.baselinems.data.SessionEntity
+import com.mustafan4x.baselinems.data.TestResultDao
+import com.mustafan4x.baselinems.data.TestResultEntity
+import com.mustafan4x.baselinems.data.TestType
+import com.mustafan4x.baselinems.util.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -1272,18 +1272,18 @@ class BatteryOrchestratorTest {
 - [ ] **Step 3: Run the test to verify it fails**
 
 ```bash
-cd ~/src/MS-Battery
-./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.BatteryOrchestratorTest"
+cd ~/src/BaselineMS
+./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.BatteryOrchestratorTest"
 ```
 
 Expected: FAILURE with unresolved references for `BatteryOrchestrator`.
 
 - [ ] **Step 4: Implement `DeviceInfo.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/util/DeviceInfo.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/util/DeviceInfo.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.util
+package com.mustafan4x.baselinems.util
 
 import android.os.Build
 
@@ -1295,18 +1295,18 @@ object DeviceInfo {
 
 - [ ] **Step 5: Implement `BatteryOrchestrator.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/battery/BatteryOrchestrator.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/battery/BatteryOrchestrator.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery
+package com.mustafan4x.baselinems.battery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mustafan4x.msbattery.data.SessionDao
-import com.mustafan4x.msbattery.data.SessionEntity
-import com.mustafan4x.msbattery.data.TestResultDao
-import com.mustafan4x.msbattery.data.TestResultEntity
-import com.mustafan4x.msbattery.data.TestType
+import com.mustafan4x.baselinems.data.SessionDao
+import com.mustafan4x.baselinems.data.SessionEntity
+import com.mustafan4x.baselinems.data.TestResultDao
+import com.mustafan4x.baselinems.data.TestResultEntity
+import com.mustafan4x.baselinems.data.TestType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -1396,8 +1396,8 @@ class BatteryOrchestrator(
 - [ ] **Step 6: Run the tests to verify they pass**
 
 ```bash
-cd ~/src/MS-Battery
-./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.BatteryOrchestratorTest"
+cd ~/src/BaselineMS
+./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.BatteryOrchestratorTest"
 ```
 
 Expected: BUILD SUCCESSFUL, all four tests pass.
@@ -1405,7 +1405,7 @@ Expected: BUILD SUCCESSFUL, all four tests pass.
 - [ ] **Step 7: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
 git commit -m "feat(battery): implement BatteryOrchestrator state machine"
 ```
@@ -1415,17 +1415,17 @@ git commit -m "feat(battery): implement BatteryOrchestrator state machine"
 ## Task 8: Implement onboarding screens
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt`
 
 These are Composable screens. Behavior is verified by manual emulator run plus the integration test in Task 11. We confirm the project builds after writing them.
 
 - [ ] **Step 1: Implement `DisclaimerScreen.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.onboarding
+package com.mustafan4x.baselinems.ui.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -1450,7 +1450,7 @@ fun DisclaimerScreen(onAcknowledge: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "MS Neuro Battery",
+            text = "BaselineMS",
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center
         )
@@ -1472,10 +1472,10 @@ fun DisclaimerScreen(onAcknowledge: () -> Unit) {
 
 - [ ] **Step 2: Implement `ProfileSetupScreen.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.onboarding
+package com.mustafan4x.baselinems.ui.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -1496,13 +1496,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.mustafan4x.msbattery.data.Hand
-import com.mustafan4x.msbattery.data.MSType
-import com.mustafan4x.msbattery.data.Sex
-import com.mustafan4x.msbattery.data.UserProfileEntity
+import com.mustafan4x.baselinems.data.Hand
+import com.mustafan4x.baselinems.data.MSType
+import com.mustafan4x.baselinems.data.Sex
+import com.mustafan4x.baselinems.data.UserProfileEntity
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
-import com.mustafan4x.msbattery.data.UserProfileDao
+import com.mustafan4x.baselinems.data.UserProfileDao
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1584,7 +1584,7 @@ private fun <T : Enum<T>> EnumDropdown(
 - [ ] **Step 3: Build to verify it compiles**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 ./gradlew :app:assembleDebug
 ```
 
@@ -1593,7 +1593,7 @@ Expected: BUILD SUCCESSFUL.
 - [ ] **Step 4: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
 git commit -m "feat(ui): add disclaimer and profile setup screens"
 ```
@@ -1603,16 +1603,16 @@ git commit -m "feat(ui): add disclaimer and profile setup screens"
 ## Task 9: Implement home, session runner, and settings screens
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/ui/home/HomeScreen.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/ui/home/HomeScreen.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt`
 
 - [ ] **Step 1: Implement `SessionRunnerScreen.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.home
+package com.mustafan4x.baselinems.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -1629,7 +1629,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.mustafan4x.msbattery.battery.BatteryOrchestrator
+import com.mustafan4x.baselinems.battery.BatteryOrchestrator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1682,10 +1682,10 @@ fun SessionRunnerScreen(
 
 - [ ] **Step 2: Implement `HomeScreen.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/home/HomeScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/home/HomeScreen.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.home
+package com.mustafan4x.baselinems.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -1709,8 +1709,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.mustafan4x.msbattery.data.SessionDao
-import com.mustafan4x.msbattery.data.SessionEntity
+import com.mustafan4x.baselinems.data.SessionDao
+import com.mustafan4x.baselinems.data.SessionEntity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -1727,7 +1727,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("MS Battery") },
+                title = { Text("BaselineMS") },
                 actions = {
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
@@ -1773,10 +1773,10 @@ private fun SessionRow(session: SessionEntity) {
 
 - [ ] **Step 3: Implement `SettingsScreen.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.settings
+package com.mustafan4x.baselinems.ui.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -1794,8 +1794,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.mustafan4x.msbattery.data.UserProfileDao
-import com.mustafan4x.msbattery.data.UserProfileEntity
+import com.mustafan4x.baselinems.data.UserProfileDao
+import com.mustafan4x.baselinems.data.UserProfileEntity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -1825,7 +1825,7 @@ fun SettingsScreen(userProfileDao: UserProfileDao) {
             Text(" ")
             Text("About", style = MaterialTheme.typography.titleMedium)
             Text(
-                "MS Neuro Battery is not a medical device. It does not diagnose or treat any condition.",
+                "BaselineMS is not a medical device. It does not diagnose or treat any condition.",
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -1836,7 +1836,7 @@ fun SettingsScreen(userProfileDao: UserProfileDao) {
 - [ ] **Step 4: Build to verify it compiles**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 ./gradlew :app:assembleDebug
 ```
 
@@ -1845,35 +1845,35 @@ Expected: BUILD SUCCESSFUL.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
 git commit -m "feat(ui): add home, session runner, and settings screens"
 ```
 
 ---
 
-## Task 10: Wire `RootScreen`, `MSBatteryApp` (Application), and `MainActivity`
+## Task 10: Wire `RootScreen`, `BaselineMSApp` (Application), and `MainActivity`
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/MSBatteryApp.kt`
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/MainActivity.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/BaselineMSApp.kt`
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/MainActivity.kt`
 - Modify: `app/src/main/AndroidManifest.xml`
 
 `RootScreen` decides between disclaimer, profile setup, and home based on `SharedPreferences` and the Room store. The Application class owns the `AppDatabase` instance for the entire app lifecycle.
 
-- [ ] **Step 1: Implement `MSBatteryApp.kt`**
+- [ ] **Step 1: Implement `BaselineMSApp.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/MSBatteryApp.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/BaselineMSApp.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery
+package com.mustafan4x.baselinems
 
 import android.app.Application
 import androidx.room.Room
-import com.mustafan4x.msbattery.data.AppDatabase
+import com.mustafan4x.baselinems.data.AppDatabase
 
-class MSBatteryApp : Application() {
+class BaselineMSApp : Application() {
 
     lateinit var database: AppDatabase
         private set
@@ -1883,7 +1883,7 @@ class MSBatteryApp : Application() {
         database = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java,
-            "msbattery.db"
+            "baselinems.db"
         ).build()
     }
 }
@@ -1891,10 +1891,10 @@ class MSBatteryApp : Application() {
 
 - [ ] **Step 2: Implement `RootScreen.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui
+package com.mustafan4x.baselinems.ui
 
 import android.content.Context
 import androidx.compose.runtime.Composable
@@ -1907,23 +1907,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.mustafan4x.msbattery.MSBatteryApp
-import com.mustafan4x.msbattery.battery.BatteryOrchestrator
-import com.mustafan4x.msbattery.battery.MockTestModule
-import com.mustafan4x.msbattery.ui.home.HomeScreen
-import com.mustafan4x.msbattery.ui.home.SessionRunnerScreen
-import com.mustafan4x.msbattery.ui.onboarding.DisclaimerScreen
-import com.mustafan4x.msbattery.ui.onboarding.ProfileSetupScreen
-import com.mustafan4x.msbattery.ui.settings.SettingsScreen
-import com.mustafan4x.msbattery.util.DeviceInfo
+import com.mustafan4x.baselinems.BaselineMSApp
+import com.mustafan4x.baselinems.battery.BatteryOrchestrator
+import com.mustafan4x.baselinems.battery.MockTestModule
+import com.mustafan4x.baselinems.ui.home.HomeScreen
+import com.mustafan4x.baselinems.ui.home.SessionRunnerScreen
+import com.mustafan4x.baselinems.ui.onboarding.DisclaimerScreen
+import com.mustafan4x.baselinems.ui.onboarding.ProfileSetupScreen
+import com.mustafan4x.baselinems.ui.settings.SettingsScreen
+import com.mustafan4x.baselinems.util.DeviceInfo
 
-private const val PREFS = "msbattery_prefs"
+private const val PREFS = "baselinems_prefs"
 private const val KEY_DISCLAIMER = "disclaimer_acknowledged"
 
 @Composable
 fun RootScreen() {
     val context = LocalContext.current
-    val app = context.applicationContext as MSBatteryApp
+    val app = context.applicationContext as BaselineMSApp
     val nav = rememberNavController()
     var disclaimerAcknowledged by remember {
         mutableStateOf(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_DISCLAIMER, false))
@@ -1990,19 +1990,19 @@ fun RootScreen() {
 
 - [ ] **Step 3: Update `MainActivity.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/MainActivity.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/MainActivity.kt`
 
 Replace with:
 
 ```kotlin
-package com.mustafan4x.msbattery
+package com.mustafan4x.baselinems
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import com.mustafan4x.msbattery.ui.RootScreen
+import com.mustafan4x.baselinems.ui.RootScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -2020,17 +2020,17 @@ class MainActivity : ComponentActivity() {
 
 File: `app/src/main/AndroidManifest.xml`
 
-Update the `<application>` tag to include `android:name=".MSBatteryApp"`. The full element should look like:
+Update the `<application>` tag to include `android:name=".BaselineMSApp"`. The full element should look like:
 
 ```xml
 <application
-    android:name=".MSBatteryApp"
+    android:name=".BaselineMSApp"
     android:allowBackup="false"
     android:icon="@mipmap/ic_launcher"
-    android:label="MSBattery"
+    android:label="BaselineMS"
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
-    android:theme="@style/Theme.MSBattery">
+    android:theme="@style/Theme.BaselineMS">
     <activity
         android:name=".MainActivity"
         android:exported="true">
@@ -2049,9 +2049,9 @@ Confirm there is **no** `<uses-permission android:name="android.permission.INTER
 Create or use an Android Virtual Device (AVD) running API 33 or 34. In Android Studio, use the Device Manager to create a Pixel 7 with API 33 if you do not have one.
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 ./gradlew :app:installDebug
-adb shell am start -n com.mustafan4x.msbattery/.MainActivity
+adb shell am start -n com.mustafan4x.baselinems/.MainActivity
 ```
 
 Walk the flow on the emulator:
@@ -2067,9 +2067,9 @@ Walk the flow on the emulator:
 - [ ] **Step 6: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
-git commit -m "feat(app): wire RootScreen, MSBatteryApp Application class, and MainActivity; complete Phase 1 happy path"
+git commit -m "feat(app): wire RootScreen, BaselineMSApp Application class, and MainActivity; complete Phase 1 happy path"
 ```
 
 ---
@@ -2077,23 +2077,23 @@ git commit -m "feat(app): wire RootScreen, MSBatteryApp Application class, and M
 ## Task 11: Add an integration test for the full battery flow
 
 **Files:**
-- Test: `app/src/test/java/com/mustafan4x/msbattery/battery/BatteryFlowIntegrationTest.kt`
+- Test: `app/src/test/java/com/mustafan4x/baselinems/battery/BatteryFlowIntegrationTest.kt`
 
 This test exercises orchestrator + Room persistence with multiple modules and verifies the complete data shape that the UI depends on. It runs on the JVM via Robolectric so it stays in the fast unit test layer.
 
 - [ ] **Step 1: Write the failing test**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/battery/BatteryFlowIntegrationTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/battery/BatteryFlowIntegrationTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery
+package com.mustafan4x.baselinems.battery
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.mustafan4x.msbattery.data.AppDatabase
-import com.mustafan4x.msbattery.data.TestType
-import com.mustafan4x.msbattery.util.MainDispatcherRule
+import com.mustafan4x.baselinems.data.AppDatabase
+import com.mustafan4x.baselinems.data.TestType
+import com.mustafan4x.baselinems.util.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -2162,8 +2162,8 @@ class BatteryFlowIntegrationTest {
 - [ ] **Step 2: Run the test**
 
 ```bash
-cd ~/src/MS-Battery
-./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.BatteryFlowIntegrationTest"
+cd ~/src/BaselineMS
+./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.BatteryFlowIntegrationTest"
 ```
 
 Expected: BUILD SUCCESSFUL.
@@ -2173,7 +2173,7 @@ Expected: BUILD SUCCESSFUL.
 - [ ] **Step 3: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add .
 git commit -m "test(battery): add end to end integration test"
 ```
@@ -2183,16 +2183,16 @@ git commit -m "test(battery): add end to end integration test"
 ## Task 12: Add a README
 
 **Files:**
-- Create: `~/src/MS-Battery/README.md`
+- Create: `~/src/BaselineMS/README.md`
 
 The README is the artifact a recruiter will read. We seed it now and grow it as later phases land.
 
 - [ ] **Step 1: Create the README**
 
-File: `~/src/MS-Battery/README.md`
+File: `~/src/BaselineMS/README.md`
 
 ```markdown
-# MS Neuro Battery (Android)
+# BaselineMS (Android)
 
 A native Android application that lets people living with Multiple Sclerosis self administer a short, clinically grounded battery of five tests once a week, track their results longitudinally on device, and share a clear summary report with their neurologist.
 
@@ -2202,17 +2202,17 @@ Phase 1 (foundation) complete. The application runs end to end against a mock te
 
 ## Architecture
 
-See `~/src/docs/superpowers/specs/2026-05-06-ms-neuro-battery-design.md` for the full design specification.
+See `~/src/docs/superpowers/specs/2026-05-06-baselinems-design.md` for the full design specification.
 
 ## Running
 
-Open `~/src/MS-Battery` in Android Studio Iguana or later, select an Android 12+ emulator (or plug in a physical device with USB debugging enabled), and press Run.
+Open `~/src/BaselineMS` in Android Studio Iguana or later, select an Android 12+ emulator (or plug in a physical device with USB debugging enabled), and press Run.
 
 From the command line:
 
 ```
 ./gradlew :app:installDebug
-adb shell am start -n com.mustafan4x.msbattery/.MainActivity
+adb shell am start -n com.mustafan4x.baselinems/.MainActivity
 ```
 
 ## Testing
@@ -2231,7 +2231,7 @@ All data is stored on device. No cloud sync, no account, no analytics, no `INTER
 - [ ] **Step 2: Commit**
 
 ```bash
-cd ~/src/MS-Battery
+cd ~/src/BaselineMS
 git add README.md
 git commit -m "docs: add README for Phase 1"
 ```
@@ -2243,6 +2243,6 @@ git commit -m "docs: add README for Phase 1"
 - All 12 tasks above are committed.
 - `./gradlew :app:testDebugUnitTest` returns `BUILD SUCCESSFUL` with zero failures across `EnumsTest`, `ConvertersTest`, `UserProfileDaoTest`, `SessionDaoTest`, `TestResultDaoTest`, `MockTestModuleTest`, `BatteryOrchestratorTest`, and `BatteryFlowIntegrationTest`.
 - The emulator walkthrough in Task 10 Step 5 succeeds end to end on a real Android 12+ AVD.
-- A clean working tree on `main` of the `MSBattery` git repo.
+- A clean working tree on `main` of the `BaselineMS` git repo.
 
 The next plan (Phase 2: Tap Test) will swap `MockTestModule` for the real bilateral tap test, leaving everything else untouched.

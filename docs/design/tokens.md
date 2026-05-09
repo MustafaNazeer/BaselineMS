@@ -1,4 +1,4 @@
-# Design tokens, MS Neuro Battery
+# Design tokens, BaselineMS
 
 **Status:** Phase 0 deliverable, written by the UI/UX Designer.
 
@@ -287,12 +287,12 @@ Items where the UI/UX Designer made a defensible call but the Patient Advocate o
 
 This file is the source of truth for tokens. The Android Engineer translates these into:
 
-- A `MsBatteryColorScheme` defined in `app/src/main/java/.../ui/theme/Color.kt` with the light and dark hex values from Section 2.
-- A `MsBatteryTypography` defined in `app/src/main/java/.../ui/theme/Type.kt` with the type scale assignments from Section 3.
-- A spacing object (e.g., `MsBatterySpacing`) exposing the five canonical values from Section 4 as `Dp` constants.
-- A `MsBatteryTheme` composable wrapping `MaterialTheme` with the above and reading the user's high contrast preference from settings.
+- A `BaselineMSColorScheme` defined in `app/src/main/java/.../ui/theme/Color.kt` with the light and dark hex values from Section 2.
+- A `BaselineMSTypography` defined in `app/src/main/java/.../ui/theme/Type.kt` with the type scale assignments from Section 3.
+- A spacing object (e.g., `BaselineMSSpacing`) exposing the five canonical values from Section 4 as `Dp` constants.
+- A `BaselineMSTheme` composable wrapping `MaterialTheme` with the above and reading the user's high contrast preference from settings.
 
-The current `MainActivity.kt` placeholder uses bare `MaterialTheme {}` with no colors or typography set, which is acceptable as a starting point for Phase 0 (it compiles and runs) but must be replaced in Phase 1 by the `MsBatteryTheme` composable. This is a Phase 1 task for the Android Engineer.
+The current `MainActivity.kt` placeholder uses bare `MaterialTheme {}` with no colors or typography set, which is acceptable as a starting point for Phase 0 (it compiles and runs) but must be replaced in Phase 1 by the `BaselineMSTheme` composable. This is a Phase 1 task for the Android Engineer.
 
 ## 12. Coordination
 

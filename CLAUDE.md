@@ -1,14 +1,14 @@
-# CLAUDE.md, MS Neuro Battery project instructions
+# CLAUDE.md, BaselineMS project instructions
 
 This file is auto loaded by Claude Code in every session opened in this directory. It defines how the project is organized, how phases are paced, how specialists are dispatched, and which conventions every session must follow. Changes to this file change the project; read it carefully before editing.
 
 ## Project at a glance
 
-MS Neuro Battery is a native Android application that lets people living with Multiple Sclerosis self administer a five test neurological battery once a week, track results longitudinally on device, and share a clinician ready PDF report. The technical centerpiece is a validated gait analysis pipeline. Privacy posture is strict: no `INTERNET` permission, no cloud sync, no account, no telemetry.
+BaselineMS is a native Android application that lets people living with Multiple Sclerosis self administer a five test neurological battery once a week, track results longitudinally on device, and share a clinician ready PDF report. The technical centerpiece is a validated gait analysis pipeline. Privacy posture is strict: no `INTERNET` permission, no cloud sync, no account, no telemetry.
 
 Full specification lives at `SPEC.md` at the root of this project. Always treat `SPEC.md` as the source of truth for what is being built. Always treat `STATUS.md` as the source of truth for what phase is next.
 
-GitHub remote: https://github.com/Mustafan4x/MS-Battery
+GitHub remote: https://github.com/Mustafan4x/BaselineMS
 
 ## Inherited rules from the user's global CLAUDE.md
 
@@ -91,13 +91,13 @@ Never start, pause, or complete a phase without updating `STATUS.md` first.
 When the PM dispatches a specialist, use exactly this prompt shape (substitute the phase number and agent path):
 
 ```
-You are the <Agent name> for the MS Neuro Battery project.
+You are the <Agent name> for the BaselineMS project.
 
 Read these files in order before doing anything else:
-1. /home/mustafa/src/MS-Battery/SPEC.md
-2. /home/mustafa/src/MS-Battery/agents/<NN-agent-name>.md
-3. /home/mustafa/src/MS-Battery/STATUS.md
-4. /home/mustafa/src/MS-Battery/CLAUDE.md (specifically the "Inherited rules" and the dispatch template sections)
+1. /home/mustafa/src/BaselineMS/SPEC.md
+2. /home/mustafa/src/BaselineMS/agents/<NN-agent-name>.md
+3. /home/mustafa/src/BaselineMS/STATUS.md
+4. /home/mustafa/src/BaselineMS/CLAUDE.md (specifically the "Inherited rules" and the dispatch template sections)
 
 You are working on Phase <N>. Stay strictly in your role as defined in your agent brief.
 Do not recursively dispatch subagents; if you need work done outside your role, stop and report
@@ -149,7 +149,7 @@ A small set of skills is project relevant:
 ## Directory layout
 
 ```
-~/src/MS-Battery/
+~/src/BaselineMS/
 ├── CLAUDE.md                    (this file)
 ├── SPEC.md                      (project specification)
 ├── STATUS.md                    (single source of truth for phase status)

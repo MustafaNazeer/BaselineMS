@@ -1,14 +1,14 @@
-# MS Neuro Battery Phase 2: Tap Test Implementation Plan (Android)
+# BaselineMS Phase 2: Tap Test Implementation Plan (Android)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace `MockTestModule` with `BilateralTapTest`, the first real `TestModule`, while landing the subset of the Phase 1 Patient Advocate review that affects screens Phase 2 touches. End state is a runnable app where the weekly battery executes a real bilateral tap test (30 second alternating tap on two on screen targets, dominant hand then non dominant hand), persists tap rate, inter tap interval coefficient of variation, asymmetry index, and miss rate to Room, and surfaces an honest quality score that does not punish a fatigued user.
 
-**Architecture:** The `TestModule` interface from Phase 1 is the seam, so the orchestrator does not change. `BilateralTapTest` lives in `app/src/main/java/com/mustafan4x/msbattery/battery/tap/` and splits into a pure Kotlin feature computation module (`TapEvent.kt`, `TapRound.kt`, `TapFeatures.kt`) and a Compose UI module (`BilateralTapTest.kt`). The pure module is JVM testable without Robolectric and is the home for all numeric math. The UI module is tested with Compose UI tests where they pay rent and otherwise verified through manual emulator walkthrough.
+**Architecture:** The `TestModule` interface from Phase 1 is the seam, so the orchestrator does not change. `BilateralTapTest` lives in `app/src/main/java/com/mustafan4x/baselinems/battery/tap/` and splits into a pure Kotlin feature computation module (`TapEvent.kt`, `TapRound.kt`, `TapFeatures.kt`) and a Compose UI module (`BilateralTapTest.kt`). The pure module is JVM testable without Robolectric and is the home for all numeric math. The UI module is tested with Compose UI tests where they pay rent and otherwise verified through manual emulator walkthrough.
 
 **Tech Stack:** Kotlin 1.9, Jetpack Compose (Material 3), Navigation Compose, Room (already wired), Kotlin Coroutines and Flow, JUnit 4, Robolectric, kotlinx-coroutines-test, `androidx.compose.ui.test`. Same stack as Phase 1.
 
-**Related spec:** `~/src/MS-Battery/SPEC.md` Section 6.1 (Tap Test) and Section 11 (Testing Strategy).
+**Related spec:** `~/src/BaselineMS/SPEC.md` Section 6.1 (Tap Test) and Section 11 (Testing Strategy).
 
 **Related references:** `docs/source/clinical-references.md` "Bilateral Tap Test (proxy for 9 Hole Peg Test)" entry. Anchors are Tanigawa et al. 2017 (the MS specific construct anchor for tap rate as an upper limb dexterity measure), Mathiowetz et al. 1985 (the original 9HPT paper), and Feys et al. 2017 (the modern MS specific 9HPT clinical trial endpoint consensus). All three were verified by the Citation Auditor in Phase 0 and the Phase 0 to Phase 1 cleanup re audit; no new citations are introduced in this plan.
 
@@ -23,7 +23,7 @@
 Files this plan creates or modifies:
 
 ```
-~/src/MS-Battery/
+~/src/BaselineMS/
 ├── STATUS.md                                     (modify: phase status flips)
 ├── docs/
 │   ├── plans/
@@ -35,7 +35,7 @@ Files this plan creates or modifies:
 │   │   └── clinical-references.md                (no change; entries already audited)
 │   └── security/
 │       └── compliance-review.md                  (modify: append Phase 2 disclaimer entry)
-└── app/src/main/java/com/mustafan4x/msbattery/
+└── app/src/main/java/com/mustafan4x/baselinems/
     ├── battery/
     │   ├── tap/
     │   │   ├── TapEvent.kt                       (create)
@@ -56,7 +56,7 @@ Files this plan creates or modifies:
         └── settings/
             └── SettingsScreen.kt                 (modify: year of birth label, About bodyLarge, Spacer not Text(" "))
 
-app/src/test/java/com/mustafan4x/msbattery/
+app/src/test/java/com/mustafan4x/baselinems/
 ├── battery/
 │   └── tap/
 │       ├── TapFeaturesTest.kt                    (create)
@@ -79,7 +79,7 @@ This phase block contains decisions that block code work. Until each is resolved
 **Why this is needed:** Patient Advocate Issue 5 proposes splitting the SPEC.md Section 10 disclaimer ("Share with your neurologist for clinical decisions") into three left aligned sentences and softening the third sentence to "When you visit your neurologist, you can share these results to help the conversation." Issue 6 proposes changing the button copy "I understand" to "Got it, continue." Both changes touch the regulatory positioning the Compliance Reviewer signed off on in Phase 0 (`docs/security/compliance-review.md`). The Compliance Reviewer has veto power on this surface.
 
 **Files reviewed:**
-- `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt:30-42`
+- `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt:30-42`
 - `SPEC.md` Section 10
 - `docs/security/compliance-review.md` (Phase 0 sign off entry)
 
@@ -112,10 +112,10 @@ git commit -m "compliance: phase 2 disclaimer copy ratification"
 
 ### Task 2: Data Engineer plus Database Administrator decision on nullable heightCm and profile edit path
 
-**Why this is needed:** Patient Advocate Issue 4 proposes a "Skip for now" path on profile setup, which (in the Patient Advocate's framing) sets `heightCm` to null. `UserProfileEntity.heightCm` is currently `val heightCm: Double` (non null) per `app/src/main/java/com/mustafan4x/msbattery/data/UserProfileEntity.kt:14`. Patient Advocate Issue 17 proposes an "Edit profile" path from Settings, which conflicts with `SPEC.md` Section 8's "append only at the Session level" framing: SPEC is silent on whether `UserProfileEntity` is mutable.
+**Why this is needed:** Patient Advocate Issue 4 proposes a "Skip for now" path on profile setup, which (in the Patient Advocate's framing) sets `heightCm` to null. `UserProfileEntity.heightCm` is currently `val heightCm: Double` (non null) per `app/src/main/java/com/mustafan4x/baselinems/data/UserProfileEntity.kt:14`. Patient Advocate Issue 17 proposes an "Edit profile" path from Settings, which conflicts with `SPEC.md` Section 8's "append only at the Session level" framing: SPEC is silent on whether `UserProfileEntity` is mutable.
 
 **Files reviewed:**
-- `app/src/main/java/com/mustafan4x/msbattery/data/UserProfileEntity.kt`
+- `app/src/main/java/com/mustafan4x/baselinems/data/UserProfileEntity.kt`
 - `SPEC.md` Section 8
 - `docs/data/schema.md` (if present; written by Data Engineer in Phase 1)
 
@@ -209,22 +209,22 @@ The 13 issues folded into Phase 2 from the Phase 1 review. Each task is bite siz
 ### Task 4: Human readable enum labels (Patient Advocate Issue 1)
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/ui/common/EnumLabels.kt`
-- Create: `app/src/test/java/com/mustafan4x/msbattery/ui/common/EnumLabelsTest.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/ui/common/EnumLabels.kt`
+- Create: `app/src/test/java/com/mustafan4x/baselinems/ui/common/EnumLabelsTest.kt`
 
 **Why:** the user sees raw enum names (`RRMS`, `UNDISCLOSED`, `AMBIDEXTROUS`, etc.) rendered in screaming caps. Patient Advocate Issue 1 names this as a dignity concern and a cog fog concern. The fix introduces a UI layer label resolver that does not change the Room enums.
 
 - [ ] **Step 1: Write the failing test**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/ui/common/EnumLabelsTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/ui/common/EnumLabelsTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.common
+package com.mustafan4x.baselinems.ui.common
 
-import com.mustafan4x.msbattery.data.Hand
-import com.mustafan4x.msbattery.data.MSType
-import com.mustafan4x.msbattery.data.Sex
-import com.mustafan4x.msbattery.data.TestType
+import com.mustafan4x.baselinems.data.Hand
+import com.mustafan4x.baselinems.data.MSType
+import com.mustafan4x.baselinems.data.Sex
+import com.mustafan4x.baselinems.data.TestType
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -263,21 +263,21 @@ class EnumLabelsTest {
 
 - [ ] **Step 2: Run the test to verify it fails**
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.ui.common.EnumLabelsTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.ui.common.EnumLabelsTest"`
 
 Expected: FAIL with `Unresolved reference: displayLabel`.
 
 - [ ] **Step 3: Write the implementation**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/common/EnumLabels.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/common/EnumLabels.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.common
+package com.mustafan4x.baselinems.ui.common
 
-import com.mustafan4x.msbattery.data.Hand
-import com.mustafan4x.msbattery.data.MSType
-import com.mustafan4x.msbattery.data.Sex
-import com.mustafan4x.msbattery.data.TestType
+import com.mustafan4x.baselinems.data.Hand
+import com.mustafan4x.baselinems.data.MSType
+import com.mustafan4x.baselinems.data.Sex
+import com.mustafan4x.baselinems.data.TestType
 
 fun Sex.displayLabel(): String = when (this) {
     Sex.FEMALE -> "Female"
@@ -311,33 +311,33 @@ fun TestType.displayLabel(): String = when (this) {
 
 - [ ] **Step 4: Run the test to verify it passes**
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.ui.common.EnumLabelsTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.ui.common.EnumLabelsTest"`
 
 Expected: PASS, four tests, zero failures.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/ui/common/EnumLabels.kt \
-         app/src/test/java/com/mustafan4x/msbattery/ui/common/EnumLabelsTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/ui/common/EnumLabels.kt \
+         app/src/test/java/com/mustafan4x/baselinems/ui/common/EnumLabelsTest.kt
 git commit -m "ui: human readable enum labels for profile and test type display"
 ```
 
 ### Task 5: Replace EnumDropdown with Material 3 ExposedDropdownMenuBox (Patient Advocate Issue 2)
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt`
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt`
 
 **Why:** Patient Advocate Issue 2 names the existing two step "Change" button plus dropdown as a cog fog burden. `ExposedDropdownMenuBox` is one tap to open, one tap to choose, label visible at all times.
 
 - [ ] **Step 1: Replace `EnumDropdown` with `EnumMenuBox` and switch the field rendering to label resolved**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt`
 
 Delete the existing `private fun <T : Enum<T>> EnumDropdown(...)` at lines 83 to 102 and replace its three call sites at lines 58, 59, 60 plus the new helper. The full file after the change:
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.onboarding
+package com.mustafan4x.baselinems.ui.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -363,12 +363,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.mustafan4x.msbattery.data.Hand
-import com.mustafan4x.msbattery.data.MSType
-import com.mustafan4x.msbattery.data.Sex
-import com.mustafan4x.msbattery.data.UserProfileDao
-import com.mustafan4x.msbattery.data.UserProfileEntity
-import com.mustafan4x.msbattery.ui.common.displayLabel
+import com.mustafan4x.baselinems.data.Hand
+import com.mustafan4x.baselinems.data.MSType
+import com.mustafan4x.baselinems.data.Sex
+import com.mustafan4x.baselinems.data.UserProfileDao
+import com.mustafan4x.baselinems.data.UserProfileEntity
+import com.mustafan4x.baselinems.ui.common.displayLabel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -521,10 +521,10 @@ This single file edit closes Patient Advocate Issues 1 (raw enum names; via `dis
 
 The Data Engineer's `docs/data/schema.md` "Phase 2 schema decisions, 2026-05-07" section ratified `heightCm: Double?` with a full `Migration(1, 2)` code block (Path A). The DBA's `docs/data/schema.md` "Phase 2 schema audit, DBA verdict, 2026-05-07" section reviewed the migration and recommended the KSP arg form for `exportSchema`. The Android Engineer applies all of the following from those two sections, in this commit ordering:
 
-1. Add the KSP `room.schemaLocation` arg to `app/build.gradle.kts` and flip `exportSchema = true` in `AppDatabase.kt`. Build once to capture `schemas/com.mustafan4x.msbattery.data.AppDatabase/1.json`. Commit this v1 snapshot capture as a separate commit before any version bump (per DBA Item 5 commit ordering).
-2. Modify `app/src/main/java/com/mustafan4x/msbattery/data/UserProfileEntity.kt` to make `heightCm: Double?` (nullable).
+1. Add the KSP `room.schemaLocation` arg to `app/build.gradle.kts` and flip `exportSchema = true` in `AppDatabase.kt`. Build once to capture `schemas/com.mustafan4x.baselinems.data.AppDatabase/1.json`. Commit this v1 snapshot capture as a separate commit before any version bump (per DBA Item 5 commit ordering).
+2. Modify `app/src/main/java/com/mustafan4x/baselinems/data/UserProfileEntity.kt` to make `heightCm: Double?` (nullable).
 3. Bump `AppDatabase` `version` from 1 to 2.
-4. Add the `MIGRATION_1_2` `Migration` object exactly as written in `docs/data/schema.md` Path A code, and wire it into the `Room.databaseBuilder(...)` call in `MSBatteryApp.kt` via `.addMigrations(MIGRATION_1_2)`.
+4. Add the `MIGRATION_1_2` `Migration` object exactly as written in `docs/data/schema.md` Path A code, and wire it into the `Room.databaseBuilder(...)` call in `BaselineMSApp.kt` via `.addMigrations(MIGRATION_1_2)`.
 5. Build again to capture the v2 snapshot, then commit the schema bump and migration.
 6. Add the Robolectric migration test from `docs/data/schema.md` with the five DBA modifications (assert all seven post migration columns; add the empty table case method; verify `MigrationTestHelper` constructor signature against the actual `room-testing` version on the classpath; switch `check` to `assertEquals`; add the post migration null insert read back assertion).
 
@@ -564,27 +564,27 @@ Expected: BUILD SUCCESSFUL. All 23 Phase 1 tests still pass plus the four new `E
 
 ```bash
 git add app/build.gradle.kts \
-         app/src/main/java/com/mustafan4x/msbattery/data/AppDatabase.kt \
-         app/schemas/com.mustafan4x.msbattery.data.AppDatabase/1.json
+         app/src/main/java/com/mustafan4x/baselinems/data/AppDatabase.kt \
+         app/schemas/com.mustafan4x.baselinems.data.AppDatabase/1.json
 git commit -m "data: capture v1 Room schema snapshot via KSP exportSchema"
 ```
 
 Then a second commit:
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt \
-         app/src/main/java/com/mustafan4x/msbattery/data/UserProfileEntity.kt \
-         app/src/main/java/com/mustafan4x/msbattery/data/AppDatabase.kt \
-         app/src/main/java/com/mustafan4x/msbattery/MSBatteryApp.kt \
-         app/src/test/java/com/mustafan4x/msbattery/data/Migration1To2Test.kt \
-         app/schemas/com.mustafan4x.msbattery.data.AppDatabase/2.json
+git add app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt \
+         app/src/main/java/com/mustafan4x/baselinems/data/UserProfileEntity.kt \
+         app/src/main/java/com/mustafan4x/baselinems/data/AppDatabase.kt \
+         app/src/main/java/com/mustafan4x/baselinems/BaselineMSApp.kt \
+         app/src/test/java/com/mustafan4x/baselinems/data/Migration1To2Test.kt \
+         app/schemas/com.mustafan4x.baselinems.data.AppDatabase/2.json
 git commit -m "ui(onboarding): exposed dropdown menu, no default values, plausibility validation, skip path; data: nullable heightCm via Migration(1, 2)"
 ```
 
 ### Task 6: Disclaimer chunking and (conditional) wording softening (Patient Advocate Issues 5 and 6)
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt`
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt`
 
 **Why:** Patient Advocate Issue 5 names dense centered body text as a low contrast sensitivity and cog fog burden. The structural fix (chunking into three left aligned sentences) is independent of regulatory wording. The wording softening of sentence 3 is gated on Phase 2A Task 1.
 
@@ -592,12 +592,12 @@ git commit -m "ui(onboarding): exposed dropdown menu, no default values, plausib
 
 The Compliance Reviewer's `docs/security/compliance-review.md` Entry 3 ratified the bare Patient Advocate proposal for sentence 3 ("When you visit your neurologist, you can share these results to help the conversation.") and the "Got it, continue" button copy as both COMPLIANT. Both ship verbatim.
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt`
 
 Replace the entire file with:
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.onboarding
+package com.mustafan4x.baselinems.ui.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -622,7 +622,7 @@ fun DisclaimerScreen(onAcknowledge: () -> Unit) {
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = "MS Neuro Battery",
+            text = "BaselineMS",
             style = MaterialTheme.typography.headlineLarge
         )
         Text(
@@ -659,23 +659,23 @@ Expected: BUILD SUCCESSFUL, tests pass.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/DisclaimerScreen.kt
+git add app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/DisclaimerScreen.kt
 git commit -m "ui(onboarding): chunk disclaimer to three left aligned sentences per patient advocate review"
 ```
 
 ### Task 7: HomeScreen warmer copy, spacer fix, relative dates (Patient Advocate Issues 7, 8, 9)
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/ui/home/HomeScreen.kt`
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/ui/home/HomeScreen.kt`
 
 **Why:** Issue 7 changes "Start weekly battery" to "Start this week's check in" and warms the empty state. Issue 8 replaces the double space hack with a `Spacer`. Issue 9 introduces relative dates ("Today, 14:30", "Yesterday, 09:15", "May 5") for session history.
 
 - [ ] **Step 1: Add a `formatRelative(epochMs)` helper with a unit test**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/ui/home/HomeScreenFormattersTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/ui/home/HomeScreenFormattersTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.home
+package com.mustafan4x.baselinems.ui.home
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -715,16 +715,16 @@ class HomeScreenFormattersTest {
 }
 ```
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.ui.home.HomeScreenFormattersTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.ui.home.HomeScreenFormattersTest"`
 
 Expected: FAIL with `Unresolved reference: formatRelative`.
 
 - [ ] **Step 2: Implement `formatRelative` and rewrite `HomeScreen.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/home/HomeScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/home/HomeScreen.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.home
+package com.mustafan4x.baselinems.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -750,8 +750,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.mustafan4x.msbattery.data.SessionDao
-import com.mustafan4x.msbattery.data.SessionEntity
+import com.mustafan4x.baselinems.data.SessionDao
+import com.mustafan4x.baselinems.data.SessionEntity
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -769,7 +769,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("MS Battery") },
+                title = { Text("BaselineMS") },
                 actions = {
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
@@ -846,31 +846,31 @@ internal fun formatRelative(epochMs: Long, locale: Locale): String {
 
 - [ ] **Step 3: Run the test to verify it passes**
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.ui.home.HomeScreenFormattersTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.ui.home.HomeScreenFormattersTest"`
 
 Expected: PASS, three tests.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/ui/home/HomeScreen.kt \
-         app/src/test/java/com/mustafan4x/msbattery/ui/home/HomeScreenFormattersTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/ui/home/HomeScreen.kt \
+         app/src/test/java/com/mustafan4x/baselinems/ui/home/HomeScreenFormattersTest.kt
 git commit -m "ui(home): warmer copy, spacer instead of double space, relative date formatting"
 ```
 
 ### Task 8: SessionRunnerScreen persistent header, cancel confirmation, idle and complete copy (Patient Advocate Issues 10, 11, 12, 13)
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt`
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt`
 
 **Why:** Issue 10 (persistent test progress header) is the load bearing precondition for Phase 2 — once `BilateralTapTest` hides its instructions during the 30 second tap window, the user has nothing reminding them what test they are on without this header. Issue 11 (cancel confirmation) prevents tremor patients from losing collected results. Issues 12 (idle copy) and 13 (complete copy) close the cog fog and tone gaps.
 
 - [ ] **Step 1: Rewrite `SessionRunnerScreen.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.home
+package com.mustafan4x.baselinems.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -896,8 +896,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.mustafan4x.msbattery.battery.BatteryOrchestrator
-import com.mustafan4x.msbattery.ui.common.displayLabel
+import com.mustafan4x.baselinems.battery.BatteryOrchestrator
+import com.mustafan4x.baselinems.ui.common.displayLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1010,23 +1010,23 @@ Expected: BUILD SUCCESSFUL, all tests still pass (this change does not change or
 - [ ] **Step 3: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/ui/home/SessionRunnerScreen.kt
+git add app/src/main/java/com/mustafan4x/baselinems/ui/home/SessionRunnerScreen.kt
 git commit -m "ui(session): persistent test header, cancel confirmation dialog, warmer idle and completion copy"
 ```
 
 ### Task 9: Settings DOB label, About bodyLarge, Spacer fix, conditional Edit profile (Patient Advocate Issues 15, 16, 17)
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt`
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt`
 
 **Why:** Issue 15 changes the "Date of birth: 1995-01-01" line to "Year of birth: 1995" because only the year was collected. Issue 16 raises the About disclaimer from `bodySmall` to `bodyLarge` and replaces the `Text(" ")` spacer hack with a `Spacer`. Issue 17 (Edit profile path) is gated on Phase 2A Task 2.
 
 - [ ] **Step 1: Rewrite `SettingsScreen.kt` for the unconditional changes**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui.settings
+package com.mustafan4x.baselinems.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -1049,9 +1049,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.mustafan4x.msbattery.data.UserProfileDao
-import com.mustafan4x.msbattery.data.UserProfileEntity
-import com.mustafan4x.msbattery.ui.common.displayLabel
+import com.mustafan4x.baselinems.data.UserProfileDao
+import com.mustafan4x.baselinems.data.UserProfileEntity
+import com.mustafan4x.baselinems.ui.common.displayLabel
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1088,7 +1088,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(16.dp))
             Text("About", style = MaterialTheme.typography.titleMedium)
             Text(
-                "MS Neuro Battery is not a medical device. " +
+                "BaselineMS is not a medical device. " +
                     "It does not diagnose or treat any condition.",
                 style = MaterialTheme.typography.bodyLarge
             )
@@ -1114,23 +1114,23 @@ Expected: BUILD SUCCESSFUL.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/ui/settings/SettingsScreen.kt
+git add app/src/main/java/com/mustafan4x/baselinems/ui/settings/SettingsScreen.kt
 git commit -m "ui(settings): year of birth label, bodyLarge about, spacer fix, optional edit profile entry"
 ```
 
 ### Task 10: RootScreen race fix and BilateralTapTest wire in deferred to Phase 2C (Patient Advocate Issue 18)
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt`
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt`
 
 **Why:** Issue 18 names a transient race where `startDestination` is computed before the suspending `hasProfile` resolves, briefly landing returning users on the profile setup screen. The fix: gate the `NavHost` behind a small splash that resolves both checks before any destination is picked. This is structural; the Tap test wire in lives in Phase 2C Task 17 below.
 
 - [ ] **Step 1: Rewrite `RootScreen.kt` for the race fix only (still wiring `MockTestModule` in the session route)**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.ui
+package com.mustafan4x.baselinems.ui
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -1149,23 +1149,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.mustafan4x.msbattery.MSBatteryApp
-import com.mustafan4x.msbattery.battery.BatteryOrchestrator
-import com.mustafan4x.msbattery.battery.MockTestModule
-import com.mustafan4x.msbattery.ui.home.HomeScreen
-import com.mustafan4x.msbattery.ui.home.SessionRunnerScreen
-import com.mustafan4x.msbattery.ui.onboarding.DisclaimerScreen
-import com.mustafan4x.msbattery.ui.onboarding.ProfileSetupScreen
-import com.mustafan4x.msbattery.ui.settings.SettingsScreen
-import com.mustafan4x.msbattery.util.DeviceInfo
+import com.mustafan4x.baselinems.BaselineMSApp
+import com.mustafan4x.baselinems.battery.BatteryOrchestrator
+import com.mustafan4x.baselinems.battery.MockTestModule
+import com.mustafan4x.baselinems.ui.home.HomeScreen
+import com.mustafan4x.baselinems.ui.home.SessionRunnerScreen
+import com.mustafan4x.baselinems.ui.onboarding.DisclaimerScreen
+import com.mustafan4x.baselinems.ui.onboarding.ProfileSetupScreen
+import com.mustafan4x.baselinems.ui.settings.SettingsScreen
+import com.mustafan4x.baselinems.util.DeviceInfo
 
-private const val PREFS = "msbattery_prefs"
+private const val PREFS = "baselinems_prefs"
 private const val KEY_DISCLAIMER = "disclaimer_acknowledged"
 
 @Composable
 fun RootScreen() {
     val context = LocalContext.current
-    val app = context.applicationContext as MSBatteryApp
+    val app = context.applicationContext as BaselineMSApp
     val nav = rememberNavController()
 
     var resolved by remember { mutableStateOf(false) }
@@ -1258,7 +1258,7 @@ Expected: BUILD SUCCESSFUL.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt
+git add app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt
 git commit -m "ui(root): resolve disclaimer and profile checks before nav host first composition"
 ```
 
@@ -1271,17 +1271,17 @@ This is the load bearing phase block. Pure Kotlin math files first, with TDD; Co
 ### Task 11: TapEvent and TapRound data models
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapEvent.kt`
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapRound.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapEvent.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapRound.kt`
 
 **Why:** the data models are the contract every other Tap module file consumes. Created without tests because there is no behavior; the behavior tests live in Task 12 where features are computed.
 
 - [ ] **Step 1: Create `TapEvent.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapEvent.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapEvent.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery.tap
+package com.mustafan4x.baselinems.battery.tap
 
 enum class TapSide { LEFT, RIGHT }
 
@@ -1298,10 +1298,10 @@ data class TapEvent(
 
 - [ ] **Step 2: Create `TapRound.kt`**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapRound.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapRound.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery.tap
+package com.mustafan4x.baselinems.battery.tap
 
 enum class HandRole { DOMINANT, NON_DOMINANT }
 
@@ -1322,25 +1322,25 @@ Expected: BUILD SUCCESSFUL.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapEvent.kt \
-         app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapRound.kt
+git add app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapEvent.kt \
+         app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapRound.kt
 git commit -m "battery(tap): tap event and tap round data models"
 ```
 
 ### Task 12: TapFeatures.computeRound (tap rate, ITI CV)
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapFeatures.kt`
-- Create: `app/src/test/java/com/mustafan4x/msbattery/battery/tap/TapFeaturesTest.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapFeatures.kt`
+- Create: `app/src/test/java/com/mustafan4x/baselinems/battery/tap/TapFeaturesTest.kt`
 
 **Why:** the per round features are the building blocks for everything else. TDD because the math is the load bearing piece of this phase.
 
 - [ ] **Step 1: Write the failing tests for tap rate and ITI CV**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/battery/tap/TapFeaturesTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/battery/tap/TapFeaturesTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery.tap
+package com.mustafan4x.baselinems.battery.tap
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -1421,16 +1421,16 @@ class TapFeaturesTest {
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.tap.TapFeaturesTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.tap.TapFeaturesTest"`
 
 Expected: FAIL with `Unresolved reference: TapFeatures` and `Unresolved reference: computeRound`.
 
 - [ ] **Step 3: Write the minimal implementation**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapFeatures.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapFeatures.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery.tap
+package com.mustafan4x.baselinems.battery.tap
 
 import kotlin.math.sqrt
 
@@ -1472,23 +1472,23 @@ object TapFeatures {
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.tap.TapFeaturesTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.tap.TapFeaturesTest"`
 
 Expected: PASS, six tests, zero failures.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapFeatures.kt \
-         app/src/test/java/com/mustafan4x/msbattery/battery/tap/TapFeaturesTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapFeatures.kt \
+         app/src/test/java/com/mustafan4x/baselinems/battery/tap/TapFeaturesTest.kt
 git commit -m "battery(tap): per round tap rate and inter tap interval coefficient of variation with tests"
 ```
 
 ### Task 13: Cross round features: asymmetry, miss rate, quality score
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapFeatures.kt`
-- Modify: `app/src/test/java/com/mustafan4x/msbattery/battery/tap/TapFeaturesTest.kt`
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapFeatures.kt`
+- Modify: `app/src/test/java/com/mustafan4x/baselinems/battery/tap/TapFeaturesTest.kt`
 
 **Why:** asymmetry, miss rate, and quality score live across both rounds and produce the final feature payload the orchestrator persists.
 
@@ -1581,13 +1581,13 @@ Append to `TapFeaturesTest.kt` (still inside the same class):
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.tap.TapFeaturesTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.tap.TapFeaturesTest"`
 
 Expected: FAIL with `Unresolved reference: computeSession` and `Unresolved reference: toFeatureMap`.
 
 - [ ] **Step 3: Extend `TapFeatures.kt`**
 
-Append to `app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapFeatures.kt` (extend the file, do not rewrite the existing object):
+Append to `app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapFeatures.kt` (extend the file, do not rewrite the existing object):
 
 ```kotlin
 data class SessionFeatures(
@@ -1643,34 +1643,34 @@ Note: `computeSession` is declared as an extension on the `TapFeatures` object s
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.tap.TapFeaturesTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.tap.TapFeaturesTest"`
 
 Expected: PASS, twelve tests total in `TapFeaturesTest`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/battery/tap/TapFeatures.kt \
-         app/src/test/java/com/mustafan4x/msbattery/battery/tap/TapFeaturesTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/battery/tap/TapFeatures.kt \
+         app/src/test/java/com/mustafan4x/baselinems/battery/tap/TapFeaturesTest.kt
 git commit -m "battery(tap): cross round asymmetry, miss rate, quality score, feature map"
 ```
 
 ### Task 14: BilateralTapTest module skeleton conforming to TestModule
 
 **Files:**
-- Create: `app/src/main/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTest.kt`
-- Create: `app/src/test/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTestMetadataTest.kt`
+- Create: `app/src/main/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTest.kt`
+- Create: `app/src/test/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTestMetadataTest.kt`
 
 **Why:** the metadata fields (`testType`, `displayName`, `instructions`, `estimatedDurationSeconds`) are part of the `TestModule` contract and are exercised by the orchestrator and the SessionRunnerScreen. Test the metadata first; the Compose UI follows in the next task.
 
 - [ ] **Step 1: Write the failing test**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTestMetadataTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTestMetadataTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery.tap
+package com.mustafan4x.baselinems.battery.tap
 
-import com.mustafan4x.msbattery.data.TestType
+import com.mustafan4x.baselinems.data.TestType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -1693,21 +1693,21 @@ The estimated duration is 70 seconds: 5 second pre test instructions, 30 seconds
 
 - [ ] **Step 2: Run the test to verify it fails**
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.tap.BilateralTapTestMetadataTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.tap.BilateralTapTestMetadataTest"`
 
 Expected: FAIL with `Unresolved reference: BilateralTapTest`.
 
 - [ ] **Step 3: Create the module skeleton**
 
-File: `app/src/main/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTest.kt`
+File: `app/src/main/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery.tap
+package com.mustafan4x.baselinems.battery.tap
 
 import androidx.compose.runtime.Composable
-import com.mustafan4x.msbattery.battery.TestModule
-import com.mustafan4x.msbattery.battery.TestResultPayload
-import com.mustafan4x.msbattery.data.TestType
+import com.mustafan4x.baselinems.battery.TestModule
+import com.mustafan4x.baselinems.battery.TestResultPayload
+import com.mustafan4x.baselinems.data.TestType
 
 class BilateralTapTest : TestModule {
 
@@ -1735,7 +1735,7 @@ class BilateralTapTest : TestModule {
 
 - [ ] **Step 4: Add the placeholder composable so the file compiles**
 
-Append to `app/src/main/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTest.kt`:
+Append to `app/src/main/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTest.kt`:
 
 ```kotlin
 @Composable
@@ -1750,22 +1750,22 @@ This placeholder is replaced in Task 15. It exists now only so the metadata test
 
 - [ ] **Step 5: Run the test to verify it passes**
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.tap.BilateralTapTestMetadataTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.tap.BilateralTapTestMetadataTest"`
 
 Expected: PASS, one test.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTest.kt \
-         app/src/test/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTestMetadataTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTest.kt \
+         app/src/test/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTestMetadataTest.kt
 git commit -m "battery(tap): bilateral tap test module skeleton with metadata test"
 ```
 
 ### Task 15: BilateralTapTest Compose UI: countdown, targets, rounds, completion
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTest.kt` (replace the placeholder `BilateralTapTestContent`)
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTest.kt` (replace the placeholder `BilateralTapTestContent`)
 
 **Why:** the UI is the seam where touchscreen events become `TapEvent`s. The Compose layer drives the round state machine: pre instructions → countdown → dominant round → rest → countdown → non dominant round → complete.
 
@@ -1773,7 +1773,7 @@ The UI is intentionally not unit tested at this layer because the math is fully 
 
 - [ ] **Step 1: Add the new imports at the top of `BilateralTapTest.kt`**
 
-Append to the existing import block at the top of `app/src/main/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTest.kt`:
+Append to the existing import block at the top of `app/src/main/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTest.kt`:
 
 ```kotlin
 import androidx.compose.foundation.background
@@ -2034,23 +2034,23 @@ Expected: BUILD SUCCESSFUL, all tests still pass.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTest.kt
+git add app/src/main/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTest.kt
 git commit -m "battery(tap): bilateral tap test compose ui with countdown, two rounds, and rest phase"
 ```
 
 ### Task 16: Compose smoke test for BilateralTapTest
 
 **Files:**
-- Create: `app/src/test/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTestRenderTest.kt`
+- Create: `app/src/test/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTestRenderTest.kt`
 
 **Why:** verifies the screen renders without crashing in the pre instructions phase. Deeper UI testing (countdown ticking, target touches counting taps) is expensive to test and is verified by the Patient Advocate review in Phase 2D and the manual emulator walkthrough. This single smoke test is enough to catch a Compose composable that fails on first composition.
 
 - [ ] **Step 1: Write the test**
 
-File: `app/src/test/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTestRenderTest.kt`
+File: `app/src/test/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTestRenderTest.kt`
 
 ```kotlin
-package com.mustafan4x.msbattery.battery.tap
+package com.mustafan4x.baselinems.battery.tap
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -2079,7 +2079,7 @@ class BilateralTapTestRenderTest {
 
 - [ ] **Step 2: Run the test**
 
-Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.battery.tap.BilateralTapTestRenderTest"`
+Run: `./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.battery.tap.BilateralTapTestRenderTest"`
 
 If `androidx.compose.ui.test.junit4` is not on the test classpath, the test fails to compile. In that case, add to `app/build.gradle.kts` `dependencies` block:
 
@@ -2097,7 +2097,7 @@ If adding the dependency turns out to be non trivial in this Phase 2 window (Com
 - [ ] **Step 3: Commit**
 
 ```bash
-git add app/src/test/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTestRenderTest.kt \
+git add app/src/test/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTestRenderTest.kt \
          app/build.gradle.kts
 git commit -m "battery(tap): compose smoke test verifying pre instructions render"
 ```
@@ -2105,22 +2105,22 @@ git commit -m "battery(tap): compose smoke test verifying pre instructions rende
 ### Task 17: Wire BilateralTapTest into RootScreen, replacing MockTestModule
 
 **Files:**
-- Modify: `app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt`
+- Modify: `app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt`
 
 **Why:** the user facing flow now runs the real Tap test. `MockTestModule` and its tests stay in the codebase because the `MockTestModuleTest` and `BatteryOrchestratorTest` and `BatteryFlowIntegrationTest` use it as a test fixture; only the `RootScreen` `session` route changes its module list.
 
 - [ ] **Step 1: Edit `RootScreen.kt`**
 
-In `app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt`, replace the import:
+In `app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt`, replace the import:
 
 ```kotlin
-import com.mustafan4x.msbattery.battery.MockTestModule
+import com.mustafan4x.baselinems.battery.MockTestModule
 ```
 
 with:
 
 ```kotlin
-import com.mustafan4x.msbattery.battery.tap.BilateralTapTest
+import com.mustafan4x.baselinems.battery.tap.BilateralTapTest
 ```
 
 and replace the `modules = listOf(MockTestModule())` line in the `composable("session")` block with:
@@ -2138,7 +2138,7 @@ Expected: BUILD SUCCESSFUL, all tests pass. Note: `BatteryFlowIntegrationTest` a
 - [ ] **Step 3: Commit**
 
 ```bash
-git add app/src/main/java/com/mustafan4x/msbattery/ui/RootScreen.kt
+git add app/src/main/java/com/mustafan4x/baselinems/ui/RootScreen.kt
 git commit -m "ui(root): wire bilateral tap test as the first concrete test module"
 ```
 

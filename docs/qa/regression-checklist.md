@@ -32,14 +32,14 @@ Keep entries small and falsifiable. "The app works" is not a checklist item. "On
 - Outcome: `BUILD SUCCESSFUL in 10s`, 30 actionable tasks executed.
 - Total tests run: 23 across 8 suites, 0 failures, 0 errors, 0 skipped (verified by parsing `app/build/test-results/testDebugUnitTest/TEST-*.xml`). This matches the Code Reviewer's reported counts.
 - Per suite breakdown:
-  - `com.mustafan4x.msbattery.data.EnumsTest`: 5 tests, all pass.
-  - `com.mustafan4x.msbattery.data.ConvertersTest`: 5 tests, all pass.
-  - `com.mustafan4x.msbattery.data.UserProfileDaoTest`: 2 tests, all pass.
-  - `com.mustafan4x.msbattery.data.SessionDaoTest`: 3 tests, all pass.
-  - `com.mustafan4x.msbattery.data.TestResultDaoTest`: 1 test, all pass.
-  - `com.mustafan4x.msbattery.battery.MockTestModuleTest`: 2 tests, all pass.
-  - `com.mustafan4x.msbattery.battery.BatteryOrchestratorTest`: 4 tests, all pass.
-  - `com.mustafan4x.msbattery.battery.BatteryFlowIntegrationTest`: 1 test, passes.
+  - `com.mustafan4x.baselinems.data.EnumsTest`: 5 tests, all pass.
+  - `com.mustafan4x.baselinems.data.ConvertersTest`: 5 tests, all pass.
+  - `com.mustafan4x.baselinems.data.UserProfileDaoTest`: 2 tests, all pass.
+  - `com.mustafan4x.baselinems.data.SessionDaoTest`: 3 tests, all pass.
+  - `com.mustafan4x.baselinems.data.TestResultDaoTest`: 1 test, all pass.
+  - `com.mustafan4x.baselinems.battery.MockTestModuleTest`: 2 tests, all pass.
+  - `com.mustafan4x.baselinems.battery.BatteryOrchestratorTest`: 4 tests, all pass.
+  - `com.mustafan4x.baselinems.battery.BatteryFlowIntegrationTest`: 1 test, passes.
 
 **Commit chain on `main` from `60b370e..HEAD`.** 12 commits verified.
 
@@ -51,7 +51,7 @@ Keep entries small and falsifiable. "The app works" is not a checklist item. "On
 6. `4a928eb` feat(battery): implement BatteryOrchestrator state machine (Task 7)
 7. `d59efa5` feat(ui): add disclaimer and profile setup screens (Task 8)
 8. `45df915` feat(ui): add home, session runner, and settings screens (Task 9)
-9. `47e5cf4` feat(app): wire RootScreen, MSBatteryApp Application class, and MainActivity (Task 10)
+9. `47e5cf4` feat(app): wire RootScreen, BaselineMSApp Application class, and MainActivity (Task 10)
 10. `3535ee6` test(battery): add end to end integration test (Task 11)
 11. `b2286c5` docs: update README for Phase 1 completion (Task 12, Documentation Engineer)
 12. `5adf1bd` Phase 1 reviews: DBA schema audit (PASS) and Patient Advocate Phase 1 review (18 issues for Phase 2 prep)
@@ -91,20 +91,20 @@ Keep entries small and falsifiable. "The app works" is not a checklist item. "On
 - Outcome: `BUILD SUCCESSFUL in 13s`, 30 actionable tasks executed.
 - Total tests run: **46 tests, 0 failures, 0 errors, 0 skipped** (verified by parsing `app/build/test-results/testDebugUnitTest/TEST-*.xml`).
 - Per suite breakdown:
-  - `com.mustafan4x.msbattery.battery.BatteryFlowIntegrationTest`: 1 test, passes (carried from Phase 1).
-  - `com.mustafan4x.msbattery.battery.BatteryOrchestratorTest`: 4 tests, all pass (carried from Phase 1).
-  - `com.mustafan4x.msbattery.battery.MockTestModuleTest`: 2 tests, all pass (carried from Phase 1).
-  - `com.mustafan4x.msbattery.battery.tap.BilateralTapTestMetadataTest`: 1 test, passes (new in Phase 2).
-  - `com.mustafan4x.msbattery.battery.tap.BilateralTapTestRenderTest`: 1 test, passes (new in Phase 2).
-  - `com.mustafan4x.msbattery.battery.tap.TapFeaturesTest`: 12 tests, all pass (new in Phase 2).
-  - `com.mustafan4x.msbattery.data.ConvertersTest`: 5 tests, all pass (carried from Phase 1).
-  - `com.mustafan4x.msbattery.data.EnumsTest`: 5 tests, all pass (carried from Phase 1).
-  - `com.mustafan4x.msbattery.data.Migration1To2Test`: 2 tests, all pass (new in Phase 2: Room v1 to v2 migration for nullable `heightCm`).
-  - `com.mustafan4x.msbattery.data.SessionDaoTest`: 3 tests, all pass (carried from Phase 1).
-  - `com.mustafan4x.msbattery.data.TestResultDaoTest`: 1 test, passes (carried from Phase 1).
-  - `com.mustafan4x.msbattery.data.UserProfileDaoTest`: 2 tests, all pass (carried from Phase 1).
-  - `com.mustafan4x.msbattery.ui.common.EnumLabelsTest`: 4 tests, all pass (new in Phase 2: human readable enum label resolver).
-  - `com.mustafan4x.msbattery.ui.home.HomeScreenFormattersTest`: 3 tests, all pass (new in Phase 2: relative date formatters).
+  - `com.mustafan4x.baselinems.battery.BatteryFlowIntegrationTest`: 1 test, passes (carried from Phase 1).
+  - `com.mustafan4x.baselinems.battery.BatteryOrchestratorTest`: 4 tests, all pass (carried from Phase 1).
+  - `com.mustafan4x.baselinems.battery.MockTestModuleTest`: 2 tests, all pass (carried from Phase 1).
+  - `com.mustafan4x.baselinems.battery.tap.BilateralTapTestMetadataTest`: 1 test, passes (new in Phase 2).
+  - `com.mustafan4x.baselinems.battery.tap.BilateralTapTestRenderTest`: 1 test, passes (new in Phase 2).
+  - `com.mustafan4x.baselinems.battery.tap.TapFeaturesTest`: 12 tests, all pass (new in Phase 2).
+  - `com.mustafan4x.baselinems.data.ConvertersTest`: 5 tests, all pass (carried from Phase 1).
+  - `com.mustafan4x.baselinems.data.EnumsTest`: 5 tests, all pass (carried from Phase 1).
+  - `com.mustafan4x.baselinems.data.Migration1To2Test`: 2 tests, all pass (new in Phase 2: Room v1 to v2 migration for nullable `heightCm`).
+  - `com.mustafan4x.baselinems.data.SessionDaoTest`: 3 tests, all pass (carried from Phase 1).
+  - `com.mustafan4x.baselinems.data.TestResultDaoTest`: 1 test, passes (carried from Phase 1).
+  - `com.mustafan4x.baselinems.data.UserProfileDaoTest`: 2 tests, all pass (carried from Phase 1).
+  - `com.mustafan4x.baselinems.ui.common.EnumLabelsTest`: 4 tests, all pass (new in Phase 2: human readable enum label resolver).
+  - `com.mustafan4x.baselinems.ui.home.HomeScreenFormattersTest`: 3 tests, all pass (new in Phase 2: relative date formatters).
 - Phase 1 baseline was 23 tests across 8 suites. Phase 2 adds 23 tests across 6 new suites, for a Phase 2 close total of 46 tests across 14 suites.
 
 **Build clean status.**
@@ -209,32 +209,32 @@ The manual emulator walkthrough is the user's responsibility. The QA Engineer is
 - Total tests run: **83 tests across 25 suites, 0 failures, 0 errors, 0 skipped** (verified by parsing `app/build/test-results/testDebugUnitTest/TEST-*.xml`).
 - Phase 2 close baseline was 48 tests; Phase 3 grew the suite by 35 tests across 11 new suites for a Phase 3 close total of 83 tests across 25 suites. Strict growth confirmed.
 - Per suite breakdown of the 11 Phase 3 additions:
-  - `com.mustafan4x.msbattery.dsp.ButterworthLowPassTest`: 3 tests, all pass.
-  - `com.mustafan4x.msbattery.dsp.MadgwickTest`: 2 tests, all pass.
-  - `com.mustafan4x.msbattery.dsp.WorldFrameTest`: 2 tests, all pass.
-  - `com.mustafan4x.msbattery.dsp.StepDetectorTest`: 2 tests, all pass.
-  - `com.mustafan4x.msbattery.dsp.StridePairingTest`: 4 tests, all pass.
-  - `com.mustafan4x.msbattery.dsp.ZuptTest`: 3 tests, all pass.
-  - `com.mustafan4x.msbattery.dsp.FeatureExtractorTest`: 7 tests, all pass.
-  - `com.mustafan4x.msbattery.dsp.QuaternionTest`: 2 tests, all pass (added by the M2 fix in commit `78c14e5` after the Code Reviewer verdict).
-  - `com.mustafan4x.msbattery.dsp.GaitPipelineIntegrationTest`: 4 tests, all pass.
-  - `com.mustafan4x.msbattery.fixtures.SyntheticImuTest`: 6 tests, all pass.
+  - `com.mustafan4x.baselinems.dsp.ButterworthLowPassTest`: 3 tests, all pass.
+  - `com.mustafan4x.baselinems.dsp.MadgwickTest`: 2 tests, all pass.
+  - `com.mustafan4x.baselinems.dsp.WorldFrameTest`: 2 tests, all pass.
+  - `com.mustafan4x.baselinems.dsp.StepDetectorTest`: 2 tests, all pass.
+  - `com.mustafan4x.baselinems.dsp.StridePairingTest`: 4 tests, all pass.
+  - `com.mustafan4x.baselinems.dsp.ZuptTest`: 3 tests, all pass.
+  - `com.mustafan4x.baselinems.dsp.FeatureExtractorTest`: 7 tests, all pass.
+  - `com.mustafan4x.baselinems.dsp.QuaternionTest`: 2 tests, all pass (added by the M2 fix in commit `78c14e5` after the Code Reviewer verdict).
+  - `com.mustafan4x.baselinems.dsp.GaitPipelineIntegrationTest`: 4 tests, all pass.
+  - `com.mustafan4x.baselinems.fixtures.SyntheticImuTest`: 6 tests, all pass.
 - All 14 Phase 1 and Phase 2 suites carry forward with their counts unchanged.
 
 **Privacy and architectural rail spot checks.**
 
-- `grep -rn "import android" app/src/main/java/com/mustafan4x/msbattery/dsp/` returns nothing. The DSP package is pure Kotlin with zero `android.*` imports, as required by `SPEC.md` Section 5.2 and the Phase 3 plan architectural rail.
+- `grep -rn "import android" app/src/main/java/com/mustafan4x/baselinems/dsp/` returns nothing. The DSP package is pure Kotlin with zero `android.*` imports, as required by `SPEC.md` Section 5.2 and the Phase 3 plan architectural rail.
 - `grep -n "INTERNET" app/src/main/AndroidManifest.xml` returns nothing. The carryover Phase 1 and Phase 2 invariant (no `android.permission.INTERNET`) holds. Security Engineer's hard rail is intact.
 
 ### Falsifiable conditions for Phase 3 (DSP package)
 
-The conditions below are the regression tripwires for any future change that touches `app/src/main/java/com/mustafan4x/msbattery/dsp/` or `app/src/test/java/com/mustafan4x/msbattery/fixtures/`. Each item names the verification command or grep that confirms the condition holds.
+The conditions below are the regression tripwires for any future change that touches `app/src/main/java/com/mustafan4x/baselinems/dsp/` or `app/src/test/java/com/mustafan4x/baselinems/fixtures/`. Each item names the verification command or grep that confirms the condition holds.
 
 #### Per fixture pipeline accuracy budgets (`GaitPipelineIntegrationTest`)
 
 The integration test exercises four of the seven `PreCannedFixtures` entries. The other three (`slowWalk`, `briskWalk`, `severeAsymmetry`) are declared but not yet exercised; see L1 in the carryover notes below.
 
-- [ ] `healthyControlNormal` recovers cadence within 3 percent of 115.2 steps per minute. Verify with `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.dsp.GaitPipelineIntegrationTest.healthy control normal recovers cadence within 3 percent and stride length within 2 percent"`. The assertion lives at `app/src/test/java/com/mustafan4x/msbattery/dsp/GaitPipelineIntegrationTest.kt` line 15.
+- [ ] `healthyControlNormal` recovers cadence within 3 percent of 115.2 steps per minute. Verify with `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.dsp.GaitPipelineIntegrationTest.healthy control normal recovers cadence within 3 percent and stride length within 2 percent"`. The assertion lives at `app/src/test/java/com/mustafan4x/baselinems/dsp/GaitPipelineIntegrationTest.kt` line 15.
 - [ ] `healthyControlNormal` recovers stride length within 2 percent of 1.442 m. Same test method as above; the assertion is at line 16.
 - [ ] `msTypicalNormal` recovers cadence within 3 percent of 94.4 steps per minute. Verify with the test method `MS typical normal recovers within the same envelope`; assertion at line 24.
 - [ ] `msTypicalNormal` recovers stride length within 2 percent of 0.906 m. Same test method; assertion at line 25.
@@ -256,7 +256,7 @@ The two floor values reflect the orientation residual quality model documented i
 
 #### Per module DSP unit test bars
 
-Each falsifiable condition below is "the named test class passes with the recorded test count." The verification command is `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.dsp.<ClassName>"`.
+Each falsifiable condition below is "the named test class passes with the recorded test count." The verification command is `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.dsp.<ClassName>"`.
 
 - [ ] `ButterworthLowPassTest` passes with 3 tests. Covers DC pass, high frequency suppression, and zero phase response.
 - [ ] `MadgwickTest` passes with 2 tests. Covers static gravity convergence and gyroscope only integration.
@@ -269,7 +269,7 @@ Each falsifiable condition below is "the named test class passes with the record
 
 #### Synthetic generator round trip tests
 
-- [ ] `SyntheticImuTest` passes with 6 tests. Verify with `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.fixtures.SyntheticImuTest"`. The six round trip checks ensure the fixture generator's stated ground truth (number of heel strikes, mean stride length, asymmetry ratio, step time CV, gravity addition, and rotation vector convention) is recoverable by inversion of the generator's parameters. If a future change to `SyntheticImu.kt` regresses any of these round trips, every downstream pipeline test is invalidated.
+- [ ] `SyntheticImuTest` passes with 6 tests. Verify with `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.fixtures.SyntheticImuTest"`. The six round trip checks ensure the fixture generator's stated ground truth (number of heel strikes, mean stride length, asymmetry ratio, step time CV, gravity addition, and rotation vector convention) is recoverable by inversion of the generator's parameters. If a future change to `SyntheticImu.kt` regresses any of these round trips, every downstream pipeline test is invalidated.
 
 #### Suite growth and green bar
 
@@ -278,7 +278,7 @@ Each falsifiable condition below is "the named test class passes with the record
 
 #### Architectural rails (carryover from Phase 1 and Phase 2)
 
-- [ ] No `android.*` import appears anywhere under `app/src/main/java/com/mustafan4x/msbattery/dsp/`. Verify with `grep -rn "import android" app/src/main/java/com/mustafan4x/msbattery/dsp/`. The DSP package is pure Kotlin per `SPEC.md` Section 5.2 ("Signal Processing. Pure Kotlin. No sensor or UI imports.").
+- [ ] No `android.*` import appears anywhere under `app/src/main/java/com/mustafan4x/baselinems/dsp/`. Verify with `grep -rn "import android" app/src/main/java/com/mustafan4x/baselinems/dsp/`. The DSP package is pure Kotlin per `SPEC.md` Section 5.2 ("Signal Processing. Pure Kotlin. No sensor or UI imports.").
 - [ ] No `android.permission.INTERNET` appears in `app/src/main/AndroidManifest.xml`. Verify with `grep -n "INTERNET" app/src/main/AndroidManifest.xml`. This is the Security Engineer's hard rail per `SPEC.md` Section 10 and the carryover Phase 1 plus Phase 2 invariant.
 
 ### Sign off and carryover items
@@ -333,7 +333,7 @@ There is no Phase 3 manual emulator walkthrough. Phase 3 is a pure Kotlin DSP mo
 7. `2f47991` signals: RawSensorWriter gzipped CSV persistence with round trip tests (Task 5).
 8. `c33988f` battery(gait): instructions, countdown, capture, done screens with smoke tests (Task 6).
 9. `34a3174` battery(gait): viewmodel state machine and TestModule integration (Task 7).
-10. `d9b4795` battery(gait): register GaitTest in MSBatteryApp module list (Task 8).
+10. `d9b4795` battery(gait): register GaitTest in BaselineMSApp module list (Task 8).
 11. `bf99d79` review(gait): Signal Processing Engineer Phase 4 sensor stream review (Task 9).
 12. `4bc1bec` review(gait): Patient Advocate Phase 4 review (Task 10).
 13. `a8ca3e2` perf(gait): Phase 4 Performance Engineer review of sensor capture path (Task 11).
@@ -346,8 +346,8 @@ The PM handoff note for this sign off named 11 commits from `4cd0a72` exclusive;
 
 **Privacy and architectural rail spot checks.**
 
-- `grep -in 'INTERNET' /home/mustafa/src/MS-Battery/app/src/main/AndroidManifest.xml` returns nothing (exit 1). The carryover invariant from Phase 1, Phase 2, and Phase 3 (no `android.permission.INTERNET`) holds. Security Engineer's hard rail is intact. The Code Reviewer's Task 12 verdict independently verified `git diff 4cd0a72..HEAD -- app/src/main/AndroidManifest.xml` returns nothing; the manifest is byte identical to the Phase 3 close commit `4cd0a72`.
-- `grep -rn "import android" app/src/main/java/com/mustafan4x/msbattery/dsp/` continues to return nothing; the DSP package remains pure Kotlin with zero `android.*` imports per `SPEC.md` Section 5.2 and Phase 3 architectural rail. Phase 4 added `signals/` as a thin adaptation layer above `dsp/`; the dependency direction is `signals/` to `dsp/` only, verified by `grep -rn "import com.mustafan4x.msbattery.signals" app/src/main/java/com/mustafan4x/msbattery/dsp/` returning nothing (recorded in `docs/qa/code-review-phase-4.md` PASS section).
+- `grep -in 'INTERNET' /home/mustafa/src/BaselineMS/app/src/main/AndroidManifest.xml` returns nothing (exit 1). The carryover invariant from Phase 1, Phase 2, and Phase 3 (no `android.permission.INTERNET`) holds. Security Engineer's hard rail is intact. The Code Reviewer's Task 12 verdict independently verified `git diff 4cd0a72..HEAD -- app/src/main/AndroidManifest.xml` returns nothing; the manifest is byte identical to the Phase 3 close commit `4cd0a72`.
+- `grep -rn "import android" app/src/main/java/com/mustafan4x/baselinems/dsp/` continues to return nothing; the DSP package remains pure Kotlin with zero `android.*` imports per `SPEC.md` Section 5.2 and Phase 3 architectural rail. Phase 4 added `signals/` as a thin adaptation layer above `dsp/`; the dependency direction is `signals/` to `dsp/` only, verified by `grep -rn "import com.mustafan4x.baselinems.signals" app/src/main/java/com/mustafan4x/baselinems/dsp/` returning nothing (recorded in `docs/qa/code-review-phase-4.md` PASS section).
 
 ### Falsifiable conditions for Phase 4 (gait test module integration)
 
@@ -355,27 +355,27 @@ Each of the eight conditions below is the regression tripwire taken verbatim fro
 
 #### Condition 1, AndroidImuSourceTest four cases
 
-- **Verified yes.** `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.msbattery.signals.AndroidImuSourceTest"` reports `tests=4 failures=0 errors=0 skipped=0` (parsed from `app/build/test-results/testDebugUnitTest/TEST-com.mustafan4x.msbattery.signals.AndroidImuSourceTest.xml`). The four cases cover (a) `start` registers listeners on the system `SensorManager`, (b) `stream` emits an `ImuSample` on each linear acceleration event with held gyro and rotation values via zero order hold, (c) `stop` unregisters all listeners, and (d) when `Sensor.TYPE_ROTATION_VECTOR` is absent the fallback Madgwick fills `ImuSample.rotationVector` with a non null quaternion.
+- **Verified yes.** `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest --tests "com.mustafan4x.baselinems.signals.AndroidImuSourceTest"` reports `tests=4 failures=0 errors=0 skipped=0` (parsed from `app/build/test-results/testDebugUnitTest/TEST-com.mustafan4x.baselinems.signals.AndroidImuSourceTest.xml`). The four cases cover (a) `start` registers listeners on the system `SensorManager`, (b) `stream` emits an `ImuSample` on each linear acceleration event with held gyro and rotation values via zero order hold, (c) `stop` unregisters all listeners, and (d) when `Sensor.TYPE_ROTATION_VECTOR` is absent the fallback Madgwick fills `ImuSample.rotationVector` with a non null quaternion.
 - **Failure mode that would invalidate this condition.** Any of the four cases regressing (a missing listener registration, a dropped held value, a leaked listener after `stop`, or a null `rotationVector` on the fallback path), or the test class disappearing from the suite. SPE M1 flags a fixture realism caveat on case (d) (the test does not exercise the fallback Madgwick with realistic gravity included input) and is deferred to Phase 5 prep; the case still passes as written and is not invalidated by the SPE finding.
 
 #### Condition 2, RawSensorWriterTest two cases
 
-- **Verified yes.** `tests=2 failures=0 errors=0 skipped=0` on `com.mustafan4x.msbattery.signals.RawSensorWriterTest`. The two cases cover (a) round trip: a known stream of `ImuSample` rows is written to a gzipped CSV, read back, decompressed, parsed, and every field is recovered within floating point precision; (b) exception propagation: a flow that throws after N samples results in the writer closing the file and rethrowing.
+- **Verified yes.** `tests=2 failures=0 errors=0 skipped=0` on `com.mustafan4x.baselinems.signals.RawSensorWriterTest`. The two cases cover (a) round trip: a known stream of `ImuSample` rows is written to a gzipped CSV, read back, decompressed, parsed, and every field is recovered within floating point precision; (b) exception propagation: a flow that throws after N samples results in the writer closing the file and rethrowing.
 - **Failure mode that would invalidate this condition.** A round trip drift on any of the 14 columns (timestamp, three acceleration channels, three gyro channels, three linear acceleration channels, four rotation vector components), or the writer leaking the file handle after an exception, or the exception being swallowed.
 
 #### Condition 3, GaitTestViewModelTest six cases
 
-- **Verified yes.** `tests=6 failures=0 errors=0 skipped=0` on `com.mustafan4x.msbattery.battery.gait.GaitTestViewModelTest`. The six cases cover (1) Instructions to Countdown(3) on `onStart()`, (2) Countdown(3) to Capturing(0) after three one second ticks, (3) `imuSource.start()` and `RawSensorWriter.write()` invoked once on capture entry with samples accumulated in order, (4) Capturing to Done after 30 seconds with non null `GaitFeatures`, (5) `onCancel()` from Capturing transitions to Cancelled and stops the source, (6) `onContinue` from Done invokes the completion callback with a `TestResultPayload` whose `rawSensorRelativePath` matches the destination file's relative path under `Context.filesDir`.
+- **Verified yes.** `tests=6 failures=0 errors=0 skipped=0` on `com.mustafan4x.baselinems.battery.gait.GaitTestViewModelTest`. The six cases cover (1) Instructions to Countdown(3) on `onStart()`, (2) Countdown(3) to Capturing(0) after three one second ticks, (3) `imuSource.start()` and `RawSensorWriter.write()` invoked once on capture entry with samples accumulated in order, (4) Capturing to Done after 30 seconds with non null `GaitFeatures`, (5) `onCancel()` from Capturing transitions to Cancelled and stops the source, (6) `onContinue` from Done invokes the completion callback with a `TestResultPayload` whose `rawSensorRelativePath` matches the destination file's relative path under `Context.filesDir`.
 - **Failure mode that would invalidate this condition.** Any case regressing, or the state machine accepting a transition the spec forbids (Instructions to Capturing without a Countdown, Capturing to Done before 30 seconds without a cancel, etc.). SPE I1 flags a tail edge sample loss on cancel that is acceptable for Phase 4 and deferred to Phase 5 prep; case (5) still passes as written because the assertion is on state transition and source lifecycle, not on the trailing sample count.
 
 #### Condition 4, Compose smoke tests on the four GaitTest screens
 
-- **Verified yes.** `tests=4 failures=0 errors=0 skipped=0` on `com.mustafan4x.msbattery.battery.gait.GaitTestRenderTest`. The four smoke tests cover Instructions, Countdown, Capture, and Done. Each test asserts the screen renders without crashing in a Robolectric Compose host and that the primary CTA's semantic node exists (Instructions has `I am ready` and `Skip for now`; Countdown exposes the current second via `Modifier.semantics { contentDescription = secondsLabel }` plus the `Get ready to walk` headline endorsed by the Patient Advocate; Capture has a Cancel button; Done has Continue).
+- **Verified yes.** `tests=4 failures=0 errors=0 skipped=0` on `com.mustafan4x.baselinems.battery.gait.GaitTestRenderTest`. The four smoke tests cover Instructions, Countdown, Capture, and Done. Each test asserts the screen renders without crashing in a Robolectric Compose host and that the primary CTA's semantic node exists (Instructions has `I am ready` and `Skip for now`; Countdown exposes the current second via `Modifier.semantics { contentDescription = secondsLabel }` plus the `Get ready to walk` headline endorsed by the Patient Advocate; Capture has a Cancel button; Done has Continue).
 - **Failure mode that would invalidate this condition.** A screen failing to render in the test host (e.g. a Compose runtime exception), the loss of a primary CTA semantic node, or the Cancelled state path failing to reach `GaitDoneScreen` via `GaitTest.kt` lines 61 to 64.
 
 #### Condition 5, BatteryFlowIntegrationTest with the new orchestrator signature
 
-- **Verified yes.** `tests=1 failures=0 errors=0 skipped=0` on `com.mustafan4x.msbattery.battery.BatteryFlowIntegrationTest`. The orchestrator's `recordResult` was migrated in commit `b8187c8` from the three argument `recordResult(testType, qualityScore, features)` form to the two argument `recordResult(testType: TestType, payload: TestResultPayload)` form so the optional `rawSensorRelativePath` flows through to the persisted `TestResultEntity`. `BatteryFlowIntegrationTest.kt` lines 61 to 72 call the new signature with a `MockTestModule.MockResult` payload across all three test types (TAP, GAIT, VISION); the test asserts the orchestrator reaches the `Completed` state, exactly one `SessionEntity` row is written with a non null `completedAtEpochMs`, and three `TestResultEntity` rows are written.
+- **Verified yes.** `tests=1 failures=0 errors=0 skipped=0` on `com.mustafan4x.baselinems.battery.BatteryFlowIntegrationTest`. The orchestrator's `recordResult` was migrated in commit `b8187c8` from the three argument `recordResult(testType, qualityScore, features)` form to the two argument `recordResult(testType: TestType, payload: TestResultPayload)` form so the optional `rawSensorRelativePath` flows through to the persisted `TestResultEntity`. `BatteryFlowIntegrationTest.kt` lines 61 to 72 call the new signature with a `MockTestModule.MockResult` payload across all three test types (TAP, GAIT, VISION); the test asserts the orchestrator reaches the `Completed` state, exactly one `SessionEntity` row is written with a non null `completedAtEpochMs`, and three `TestResultEntity` rows are written.
 - **Failure mode that would invalidate this condition.** A regression in the orchestrator's state machine after the signature change, a payload that fails to flow `rawSensorRelativePath` to the persisted entity, or a null `completedAtEpochMs` on a session that should be marked complete.
 
 #### Condition 6, BilateralTapTest tests with the TestResultPayload extension
@@ -388,7 +388,7 @@ Each of the eight conditions below is the regression tripwire taken verbatim fro
 - **Verified yes.** Direct grep evidence:
 
 ```
-$ grep -in 'INTERNET' /home/mustafa/src/MS-Battery/app/src/main/AndroidManifest.xml
+$ grep -in 'INTERNET' /home/mustafa/src/BaselineMS/app/src/main/AndroidManifest.xml
 $ echo $?
 1
 ```
@@ -410,7 +410,7 @@ The grep returns nothing on stdout and exits 1 (no match). The Code Reviewer's T
 - **Task 5 (RawSensorWriterTest):** 2 cases. Round trip preserves every field within floating point precision; exception propagation closes the file and rethrows.
 - **Task 6 (GaitTestRenderTest):** 4 cases. Compose smoke tests for Instructions, Countdown, Capture, and Done screens.
 - **Task 7 (GaitTestViewModelTest):** 6 cases. State transitions, sensor lifecycle, payload production end to end.
-- **Task 8 (GaitTestRegistrationTest):** 1 case. `MSBatteryApp` constructs the GaitTest module without crashing in a Robolectric environment.
+- **Task 8 (GaitTestRegistrationTest):** 1 case. `BaselineMSApp` constructs the GaitTest module without crashing in a Robolectric environment.
 
 Task by task sum: 2 + 4 + 2 + 4 + 6 + 1 = 19. Per suite XML aggregation independently confirms: `TestModuleTest` 2, `AndroidImuSourceTest` 4, `RawSensorWriterTest` 2, `GaitTestRenderTest` 4, `GaitTestViewModelTest` 6, `GaitTestRegistrationTest` 1.
 

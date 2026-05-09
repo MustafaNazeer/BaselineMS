@@ -21,7 +21,7 @@ Ensure every phase ships with a green test suite, a regression checklist that ca
 
 ## Outputs
 
-- Updates to `/home/mustafa/src/MS-Battery/docs/qa/regression-checklist.md` after every phase.
+- Updates to `/home/mustafa/src/BaselineMS/docs/qa/regression-checklist.md` after every phase.
 - Test reports posted back to the PM at phase close: what tests ran, what failed, what was deferred and why.
 - Phase 5: the validation report at `docs/source/validation-report.md` (drafted by Signal Processing Engineer, methodology designed and run by you).
 - Phase 11: the beta cohort feedback summary.

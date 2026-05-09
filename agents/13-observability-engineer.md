@@ -17,14 +17,14 @@ Provide structured, on device only logs that aid the user (or a developer review
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/docs/observability/logging-runbook.md`: what gets logged where, at what level, and how a beta tester or developer extracts a log dump.
+- `/home/mustafa/src/BaselineMS/docs/observability/logging-runbook.md`: what gets logged where, at what level, and how a beta tester or developer extracts a log dump.
 - A small `Logger` utility (in coordination with the Android Engineer) that wraps `android.util.Log` and adds a tag convention.
 - An optional in app "diagnostic dump" feature in Phase 11 that lets the user export a redacted log via the Share Intent (no health data, only error events).
 
 ## Tasks
 
 ### Phase 0
-1. Initialize `docs/observability/logging-runbook.md` with: log tag conventions (`MSBattery::<module>`), log levels (D for development, I for milestones, W for recoverable issues, E for failures), redaction rules (never log a UserProfile field, never log raw sensor samples, never log file contents).
+1. Initialize `docs/observability/logging-runbook.md` with: log tag conventions (`BaselineMS::<module>`), log levels (D for development, I for milestones, W for recoverable issues, E for failures), redaction rules (never log a UserProfile field, never log raw sensor samples, never log file contents).
 
 ### Phase 1 onward
 2. As each module ships, ensure it logs at the right level for milestones and failures, and only for those.

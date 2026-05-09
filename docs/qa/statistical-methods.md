@@ -1,4 +1,4 @@
-# Statistical methods, MS Neuro Battery
+# Statistical methods, BaselineMS
 
 **Owner:** Biostatistics Reviewer (`agents/17-biostatistics-reviewer.md`).
 **Phase:** Phase 5 Part A, Task A2.
@@ -66,7 +66,7 @@ The ICC(1,1) one way random effects variant assumes each subject is measured by 
 
 The ICC(2,1) two way random effects variant treats raters as a random sample from a population of raters that we want to generalize to. That description fits a multi human rater study where we want to claim "any rater drawn from the same population would give similar reliability." It does not fit the project's design: the rater is the application, and "the application" is the specific instrument we are measuring reliability of. Phase 5's claim is "this application, on the kind of Android phone supported by SPEC.md Section 12, produces reliable measurements within a participant across 5 weekly sessions." That is a fixed rater claim.
 
-The ICC(3,1) two way mixed effects variant treats raters as fixed and subjects as random. Subjects (participants) are still a random sample from the population of MS Neuro Battery users, but the rater (the app) is the specific instrument under evaluation, not a sample of instruments. This matches the design.
+The ICC(3,1) two way mixed effects variant treats raters as fixed and subjects as random. Subjects (participants) are still a random sample from the population of BaselineMS users, but the rater (the app) is the specific instrument under evaluation, not a sample of instruments. This matches the design.
 
 There is a residual question of whether device variance (different Android phones running the app) should be modeled as a separate factor. The Phase 5 Part B test retest experiment holds device fixed within participant (same phone across 5 sessions per participant), so device variance does not enter the ICC. Cross device reliability is a different question, addressed by the Phase 4 close multi device sample rate validation in `docs/observability/sensor-runbook.md` and by the SPEC's documented limitation that voice and vision feature trends are within device, not across devices (per the Clinical Validator Phase 0 sign offs in `docs/source/clinical-references.md` for the Vision Test and the Voice Test). Gait reliability is the question this section addresses; cross device gait validity is outside Phase 5's scope.
 

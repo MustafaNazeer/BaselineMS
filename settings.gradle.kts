@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MSBattery"
+rootProject.name = "BaselineMS"
 include(":app")

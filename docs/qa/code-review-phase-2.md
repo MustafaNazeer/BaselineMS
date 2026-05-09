@@ -20,7 +20,7 @@ No blockers.
 
 ### MEDIUM: Off-target capture semantics are asserted in the plan but not tested
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/battery/tap/BilateralTapTest.kt`
+**File:** `app/src/main/java/com/mustafan4x/baselinems/battery/tap/BilateralTapTest.kt`
 **Lines:** `TwoTargets` composable, parent `Row` with `Modifier.pointerInput(Unit) { detectTapGestures(...) }` and child `Target` `Box` with `Modifier.clickable`.
 
 The plan (`docs/plans/phase-2-tap-test.md`, line 2025) claims that when a user taps inside a
@@ -43,7 +43,7 @@ before counting the tap as off-target.
 
 ### LOW: `canSave` gate does not allow the Save button when fields are empty
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/ui/onboarding/ProfileSetupScreen.kt`
+**File:** `app/src/main/java/com/mustafan4x/baselinems/ui/onboarding/ProfileSetupScreen.kt`
 
 `isPlausibleYear("")` returns `false`, so `canSave` is `false` on first render. This is intentional
 and correct behavior: the user must fill in both fields to enable Save. The Skip path correctly

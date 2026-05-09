@@ -76,7 +76,7 @@ follows Code Reviewer sign off.
 | 5 | Sensor Integration Engineer | `signals/RawSensorWriter.kt`, `RawSensorWriterTest.kt` | `2f47991` | LANDED |
 | 6 | Android Engineer | Four GaitTest screens, `GaitTestState`, `GaitTestRenderTest` | `c33988f` | LANDED |
 | 7 | Android Engineer | `GaitTestViewModel`, `GaitTest`, `GaitTestViewModelTest` (plus `open` markings on `GaitPipeline` and `RawSensorWriter`) | `34a3174` | LANDED |
-| 8 | Android Engineer | `MSBatteryApp` singleton `imuSource` plus `RootScreen` session route factory plus `GaitTestRegistrationTest` | `d9b4795` | LANDED |
+| 8 | Android Engineer | `BaselineMSApp` singleton `imuSource` plus `RootScreen` session route factory plus `GaitTestRegistrationTest` | `d9b4795` | LANDED |
 | 9 | Signal Processing Engineer | `docs/qa/spe-review-phase-4.md` | `bf99d79` | LANDED |
 | 10 | Patient Advocate | Phase 4 entry in `docs/qa/patient-advocate-reviews.md` | `4bc1bec` | LANDED |
 | 11 | Performance Engineer | Phase 4 review subsection in `docs/perf/latency-budgets.md` | `a8ca3e2` | LANDED |
@@ -181,10 +181,10 @@ consequence; the ADR is the authoritative current contract. The Phase 4 plan fil
 not retroactively edited because the plan is the historical record of how the phase was
 scoped, not the current contract.
 
-### Task 8 file location (`MSBatteryApp.kt` vs `RootScreen.kt`)
+### Task 8 file location (`BaselineMSApp.kt` vs `RootScreen.kt`)
 
-**Plan says:** "`MSBatteryApp` already constructs the `BatteryOrchestrator` with a
-`List<TestModule>`." **Implementation:** `MSBatteryApp.kt` exposes a singleton
+**Plan says:** "`BaselineMSApp` already constructs the `BatteryOrchestrator` with a
+`List<TestModule>`." **Implementation:** `BaselineMSApp.kt` exposes a singleton
 `imuSource` property (lines 14 to 20), but `BatteryOrchestrator` and `GaitTest` factory
 construction lives in `RootScreen.kt` lines 102 to 129 inside the `composable("session")`
 block. Orchestrator is per session, sensor source is per process.
@@ -198,7 +198,7 @@ registrations across activity recreations); orchestrator is session scoped.
 
 ### `GaitPipeline` and `process` made `open`
 
-`git show 34a3174 -- app/src/main/java/com/mustafan4x/msbattery/dsp/GaitPipeline.kt`
+`git show 34a3174 -- app/src/main/java/com/mustafan4x/baselinems/dsp/GaitPipeline.kt`
 shows the only diff is `class GaitPipeline` to `open class GaitPipeline` and
 `fun process` to `open fun process`. No body change, no signature change. The test
 suite uses the override via `FakeGaitPipeline` in `GaitTestViewModelTest.kt` lines 46 to
@@ -356,7 +356,7 @@ permits).
 
 - **Rail 1 (no new permissions):** verified directly under "Manifest audit." PASS.
 - **Rail 2 (`ImuSample`, `Vector3`, `Quaternion` stay in `dsp/`):**
-  `grep -rn "import com.mustafan4x.msbattery.signals" app/src/main/java/com/mustafan4x/msbattery/dsp/`
+  `grep -rn "import com.mustafan4x.baselinems.signals" app/src/main/java/com/mustafan4x/baselinems/dsp/`
   returns nothing; the dependency direction is `signals/` to `dsp/` only.
 - **Rail 4 (100 Hz nominal):** `AndroidImuSource.kt` line 37 `samplingPeriodMicros: Int = 10_000`
   matches the rail wording exactly.

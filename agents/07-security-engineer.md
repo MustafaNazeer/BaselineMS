@@ -28,8 +28,8 @@ Publish and maintain the threat model, the hardening checklist, and the dependen
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/docs/security/threat-model.md`: enumerate adversaries (curious roommate, lost or stolen phone, malicious app on the same device, forensic adversary on a rooted device), their capabilities, the assets at risk, and the controls.
-- `/home/mustafa/src/MS-Battery/docs/security/hardening-checklist.md`: the concrete enforceable rules every PR is checked against (no INTERNET permission, no plaintext logging of PII, ProGuard or R8 enabled in release, signing keystore stored outside the repo, dependency review done).
+- `/home/mustafa/src/BaselineMS/docs/security/threat-model.md`: enumerate adversaries (curious roommate, lost or stolen phone, malicious app on the same device, forensic adversary on a rooted device), their capabilities, the assets at risk, and the controls.
+- `/home/mustafa/src/BaselineMS/docs/security/hardening-checklist.md`: the concrete enforceable rules every PR is checked against (no INTERNET permission, no plaintext logging of PII, ProGuard or R8 enabled in release, signing keystore stored outside the repo, dependency review done).
 - Dependency audits at every phase that adds a dependency. Each audit names the dependency, its license, its transitive dependencies, and a flag for any network or privacy concern.
 - Sign offs on AndroidManifest.xml changes, dependency changes, and release configurations.
 

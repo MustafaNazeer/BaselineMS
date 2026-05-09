@@ -1,4 +1,4 @@
-# STATUS, MS Neuro Battery
+# STATUS, BaselineMS
 
 This file is the single source of truth for which phase is next. Read it at the start of every session.
 

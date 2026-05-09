@@ -1,4 +1,4 @@
-# Implementation plan, MS Neuro Battery
+# Implementation plan, BaselineMS
 
 This document is the multi phase plan overview. Each phase has its own scope, agent roster, and rough window cost. The detailed plan for Phase 1 lives at `docs/plans/phase-1-foundation.md`. Subsequent phases get their own detailed plans at `docs/plans/phase-N-<name>.md` written by the PM at the start of each phase, after the phase boundary check-in.
 
@@ -14,7 +14,7 @@ The cardinal rule: every phase ends with the mandatory check-in protocol describ
 
 **Deliverables:**
 - `app/` Android Studio project scaffolded per Task 1 of `docs/plans/phase-1-foundation.md`.
-- Git repo initialized at the project root, GitHub remote `https://github.com/Mustafan4x/MS-Battery` wired, initial commit pushed.
+- Git repo initialized at the project root, GitHub remote `https://github.com/Mustafan4x/BaselineMS` wired, initial commit pushed.
 - GitHub Actions CI workflow that runs `./gradlew :app:testDebugUnitTest` on every PR (Linux runners are sufficient for unit tests).
 - `docs/security/threat-model.md` with attack surface enumeration and `docs/security/hardening-checklist.md` with concrete enforceable rules (no INTERNET permission, ProGuard or R8 enabled in release, Android Keystore for any future secrets).
 - `docs/design/tokens.md` with Material 3 baseline plus accessibility tokens (tap targets, contrast, type scale).
@@ -24,7 +24,7 @@ The cardinal rule: every phase ends with the mandatory check-in protocol describ
 - **Citation Auditor's** first audit of every entry in `docs/source/clinical-references.md` and every cited number in `SPEC.md`; results in `docs/source/citation-audit-log.md`.
 - **Compliance Reviewer's** initial review of `SPEC.md` Section 4 (non goals), Section 10 (privacy), and `README.md` positioning against FDA wellness guidance, HIPAA scope, and Google Play health app policy; results in `docs/security/compliance-review.md`.
 - **Patient Advocate's** initial framing notes on the patient population in `docs/qa/patient-advocate-reviews.md`.
-- **UI/UX Designer's retention design specification** in `docs/design/retention.md`. Covers reminder copy and timing rules (cap 2 per day, never after 7 PM, only fire on missed sessions, friendly tone with periodic acknowledgment messages), default schedule (one weekly reminder anchored to a user chosen slot during onboarding), the onboarding flow targeting at least 75 percent registration to activation conversion, and gait test contextual skip rules (defer when not in a walkable space). Empirical retention floor is the Galati et al. 2024 (JMIR Human Factors 11:e57033) day 30 number of 30.8 percent with reminders versus 9.7 percent without; MS Battery's design goal is to meet or exceed 30.8 percent day 30 retention. Adherence design is treated as a Phase 0 first class concern, not a Phase 11 polish item, because the patient owned PDF for the neurologist (a clinical artifact Floodlight Open did not provide) is the strongest available retention lever in this population per Oh et al. 2024 finding that clinical supervision was the single largest persistence driver.
+- **UI/UX Designer's retention design specification** in `docs/design/retention.md`. Covers reminder copy and timing rules (cap 2 per day, never after 7 PM, only fire on missed sessions, friendly tone with periodic acknowledgment messages), default schedule (one weekly reminder anchored to a user chosen slot during onboarding), the onboarding flow targeting at least 75 percent registration to activation conversion, and gait test contextual skip rules (defer when not in a walkable space). Empirical retention floor is the Galati et al. 2024 (JMIR Human Factors 11:e57033) day 30 number of 30.8 percent with reminders versus 9.7 percent without; BaselineMS's design goal is to meet or exceed 30.8 percent day 30 retention. Adherence design is treated as a Phase 0 first class concern, not a Phase 11 polish item, because the patient owned PDF for the neurologist (a clinical artifact Floodlight Open did not provide) is the strongest available retention lever in this population per Oh et al. 2024 finding that clinical supervision was the single largest persistence driver.
 
 **End of phase:** run the mandatory check-in protocol before starting Phase 1.
 

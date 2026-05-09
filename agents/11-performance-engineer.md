@@ -20,7 +20,7 @@ Ensure the IMU pipeline runs at a stable 100 Hz on real Android 12 plus devices,
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/docs/perf/latency-budgets.md`: the budgets the application must hit, the actual measurements, and any deviation.
+- `/home/mustafa/src/BaselineMS/docs/perf/latency-budgets.md`: the budgets the application must hit, the actual measurements, and any deviation.
 - Notes appended to `docs/perf/` per phase that introduces performance sensitive code.
 - Performance bug reports back to the PM when a budget is missed.
 

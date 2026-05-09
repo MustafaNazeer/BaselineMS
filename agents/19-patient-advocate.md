@@ -31,7 +31,7 @@ Catch design choices that are technically correct but fail a real MS patient usi
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/docs/qa/patient-advocate-reviews.md`: append only log of reviews. Each entry records:
+- `/home/mustafa/src/BaselineMS/docs/qa/patient-advocate-reviews.md`: append only log of reviews. Each entry records:
   - Date.
   - Phase and screen reviewed.
   - Specific MS related concerns identified (fatigue, vision, cognition, dexterity, gait, heat).

@@ -25,7 +25,7 @@ Verify, against primary source material, that every cited reference in the proje
 
 ## Outputs
 
-- `/home/mustafa/src/MS-Battery/docs/source/citation-audit-log.md`: append only log of every audit performed. Each entry records:
+- `/home/mustafa/src/BaselineMS/docs/source/citation-audit-log.md`: append only log of every audit performed. Each entry records:
   - Date.
   - The artifact and line where the citation appears.
   - The cited reference.

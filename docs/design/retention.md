@@ -1,4 +1,4 @@
-# Retention design specification, MS Neuro Battery
+# Retention design specification, BaselineMS
 
 **Status:** Phase 0 deliverable, written by the UI/UX Designer.
 
@@ -10,7 +10,7 @@
 
 Galati et al. 2024 (*JMIR Human Factors* 11:e57033, see `docs/source/clinical-references.md`) is the user experience companion paper to the Floodlight Open program. In the US MS cohort, day 30 retention with reminders enabled was 30.8 percent. Without reminders, it fell to 9.7 percent. Reminders roughly tripled retention. The same paper documents that an onboarding redesign moved registration to activation conversion from 53.9 percent to 74.6 percent, a 20 point retention floor before any test runs.
 
-The broader Floodlight cohort analysis (Oh et al. 2024) identified clinical supervision as the single largest persistence driver. MS Battery does not have clinical supervision in the trial sense, but it operationalizes the same lever differently: the patient owned PDF for the neurologist gives the user a tangible, recurring clinical reason to keep weekly sessions, an artifact Floodlight Open did not provide.
+The broader Floodlight cohort analysis (Oh et al. 2024) identified clinical supervision as the single largest persistence driver. BaselineMS does not have clinical supervision in the trial sense, but it operationalizes the same lever differently: the patient owned PDF for the neurologist gives the user a tangible, recurring clinical reason to keep weekly sessions, an artifact Floodlight Open did not provide.
 
 These findings are why retention design is a Phase 0 deliverable, alongside design tokens, rather than a Phase 11 polish item. Getting reminders, onboarding, and the PDF reward right at the start is what determines whether the application has a beta cohort to validate against. The empirical floor: meet or exceed 30.8 percent day 30 retention with reminders enabled. The design goal, given the PDF reward mechanic Floodlight lacked: 50 percent or higher.
 
@@ -86,9 +86,9 @@ These are constraints, not implementation. The Android Engineer reports back if 
 
 ### 3.1 Goal
 
-Move the user from "first install" to "first completed test of the first session" in under three minutes, and from "first completed test" to "first completed full session with PDF preview" in under ten minutes. Galati 2024's redesigned onboarding moved registration to activation conversion from 53.9 percent to 74.6 percent. MS Battery's design target is at least 75 percent.
+Move the user from "first install" to "first completed test of the first session" in under three minutes, and from "first completed test" to "first completed full session with PDF preview" in under ten minutes. Galati 2024's redesigned onboarding moved registration to activation conversion from 53.9 percent to 74.6 percent. BaselineMS's design target is at least 75 percent.
 
-The single largest difference between MS Battery's onboarding and Floodlight Open's: MS Battery has no account, no email, no server side identifier (`SPEC.md` Section 10). Every step Floodlight needed for account creation is removed. This is a structural advantage; the design must not waste it.
+The single largest difference between BaselineMS's onboarding and Floodlight Open's: BaselineMS has no account, no email, no server side identifier (`SPEC.md` Section 10). Every step Floodlight needed for account creation is removed. This is a structural advantage; the design must not waste it.
 
 ### 3.2 Flow steps
 
@@ -123,7 +123,7 @@ Notification tap (Section 2.5) opens the session runner directly. The system bac
 
 This is the activation hook. After the user completes their first weekly session, the application generates a one page "preview report" PDF with the single session's results and a placeholder for the trends the next session will start to fill in. Surfaced as a "View your first report" button on the post session screen.
 
-The mechanic addresses the gap Galati 2024 identifies: Floodlight users had to wait for cumulative weeks of data before seeing personal value. MS Battery shows the user a tangible payoff (a real PDF, in their hands, with their name and their results) on day one. The trends are sparse on day one by definition; the report says so honestly ("Trends will fill in as you complete more sessions") and shows a single point on each chart. The user has the receipt of the work they just did.
+The mechanic addresses the gap Galati 2024 identifies: Floodlight users had to wait for cumulative weeks of data before seeing personal value. BaselineMS shows the user a tangible payoff (a real PDF, in their hands, with their name and their results) on day one. The trends are sparse on day one by definition; the report says so honestly ("Trends will fill in as you complete more sessions") and shows a single point on each chart. The user has the receipt of the work they just did.
 
 The PDF is generated on device (Phase 10's `PdfDocument` infrastructure is reused) and offered through the Share Intent so the user can save it, email it to themselves, or save it to Files immediately. Saving to Files in particular is the implicit suggestion: "this is yours, hold onto it."
 
@@ -131,7 +131,7 @@ The PDF is generated on device (Phase 10's `PdfDocument` infrastructure is reuse
 
 ### 4.1 Why the gait test gets a skip rule the others do not
 
-The gait test requires the user to walk in a straight line for 30 seconds with the phone in their pocket. Galati 2024's qualitative analysis identifies "physical or contextual barriers" including unsafe locations as a top quit reason for the 2 minute walk test in the Floodlight cohort. The 2 minute walk test had the lowest day 1 retention of any test in that study (32.34 percent without reminders, 40.7 percent with). MS Battery shortens the walk to 30 seconds, but the contextual barrier remains: the user may not have a clear walking space at the moment of their session.
+The gait test requires the user to walk in a straight line for 30 seconds with the phone in their pocket. Galati 2024's qualitative analysis identifies "physical or contextual barriers" including unsafe locations as a top quit reason for the 2 minute walk test in the Floodlight cohort. The 2 minute walk test had the lowest day 1 retention of any test in that study (32.34 percent without reminders, 40.7 percent with). BaselineMS shortens the walk to 30 seconds, but the contextual barrier remains: the user may not have a clear walking space at the moment of their session.
 
 A user who hits the gait test in a cramped office, a moving vehicle, a cluttered apartment with a child or pet underfoot, or any other unsafe location must be able to defer the gait test without abandoning the entire session. Forcing them to walk would corrupt the measurement and create a fall risk. Forcing them to abandon the session loses four other tests' worth of data and lowers retention.
 
@@ -181,14 +181,14 @@ Quarterly framing is chosen because it matches the user's clinical context: most
 
 ## 6. Empirical retention floor and design target
 
-| Metric | Floodlight floor (Galati 2024) | MS Battery design target |
+| Metric | Floodlight floor (Galati 2024) | BaselineMS design target |
 |--------|-------------------------------|--------------------------|
 | Day 30 retention with reminders, US MS cohort | 30.8 percent | 30.8 percent or higher (must clear) |
 | Day 30 retention without reminders, US MS cohort | 9.7 percent | not directly measured (reminders are default on) |
 | Registration to activation conversion (redesigned onboarding) | 74.6 percent | 75 percent or higher |
 | Registration to activation conversion (pre redesign) | 53.9 percent | floor reference, not target |
 
-MS Battery's headline retention target: meet or exceed 30.8 percent day 30 retention with reminders enabled. Stretch target, given the patient owned PDF reward Floodlight lacked: 50 percent or higher day 30 retention. Phase 5 does not measure retention; Phase 11 does, against the beta cohort.
+BaselineMS's headline retention target: meet or exceed 30.8 percent day 30 retention with reminders enabled. Stretch target, given the patient owned PDF reward Floodlight lacked: 50 percent or higher day 30 retention. Phase 5 does not measure retention; Phase 11 does, against the beta cohort.
 
 The retention curve is reported in the README's `Retention` subsection per `SPEC.md` Section 9. Numbers are reported as measured, no rounding up, no aspirational claims. If the application does not clear 30.8 percent in beta, the README says so and the next iteration addresses why.
 

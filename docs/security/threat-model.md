@@ -1,4 +1,4 @@
-# Threat model, MS Neuro Battery
+# Threat model, BaselineMS
 
 **Phase:** 0 (Bootstrap setup)
 **Author role:** Security Engineer (agent 07)
@@ -7,7 +7,7 @@
 
 This document enumerates the trust boundaries, assets, threats (organized by STRIDE), mitigations already present in the design, and the residual risks the user accepts. It is the technical companion to `docs/security/hardening-checklist.md` (the enforceable rules) and to the Compliance Reviewer's `docs/security/compliance-review.md` (the regulatory positioning).
 
-The privacy posture this document defends is described in `SPEC.md` Section 10 and Section 4 (non goals 4 and 5: no backend sync, no iOS in v1). The clinical motivation for that posture is the Floodlight Open analyses recorded in `docs/source/clinical-references.md` (Oh et al. 2024, *Scientific Reports*; Galati et al. 2024, *JMIR Human Factors*). MS Battery is positioned as the patient owned, on device, no INTERNET, no account alternative to a cloud based pilot.
+The privacy posture this document defends is described in `SPEC.md` Section 10 and Section 4 (non goals 4 and 5: no backend sync, no iOS in v1). The clinical motivation for that posture is the Floodlight Open analyses recorded in `docs/source/clinical-references.md` (Oh et al. 2024, *Scientific Reports*; Galati et al. 2024, *JMIR Human Factors*). BaselineMS is positioned as the patient owned, on device, no INTERNET, no account alternative to a cloud based pilot.
 
 ## 1. Trust boundaries
 
@@ -26,7 +26,7 @@ The following assets live inside the app sandbox. Sensitivity ratings reflect th
 
 | Asset | Where it lives | Sensitivity | Notes |
 |-------|---------------|-------------|-------|
-| User profile (`UserProfileEntity`: date of birth, biological sex, dominant hand, MS type, height) | Room database in `/data/data/com.mustafan4x.msbattery/databases/` | High. Health condition disclosure. | MS type field can be `UNDISCLOSED`; the app does not require it. |
+| User profile (`UserProfileEntity`: date of birth, biological sex, dominant hand, MS type, height) | Room database in `/data/data/com.mustafan4x.baselinems/databases/` | High. Health condition disclosure. | MS type field can be `UNDISCLOSED`; the app does not require it. |
 | Session metadata (`SessionEntity`) | Same Room database | Low to medium | Timestamps and device info; not personally identifying on its own, but linkable to the profile. |
 | Test results (`TestResultEntity`: feature JSON, quality scores, foreign keys to sessions) | Same Room database | High | The longitudinal record of motor, cognitive, vision, and voice metrics is the most sensitive asset because it is the clinical signal itself. |
 | Raw IMU traces (gait test, gzipped CSV) | App private files dir, referenced from `TestResultEntity.rawSensorRelativePath` | Medium to high | Raw 100 Hz accelerometer and gyroscope traces over a 30 second walk. Could in principle be re identifying through gait biometrics if exfiltrated alongside the profile. |
@@ -45,7 +45,7 @@ The STRIDE categories are evaluated against the threat actors named in the agent
 | Threat | Likelihood | Impact | Mitigation |
 |--------|-----------|--------|-----------|
 | An attacker spoofs the user's identity to the application. | Not applicable. The application has no account, no login, no remote identity. There is nothing to spoof at the application layer. | None | Out of scope by design. |
-| Another app spoofs the MS Battery package to receive the user's exported PDF (intent redirection). | Low | Medium | The user picks the recipient app from the share sheet on every export. The application does not auto target any single recipient. |
+| Another app spoofs the BaselineMS package to receive the user's exported PDF (intent redirection). | Low | Medium | The user picks the recipient app from the share sheet on every export. The application does not auto target any single recipient. |
 | An attacker spoofs the device's neurology user (i.e., uses the unlocked phone and pretends to be the patient when running a session, polluting the longitudinal record). | Medium for shared family devices | Medium (data integrity, not confidentiality) | Mitigation is procedural: the app is single user, the user is told this in onboarding, and the user is responsible for the device they install on. The application does not authenticate per session. This is documented as a residual risk in Section 5. |
 
 ### 3.2 Tampering
@@ -53,7 +53,7 @@ The STRIDE categories are evaluated against the threat actors named in the agent
 | Threat | Likelihood | Impact | Mitigation |
 |--------|-----------|--------|-----------|
 | A roommate with the unlocked phone deletes or edits sessions through the app's UI. | Medium for shared devices | Medium (loss of longitudinal record) | The data model is append only at the `Session` level (`SPEC.md` Section 8). Corrections produce a new session. Bulk deletion through the app UI is the user's prerogative as the data owner. Out of band tampering with the Room database file is blocked by app sandboxing on a non rooted device. |
-| A malicious app on the same non rooted device modifies MS Battery's database. | Very low | High | Android per app UID isolation prevents it. App private storage at `/data/data/com.mustafan4x.msbattery/` is not readable or writable by other apps without root. |
+| A malicious app on the same non rooted device modifies BaselineMS's database. | Very low | High | Android per app UID isolation prevents it. App private storage at `/data/data/com.mustafan4x.baselinems/` is not readable or writable by other apps without root. |
 | A forensic adversary on a rooted device modifies the database or raw sensor traces. | Low (requires physical possession plus root) | Medium | Out of scope as a primary attack model. Documented as a residual risk in Section 5. The user is the data owner; if their device is rooted by an adversary they have already lost the integrity battle for the device. |
 | An attacker tampers with the exported PDF after it leaves the device. | Medium (file in transit through email, messaging, cloud drive) | Medium (could mislead a neurologist) | Out of the application's control once the user shares the file. The PDF includes a generated date, app version, and the disclaimer text. Cryptographic signing of exports is not in scope for v1; flagged for `future-ideas.md` if demand emerges. |
 
@@ -75,7 +75,7 @@ This is the most important STRIDE category for this application. The assets in S
 | A roommate or family member opens the app on the unlocked phone and views the history. | Medium for shared devices | High | The application is sandboxed behind the device lock screen. Beyond that, the app does not implement an in app PIN in v1. App level lock is flagged as a candidate for `future-ideas.md` if user demand emerges. |
 | A thief recovers the unlocked phone before the screen times out and reads the history. | Low to medium | High | Same as above. The user's device lock screen, biometric authentication, and screen timeout are the primary defense. The application surfaces the disclaimer that the device's lock posture is the user's responsibility. |
 | A thief recovers the locked phone and attempts offline extraction of the database file. | Low | Medium to high | Android File Based Encryption (FBE) on Android 10 plus encrypts app private storage with keys tied to user credentials. The device must be unlocked at least once after boot to access Credential Encrypted (CE) storage; the database lives in CE storage by default. An attacker with the locked device cannot read the database without the user's lock screen credential. |
-| A malicious app on the same device reads MS Battery's database or files. | Very low | High | Per app UID isolation. The application does not export any content provider that exposes data. The `FileProvider` used for share intents grants per URI temporary read access only, only when the user explicitly shares. |
+| A malicious app on the same device reads BaselineMS's database or files. | Very low | High | Per app UID isolation. The application does not export any content provider that exposes data. The `FileProvider` used for share intents grants per URI temporary read access only, only when the user explicitly shares. |
 | A forensic adversary with a rooted device extracts the database. | Low (requires physical possession plus root) | High | Out of scope as a primary defense target. SQLCipher is documented as a v1.1 enhancement (`SPEC.md` Section 8.2 and the hardening checklist) for users who want stronger protection beyond FBE. Documented as a residual risk in Section 5. |
 | The user's session data is silently uploaded by Android Auto Backup to their Google account, and from there to a Google Drive subject to the same set of attackers as any cloud account. | Medium without an explicit choice (default `android:allowBackup` is true on Android 12 plus per the current manifest) | High | This is the most significant residual concern in the current scaffold. See Section 4 (mitigation in design) and Section 6 (decision flagged for the PM). |
 | A third party SDK exfiltrates data over the network. | Not applicable in v1 | High | The application does not declare `android.permission.INTERNET`. No third party analytics, crash reporting, telemetry, or networking SDK is in the dependency set. The hardening checklist forbids adding one without explicit Security Engineer sign off, and the absence of `INTERNET` would block any such SDK at runtime even if it were added. |
@@ -90,7 +90,7 @@ This is the most important STRIDE category for this application. The assets in S
 |--------|-----------|--------|-----------|
 | A malicious app fills the device's storage so the Room database cannot be written. | Low | Low (no data lost; new sessions cannot be saved) | Out of scope. This is a generic device condition. The application surfaces a clear error message if it cannot write. |
 | A pathological raw sensor trace (very long, very large) fills the app's files dir and prevents future captures. | Low | Low | The gait raw IMU file is bounded by the 30 second test window. Estimated under 60 KB per session compressed (`SPEC.md` Section 8.1). Annual storage per user is under 4 MB. There is no realistic path to denial of service from the app's own data. |
-| A user retention attack: a malicious app pushes notifications mimicking MS Battery to disrupt the weekly cadence. | Low | Low | Out of scope as a security concern. Notification spoofing protection is a platform concern. |
+| A user retention attack: a malicious app pushes notifications mimicking BaselineMS to disrupt the weekly cadence. | Low | Low | Out of scope as a security concern. Notification spoofing protection is a platform concern. |
 
 Denial of service is not a meaningful primary threat for an offline single user application. The user is also the operator; if they decide to stop using the app there is no service availability obligation.
 
@@ -98,7 +98,7 @@ Denial of service is not a meaningful primary threat for an offline single user 
 
 | Threat | Likelihood | Impact | Mitigation |
 |--------|-----------|--------|-----------|
-| A malicious app exploits an exported component of MS Battery to gain access to the database. | Low | High | The application exports only the `MainActivity` (with the standard `MAIN`/`LAUNCHER` intent filter) per the current `AndroidManifest.xml`. No content provider, no service, no broadcast receiver is exported. The `FileProvider` that will be added in Phase 10 for share intents grants per URI temporary read access only, scoped to `cacheDir`. |
+| A malicious app exploits an exported component of BaselineMS to gain access to the database. | Low | High | The application exports only the `MainActivity` (with the standard `MAIN`/`LAUNCHER` intent filter) per the current `AndroidManifest.xml`. No content provider, no service, no broadcast receiver is exported. The `FileProvider` that will be added in Phase 10 for share intents grants per URI temporary read access only, scoped to `cacheDir`. |
 | A native code vulnerability in a transitive dependency is exploited to escape the sandbox. | Very low | High | The dependency set is conservative, well maintained AndroidX libraries plus Room, Compose, kotlinx serialization, kotlinx coroutines, and test only libraries (JUnit 4, Robolectric, MockK, kotlinx coroutines test, Room testing). The Security Engineer audits every new dependency before it lands on `main`. |
 | The application requests dangerous runtime permissions and the user grants more than is needed. | Low | Low | Microphone (voice test) and camera (vision test ambient brightness) are the only dangerous runtime permissions planned. Both are requested only when the user is about to run the relevant test, and the application functions without them (the affected test is skipped). |
 
@@ -106,7 +106,7 @@ Denial of service is not a meaningful primary threat for an offline single user 
 
 The following controls are baked into the design and the Phase 0 scaffold. They are restated here so the threat model can be read as a self contained document.
 
-1. **No `android.permission.INTERNET`.** The current `AndroidManifest.xml` at `/home/mustafa/src/MS-Battery/app/src/main/AndroidManifest.xml` declares no `uses-permission` element. The merged manifest contains only the auto injected `<applicationId>.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (a custom, app scoped permission generated by AndroidX, not a network or otherwise dangerous permission).
+1. **No `android.permission.INTERNET`.** The current `AndroidManifest.xml` at `/home/mustafa/src/BaselineMS/app/src/main/AndroidManifest.xml` declares no `uses-permission` element. The merged manifest contains only the auto injected `<applicationId>.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (a custom, app scoped permission generated by AndroidX, not a network or otherwise dangerous permission).
 2. **No third party analytics, crash reporting, telemetry, or networking dependencies.** The dependency set in `app/build.gradle.kts` is: Compose BOM 2024.06.00, Material 3, Compose UI tooling, AndroidX Activity Compose 1.9.0, Lifecycle 2.8.0, Navigation Compose 2.7.7, Room 2.6.1 (runtime, ktx, compiler), kotlinx coroutines android 1.8.1, kotlinx serialization json 1.6.3, plus test only dependencies (JUnit 4, kotlinx coroutines test, Room testing, Robolectric 4.12.2, AndroidX test core and ext junit, MockK 1.13.11). None of these libraries perform network I/O at runtime in normal usage. Test libraries do not ship in the release APK.
 3. **Room database lives in app private storage.** Inaccessible to other apps on a non rooted device. Encrypted at rest by Android File Based Encryption on Android 10 plus, with keys tied to user credentials.
 4. **Append only data model at the session level.** Limits the blast radius of accidental tampering through the app UI.

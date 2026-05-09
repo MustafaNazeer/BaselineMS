@@ -1,4 +1,4 @@
-# MS Neuro Battery Phase 5: Gait Validation Suite Implementation Plan
+# BaselineMS Phase 5: Gait Validation Suite Implementation Plan
 
 > **For agentic workers:** This plan is split into Part A (agent-doable prep, executed in the current session) and Part B (user-driven validation, deferred until the user has gathered real walking course recordings and runbook entries). Part A tasks are self contained: each lands a commit, the Phase 4 close test count of 102 grows by Task A1's new fixture coverage cases, and the prep can sit on `main` cleanly while the user gathers data. Part B tasks defer until the user returns with data; the plan documents what those tasks need so a future session has a clear picture.
 
@@ -10,21 +10,21 @@
 
 **Architecture:** No code architecture changes in Phase 5. Part A's Task A1 adds integration test cases against the existing `GaitPipeline` and `PreCannedFixtures`. Part A's Tasks A2 and A3 are documentation only.
 
-**Tech Stack:** No new runtime or test dependencies. Part A's Task A1 uses the existing JUnit 4 + `kotlinx-coroutines-test` setup; the new test cases follow the pattern in `app/src/test/java/com/mustafan4x/msbattery/dsp/GaitPipelineIntegrationTest.kt`.
+**Tech Stack:** No new runtime or test dependencies. Part A's Task A1 uses the existing JUnit 4 + `kotlinx-coroutines-test` setup; the new test cases follow the pattern in `app/src/test/java/com/mustafan4x/baselinems/dsp/GaitPipelineIntegrationTest.kt`.
 
-**Related spec:** `~/src/MS-Battery/SPEC.md` Section 7.2 (validation strategy: synthetic ground truth, real walking course, test retest reliability), Section 9 (full validation strategy), Section 16 (success criteria 2: published validation numbers).
+**Related spec:** `~/src/BaselineMS/SPEC.md` Section 7.2 (validation strategy: synthetic ground truth, real walking course, test retest reliability), Section 9 (full validation strategy), Section 16 (success criteria 2: published validation numbers).
 
 **Related agent briefs:**
-- `~/src/MS-Battery/agents/20-test-fixture-engineer.md` (Task A1 owner: expands synthetic fixtures and adds integration tests).
-- `~/src/MS-Battery/agents/17-biostatistics-reviewer.md` (Task A2 owner: ICC variant justification and error metric definitions).
-- `~/src/MS-Battery/agents/14-documentation-engineer.md` (Task A3 owner: validation report scaffolding).
-- `~/src/MS-Battery/agents/02-signal-processing-engineer.md` (Part B reviewer; reconciles synthetic fixtures against real recordings).
-- `~/src/MS-Battery/agents/09-qa-engineer.md` (Part B owner: designs and runs the experiments; phase close sign off).
-- `~/src/MS-Battery/agents/01-clinical-validator.md` (Part B reviewer: ratifies validation methodology against published norms).
-- `~/src/MS-Battery/agents/16-citation-auditor.md` (Part B reviewer: final citation audit).
-- `~/src/MS-Battery/agents/21-compliance-reviewer.md` (Part B reviewer: regulatory drift on validation report wording).
-- `~/src/MS-Battery/agents/15-clinical-outcomes-reviewer.md` (Part B reviewer: final user facing copy).
-- `~/src/MS-Battery/agents/10-code-reviewer.md` (Part B reviewer at phase close).
+- `~/src/BaselineMS/agents/20-test-fixture-engineer.md` (Task A1 owner: expands synthetic fixtures and adds integration tests).
+- `~/src/BaselineMS/agents/17-biostatistics-reviewer.md` (Task A2 owner: ICC variant justification and error metric definitions).
+- `~/src/BaselineMS/agents/14-documentation-engineer.md` (Task A3 owner: validation report scaffolding).
+- `~/src/BaselineMS/agents/02-signal-processing-engineer.md` (Part B reviewer; reconciles synthetic fixtures against real recordings).
+- `~/src/BaselineMS/agents/09-qa-engineer.md` (Part B owner: designs and runs the experiments; phase close sign off).
+- `~/src/BaselineMS/agents/01-clinical-validator.md` (Part B reviewer: ratifies validation methodology against published norms).
+- `~/src/BaselineMS/agents/16-citation-auditor.md` (Part B reviewer: final citation audit).
+- `~/src/BaselineMS/agents/21-compliance-reviewer.md` (Part B reviewer: regulatory drift on validation report wording).
+- `~/src/BaselineMS/agents/15-clinical-outcomes-reviewer.md` (Part B reviewer: final user facing copy).
+- `~/src/BaselineMS/agents/10-code-reviewer.md` (Part B reviewer at phase close).
 
 **Platform note:** Local builds run with `JAVA_HOME=/snap/android-studio/209/jbr ./gradlew :app:testDebugUnitTest`. CI uses Temurin JDK 17. Part A is fully agent doable; Part B requires a real device and a real walking course.
 
@@ -35,7 +35,7 @@
 Files this plan creates or modifies:
 
 ```
-~/src/MS-Battery/
+~/src/BaselineMS/
 ├── SPEC.md                                              (no change)
 ├── STATUS.md                                            (PM updates Phase 5 row in two passes: Part A close, then Part B close)
 ├── README.md                                            (Part B updates: validation numbers, retention curves)
@@ -54,7 +54,7 @@ Files this plan creates or modifies:
 │   │   └── sensor-runbook.md                            (Part B append: per device entries from user)
 │   └── perf/
 │       └── latency-budgets.md                           (Part B append: Phase 5 PE review if relevant)
-└── app/src/test/java/com/mustafan4x/msbattery/dsp/
+└── app/src/test/java/com/mustafan4x/baselinems/dsp/
     └── GaitPipelineIntegrationTest.kt                   (Part A Task A1: append three new fixtures' coverage)
 ```
 
@@ -69,7 +69,7 @@ The dsp/ source files are consumed unchanged in Part A. Part B does not modify d
 **Owner:** Test Fixture Engineer.
 
 **Files:**
-- Modify: `app/src/test/java/com/mustafan4x/msbattery/dsp/GaitPipelineIntegrationTest.kt` (append three new test cases for `slowWalk`, `briskWalk`, and `severeAsymmetry`).
+- Modify: `app/src/test/java/com/mustafan4x/baselinems/dsp/GaitPipelineIntegrationTest.kt` (append three new test cases for `slowWalk`, `briskWalk`, and `severeAsymmetry`).
 - No production code changes.
 
 **Spec:** Phase 3 Code Reviewer LOW finding L1 noted that `PreCannedFixtures.slowWalk`, `briskWalk`, and `severeAsymmetry` had no `GaitPipelineIntegrationTest` coverage. The Test Fixture Engineer adds one test case per fixture that runs the fixture through the production `GaitPipeline.process` pipeline and asserts the recovered features against the fixture's ground truth metadata, mirroring the structure of the existing four cases for `healthyControlNormal`, `msTypicalNormal`, `mildAsymmetry`, and `noisyMsNormal`.

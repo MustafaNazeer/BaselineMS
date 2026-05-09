@@ -1,4 +1,4 @@
-# Architecture, MS Neuro Battery
+# Architecture, BaselineMS
 
 **Status:** Phase 0 deliverable, written by the Documentation Engineer.
 
@@ -10,7 +10,7 @@ This document is intentionally short. It does not duplicate the specification. I
 
 ## 1. What the application is, in one paragraph
 
-MS Neuro Battery is a native Android application built with Kotlin and Jetpack Compose. It lets a person living with Multiple Sclerosis self administer a short, sensor backed set of five tests once a week, persists the results on device, and exports a clinician facing PDF report on demand. The application has no backend, no account, no cloud sync, and no `android.permission.INTERNET` declaration. The technical centerpiece is the gait analysis pipeline (Section 4 below). The full design rationale is in `SPEC.md` Section 1 and Section 2.
+BaselineMS is a native Android application built with Kotlin and Jetpack Compose. It lets a person living with Multiple Sclerosis self administer a short, sensor backed set of five tests once a week, persists the results on device, and exports a clinician facing PDF report on demand. The application has no backend, no account, no cloud sync, and no `android.permission.INTERNET` declaration. The technical centerpiece is the gait analysis pipeline (Section 4 below). The full design rationale is in `SPEC.md` Section 1 and Section 2.
 
 ## 2. Layered architecture
 

@@ -1,4 +1,4 @@
-# Hardening checklist, MS Neuro Battery
+# Hardening checklist, BaselineMS
 
 **Phase:** 0 (Bootstrap setup)
 **Author role:** Security Engineer (agent 07)
@@ -26,7 +26,7 @@ The checklist is written so that "PR violates rule N" is a yes or no determinati
 
 The grep covers `app/src/main`, `app/src/debug`, and any future build variants. The merged manifest at build time will also be inspected by the Security Engineer at every release; the merged manifest currently contains only the AndroidX auto injected `<applicationId>.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`, which is a custom, app scoped, non network permission and is acceptable.
 
-**Current state, verified 2026-05-07:** `/home/mustafa/src/MS-Battery/app/src/main/AndroidManifest.xml` declares no `uses-permission` element. Pass.
+**Current state, verified 2026-05-07:** `/home/mustafa/src/BaselineMS/app/src/main/AndroidManifest.xml` declares no `uses-permission` element. Pass.
 
 ### A.2. Every new permission is reviewed by the Security Engineer before merge.
 

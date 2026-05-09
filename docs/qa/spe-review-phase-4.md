@@ -1,7 +1,7 @@
 # Signal Processing Engineer Review: Phase 4 (Gait Test Module Integration)
 
 Reviewer: Signal Processing Engineer agent (session 2026-05-07)
-Commits reviewed: `b8187c8..d9b4795` on `main` (Phase 4 Tasks 1 to 8: TestResultPayload extension, AndroidImuSource, ADR 0003, sensor runbook, RawSensorWriter, four GaitTest screens, GaitTestViewModel and TestModule, MSBatteryApp wiring).
+Commits reviewed: `b8187c8..d9b4795` on `main` (Phase 4 Tasks 1 to 8: TestResultPayload extension, AndroidImuSource, ADR 0003, sensor runbook, RawSensorWriter, four GaitTest screens, GaitTestViewModel and TestModule, BaselineMSApp wiring).
 Verdict: **APPROVED WITH MINOR FINDINGS**
 
 ---
@@ -63,7 +63,7 @@ calls `q.rotate(s.linearAcceleration)` consistently for both paths.
 
 ### (a) `GaitPipeline` and `process` made `open`
 
-**Ratified.** `git show 34a3174 -- app/src/main/java/com/mustafan4x/msbattery/dsp/GaitPipeline.kt`
+**Ratified.** `git show 34a3174 -- app/src/main/java/com/mustafan4x/baselinems/dsp/GaitPipeline.kt`
 shows the only diff is `class` to `open class` and `fun process` to `open fun process`.
 No body change, no signature change, no behavior shift. The test suite uses the
 override via `FakeGaitPipeline` in `GaitTestViewModelTest.kt` lines 46 to 52. Phase 3
@@ -96,7 +96,7 @@ under finding I2.
 
 ### MINOR M1: Fallback Madgwick test feeds gravity included data through the linearAcceleration channel
 
-**File:** `app/src/test/java/com/mustafan4x/msbattery/signals/AndroidImuSourceTest.kt`,
+**File:** `app/src/test/java/com/mustafan4x/baselinems/signals/AndroidImuSourceTest.kt`,
 lines 147 to 183.
 
 The fallback test omits `Sensor.TYPE_ACCELEROMETER` from the shadow sensor manager
@@ -119,7 +119,7 @@ Engineer.
 
 ### INFORMATIONAL I1: Tail edge sample loss on capture cancellation
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/battery/gait/GaitTestViewModel.kt`,
+**File:** `app/src/main/java/com/mustafan4x/baselinems/battery/gait/GaitTestViewModel.kt`,
 lines 90 to 96 (`finishCapture`) and 98 to 106 (`onCancel`).
 
 `AndroidImuSource.emissions` is a `MutableSharedFlow` with `extraBufferCapacity = 256`
@@ -139,7 +139,7 @@ Engineer (Phase 5 prep).
 
 ### INFORMATIONAL I2: First fallback Madgwick step uses gravity removed input
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/signals/AndroidImuSource.kt`,
+**File:** `app/src/main/java/com/mustafan4x/baselinems/signals/AndroidImuSource.kt`,
 lines 124 to 137.
 
 On the first linear acceleration event after `start()`, `lastAccel` may be null
@@ -159,7 +159,7 @@ show first samples are visibly off. Owner: Sensor Integration Engineer (Phase 5)
 
 ### INFORMATIONAL I3: `RawSensorWriter` virtuality is inverted from the project's interface based pattern
 
-**File:** `app/src/main/java/com/mustafan4x/msbattery/signals/RawSensorWriter.kt`,
+**File:** `app/src/main/java/com/mustafan4x/baselinems/signals/RawSensorWriter.kt`,
 lines 26 and 28.
 
 The class is `open` and `write` is `open` to enable test doubling. The project's

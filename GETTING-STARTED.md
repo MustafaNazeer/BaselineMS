@@ -1,4 +1,4 @@
-# Getting started, MS Neuro Battery
+# Getting started, BaselineMS
 
 This is the first session walkthrough. If this is the very first session opened in this directory, follow these steps in order. After Phase 0 is complete, future sessions just read `STATUS.md` and run the "work on the next phase" flow.
 
@@ -6,9 +6,9 @@ This is the first session walkthrough. If this is the very first session opened 
 
 Check that:
 
-- `~/src/MS-Battery/SPEC.md` exists.
-- `~/src/MS-Battery/STATUS.md` exists and "Next phase" reads `Phase 0: Bootstrap setup`.
-- The user has confirmed the GitHub remote at https://github.com/Mustafan4x/MS-Battery is reachable.
+- `~/src/BaselineMS/SPEC.md` exists.
+- `~/src/BaselineMS/STATUS.md` exists and "Next phase" reads `Phase 0: Bootstrap setup`.
+- The user has confirmed the GitHub remote at https://github.com/Mustafan4x/BaselineMS is reachable.
 - Android Studio Iguana or later is installed on the machine where the build will actually happen. The session itself can run on Linux without Android Studio; the build steps in Phase 0 onward require Android Studio.
 
 If any of those is missing, stop and tell the user.
@@ -29,7 +29,7 @@ You are the Project Manager unless the user tells you otherwise.
 
 Briefly state:
 
-> "I'm the PM for MS Neuro Battery. The next phase is Phase 0, Bootstrap setup. Before I start it, I need to run the check-in protocol."
+> "I'm the PM for BaselineMS. The next phase is Phase 0, Bootstrap setup. Before I start it, I need to run the check-in protocol."
 
 Then ask the three check-in questions verbatim:
 
@@ -43,7 +43,7 @@ Wait for answers. Do not proceed without them.
 
 If the user says continue, briefly review `docs/plan.md` Phase 0 section with the user. Confirm the agents you intend to dispatch:
 
-- DevOps Engineer: scaffold the Android Studio project at `~/src/MS-Battery/app/`, wire git, push initial commit to the remote.
+- DevOps Engineer: scaffold the Android Studio project at `~/src/BaselineMS/app/`, wire git, push initial commit to the remote.
 - Security Engineer: write `docs/security/threat-model.md` and `docs/security/hardening-checklist.md`.
 - UI/UX Designer: write `docs/design/tokens.md` with Material 3 baseline plus accessibility tokens.
 - Documentation Engineer: write `docs/architecture.md` and finalize `README.md`.
@@ -60,23 +60,23 @@ Use the Task tool dispatch template from `CLAUDE.md` verbatim. A concrete exampl
 
 ```
 Task tool prompt:
-You are the DevOps Engineer for the MS Neuro Battery project.
+You are the DevOps Engineer for the BaselineMS project.
 
 Read these files in order before doing anything else:
-1. /home/mustafa/src/MS-Battery/SPEC.md
-2. /home/mustafa/src/MS-Battery/agents/08-devops-engineer.md
-3. /home/mustafa/src/MS-Battery/STATUS.md
-4. /home/mustafa/src/MS-Battery/CLAUDE.md (specifically the "Inherited rules" and the dispatch template sections)
+1. /home/mustafa/src/BaselineMS/SPEC.md
+2. /home/mustafa/src/BaselineMS/agents/08-devops-engineer.md
+3. /home/mustafa/src/BaselineMS/STATUS.md
+4. /home/mustafa/src/BaselineMS/CLAUDE.md (specifically the "Inherited rules" and the dispatch template sections)
 
 You are working on Phase 0. Stay strictly in your role as defined in your agent brief.
 Do not recursively dispatch subagents; if you need work done outside your role, stop and report
 the need back so the PM can dispatch it.
 
 Your Phase 0 deliverables:
-1. Initialize the Android Studio project at /home/mustafa/src/MS-Battery/app/ following Task 1
-   of /home/mustafa/src/MS-Battery/docs/plans/phase-1-foundation.md.
+1. Initialize the Android Studio project at /home/mustafa/src/BaselineMS/app/ following Task 1
+   of /home/mustafa/src/BaselineMS/docs/plans/phase-1-foundation.md.
 2. Wire git: `git init` at the project root, `git remote add origin
-   https://github.com/Mustafan4x/MS-Battery.git`, push the initial commit.
+   https://github.com/Mustafan4x/BaselineMS.git`, push the initial commit.
 3. Configure GitHub Actions on Linux runners to run `./gradlew :app:testDebugUnitTest` on PRs.
 
 When you finish, report:
