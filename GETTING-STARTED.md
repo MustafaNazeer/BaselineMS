@@ -8,7 +8,7 @@ Check that:
 
 - `~/src/BaselineMS/SPEC.md` exists.
 - `~/src/BaselineMS/STATUS.md` exists and "Next phase" reads `Phase 0: Bootstrap setup`.
-- The user has confirmed the GitHub remote at https://github.com/Mustafan4x/BaselineMS is reachable.
+- The user has confirmed the GitHub remote at https://github.com/MustafaNazeer/BaselineMS is reachable.
 - Android Studio Iguana or later is installed on the machine where the build will actually happen. The session itself can run on Linux without Android Studio; the build steps in Phase 0 onward require Android Studio.
 
 If any of those is missing, stop and tell the user.
@@ -76,7 +76,7 @@ Your Phase 0 deliverables:
 1. Initialize the Android Studio project at /home/mustafa/src/BaselineMS/app/ following Task 1
    of /home/mustafa/src/BaselineMS/docs/plans/phase-1-foundation.md.
 2. Wire git: `git init` at the project root, `git remote add origin
-   https://github.com/Mustafan4x/BaselineMS.git`, push the initial commit.
+   https://github.com/MustafaNazeer/BaselineMS.git`, push the initial commit.
 3. Configure GitHub Actions on Linux runners to run `./gradlew :app:testDebugUnitTest` on PRs.
 
 When you finish, report:

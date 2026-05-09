@@ -14,7 +14,7 @@ The cardinal rule: every phase ends with the mandatory check-in protocol describ
 
 **Deliverables:**
 - `app/` Android Studio project scaffolded per Task 1 of `docs/plans/phase-1-foundation.md`.
-- Git repo initialized at the project root, GitHub remote `https://github.com/Mustafan4x/BaselineMS` wired, initial commit pushed.
+- Git repo initialized at the project root, GitHub remote `https://github.com/MustafaNazeer/BaselineMS` wired, initial commit pushed.
 - GitHub Actions CI workflow that runs `./gradlew :app:testDebugUnitTest` on every PR (Linux runners are sufficient for unit tests).
 - `docs/security/threat-model.md` with attack surface enumeration and `docs/security/hardening-checklist.md` with concrete enforceable rules (no INTERNET permission, ProGuard or R8 enabled in release, Android Keystore for any future secrets).
 - `docs/design/tokens.md` with Material 3 baseline plus accessibility tokens (tap targets, contrast, type scale).

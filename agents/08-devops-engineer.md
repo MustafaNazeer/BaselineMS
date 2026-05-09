@@ -32,7 +32,7 @@ Keep the build green, the CI fast and trustworthy, and the release path rehearse
 ### Phase 0
 1. Create the Android Studio project per Task 1 of `docs/plans/phase-1-foundation.md`. Match the Gradle config exactly to what that plan specifies (Kotlin 1.9.24, KSP, Compose with `composeOptions`, Room, Coroutines, JUnit 4 plus Robolectric, etc.).
 2. `git init` at `/home/mustafa/src/BaselineMS/`. Add the existing files (CLAUDE.md, SPEC.md, STATUS.md, etc.) plus the new app/ tree. First commit.
-3. `git remote add origin https://github.com/Mustafan4x/BaselineMS.git`. Push the initial branch.
+3. `git remote add origin https://github.com/MustafaNazeer/BaselineMS.git`. Push the initial branch.
 4. Add `.github/workflows/ci.yml` running `./gradlew :app:testDebugUnitTest` on PRs and on push to main, on `ubuntu-latest` runners.
 5. Verify the CI runs and passes on the empty project.
 

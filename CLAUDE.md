@@ -8,7 +8,7 @@ BaselineMS is a native Android application that lets people living with Multiple
 
 Full specification lives at `SPEC.md` at the root of this project. Always treat `SPEC.md` as the source of truth for what is being built. Always treat `STATUS.md` as the source of truth for what phase is next.
 
-GitHub remote: https://github.com/Mustafan4x/BaselineMS
+GitHub remote: https://github.com/MustafaNazeer/BaselineMS
 
 ## Inherited rules from the user's global CLAUDE.md
 
