@@ -1,5 +1,6 @@
 package com.mustafanazeer.baselinems.dsp
 
+import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.atan2
@@ -273,14 +274,14 @@ open class GaitPipeline {
         val dot = an.w * bn.w + an.x * bn.x + an.y * bn.y + an.z * bn.z
         val clamped = max(-1.0, min(1.0, abs(dot)))
         val rad = 2.0 * acos(clamped)
-        return rad * 180.0 / Math.PI
+        return rad * 180.0 / PI
     }
 
     private fun yawDegrees(q: Quaternion): Double {
         val n = q.normalized()
         val sinyCosp = 2.0 * (n.w * n.z + n.x * n.y)
         val cosyCosp = 1.0 - 2.0 * (n.y * n.y + n.z * n.z)
-        return atan2(sinyCosp, cosyCosp) * 180.0 / Math.PI
+        return atan2(sinyCosp, cosyCosp) * 180.0 / PI
     }
 
     private fun angleWrap180(angle: Double): Double {
