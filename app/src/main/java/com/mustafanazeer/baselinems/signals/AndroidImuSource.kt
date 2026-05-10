@@ -200,12 +200,14 @@ class AndroidImuSource(
         val x = values[0].toDouble()
         val y = values[1].toDouble()
         val z = values[2].toDouble()
-        val w = if (values.size >= 4) {
+        val rawW = if (values.size >= 4) {
             values[3].toDouble()
         } else {
             val v2 = x * x + y * y + z * z
             sqrt(max(0.0, 1.0 - v2))
         }
-        return Quaternion(w, x, y, z).normalized()
+        val norm = sqrt(rawW * rawW + x * x + y * y + z * z)
+        if (norm == 0.0) return Quaternion.IDENTITY
+        return Quaternion(rawW / norm, x / norm, y / norm, z / norm)
     }
 }
