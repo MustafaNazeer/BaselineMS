@@ -5,6 +5,9 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Looper
 import com.mustafanazeer.baselinems.dsp.ImuSample
 import com.mustafanazeer.baselinems.dsp.Madgwick
 import com.mustafanazeer.baselinems.dsp.Quaternion
@@ -55,6 +58,17 @@ class AndroidImuSource(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    private val sensorHandlerThread: HandlerThread =
+        HandlerThread("BaselineMS-Sensor").apply { start() }
+    private val sensorHandler: Handler = Handler(sensorHandlerThread.looper)
+
+    /**
+     * The looper that the `SensorManager` callbacks fire on. Exposed so unit tests can confirm
+     * the listener is not bound to the main looper, which would let the writer's gzip work stall
+     * the producer.
+     */
+    internal val sensorListenerLooper: Looper get() = sensorHandlerThread.looper
+
     private val fallbackMadgwick: Madgwick? = if (rotation == null) Madgwick(beta = 0.1) else null
 
     private var lastLinear: Vector3? = null
@@ -102,16 +116,16 @@ class AndroidImuSource(
 
     override fun start() {
         if (linearAccel != null) {
-            sensorManager.registerListener(listener, linearAccel, samplingPeriodMicros)
+            sensorManager.registerListener(listener, linearAccel, samplingPeriodMicros, sensorHandler)
         }
         if (gyro != null) {
-            sensorManager.registerListener(listener, gyro, samplingPeriodMicros)
+            sensorManager.registerListener(listener, gyro, samplingPeriodMicros, sensorHandler)
         }
         if (rotation != null) {
-            sensorManager.registerListener(listener, rotation, samplingPeriodMicros)
+            sensorManager.registerListener(listener, rotation, samplingPeriodMicros, sensorHandler)
         }
         if (rawAccel != null) {
-            sensorManager.registerListener(listener, rawAccel, samplingPeriodMicros)
+            sensorManager.registerListener(listener, rawAccel, samplingPeriodMicros, sensorHandler)
         }
     }
 

@@ -6,7 +6,9 @@ import com.mustafanazeer.baselinems.dsp.ImuSample
 import com.mustafanazeer.baselinems.signals.ImuSource
 import com.mustafanazeer.baselinems.signals.RawSensorWriter
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +38,8 @@ class GaitTestViewModel(
     private val rawSensorWriter: RawSensorWriter,
     private val destinationFile: File,
     private val filesDir: File,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    internal val writerDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
 
     private val _state = MutableStateFlow<GaitTestState>(GaitTestState.Instructions)
@@ -63,7 +66,7 @@ class GaitTestViewModel(
         capturedSamples.clear()
         _state.value = GaitTestState.Capturing(progressMillis = 0)
         imuSource.start()
-        writerJob = scope.launch {
+        writerJob = scope.launch(writerDispatcher) {
             try {
                 rawSensorWriter.write(
                     imuSource.stream().onEach { capturedSamples += it }

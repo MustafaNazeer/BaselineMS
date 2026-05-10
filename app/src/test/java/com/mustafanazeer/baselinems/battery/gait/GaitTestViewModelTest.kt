@@ -8,11 +8,13 @@ import com.mustafanazeer.baselinems.dsp.Quaternion
 import com.mustafanazeer.baselinems.dsp.Vector3
 import com.mustafanazeer.baselinems.signals.ImuSource
 import com.mustafanazeer.baselinems.signals.RawSensorWriter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -20,6 +22,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -94,6 +97,27 @@ class GaitTestViewModelTest {
     )
 
     @Test
+    fun `writerDispatcher defaults to Dispatchers IO when not supplied`() = runTest {
+        // Default constructor parameter pins the writer to IO so gzip and file work do not
+        // run on the composition's Main scope.
+        val (filesDir, target) = makeFiles()
+        val vm = GaitTestViewModel(
+            imuSource = FakeImuSource(),
+            gaitPipeline = FakeGaitPipeline(cannedFeatures()),
+            rawSensorWriter = CountingRawSensorWriter(target),
+            destinationFile = target,
+            filesDir = filesDir,
+            scope = this
+        )
+
+        assertSame(
+            "writerDispatcher must default to Dispatchers.IO",
+            Dispatchers.IO,
+            vm.writerDispatcher
+        )
+    }
+
+    @Test
     fun `onStart transitions Instructions to Countdown three`() = runTest {
         val (filesDir, target) = makeFiles()
         val source = FakeImuSource()
@@ -105,7 +129,8 @@ class GaitTestViewModelTest {
             rawSensorWriter = writer,
             destinationFile = target,
             filesDir = filesDir,
-            scope = this
+            scope = this,
+            writerDispatcher = UnconfinedTestDispatcher(testScheduler)
         )
 
         assertEquals(GaitTestState.Instructions, vm.state.value)
@@ -131,7 +156,8 @@ class GaitTestViewModelTest {
             rawSensorWriter = writer,
             destinationFile = target,
             filesDir = filesDir,
-            scope = this
+            scope = this,
+            writerDispatcher = UnconfinedTestDispatcher(testScheduler)
         )
 
         vm.onStart()
@@ -164,7 +190,8 @@ class GaitTestViewModelTest {
             rawSensorWriter = writer,
             destinationFile = target,
             filesDir = filesDir,
-            scope = this
+            scope = this,
+            writerDispatcher = UnconfinedTestDispatcher(testScheduler)
         )
 
         vm.onStart()
@@ -213,7 +240,8 @@ class GaitTestViewModelTest {
             rawSensorWriter = writer,
             destinationFile = target,
             filesDir = filesDir,
-            scope = this
+            scope = this,
+            writerDispatcher = UnconfinedTestDispatcher(testScheduler)
         )
 
         vm.onStart()
@@ -256,7 +284,8 @@ class GaitTestViewModelTest {
             rawSensorWriter = writer,
             destinationFile = target,
             filesDir = filesDir,
-            scope = this
+            scope = this,
+            writerDispatcher = UnconfinedTestDispatcher(testScheduler)
         )
 
         vm.onStart()
@@ -284,7 +313,8 @@ class GaitTestViewModelTest {
             rawSensorWriter = writer,
             destinationFile = target,
             filesDir = filesDir,
-            scope = this
+            scope = this,
+            writerDispatcher = UnconfinedTestDispatcher(testScheduler)
         )
 
         vm.onStart()
