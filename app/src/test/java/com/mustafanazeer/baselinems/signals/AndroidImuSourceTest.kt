@@ -3,6 +3,7 @@ package com.mustafanazeer.baselinems.signals
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorManager
+import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mustafanazeer.baselinems.dsp.ImuSample
@@ -16,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -129,6 +131,23 @@ class AndroidImuSourceTest {
         assertEquals(0.0, rot.z, 1e-6)
 
         job.cancel()
+        source.stop()
+    }
+
+    @Test
+    fun `sensor listener runs on a dedicated thread, not the main thread`() {
+        addAllSensors()
+        val source = AndroidImuSource(context)
+        source.start()
+
+        val listenerLooper = source.sensorListenerLooper
+        assertNotSame(
+            "sensor listener must not share the main looper (PE M3)",
+            Looper.getMainLooper(),
+            listenerLooper
+        )
+        assertNotNull("sensor listener looper must be non-null", listenerLooper)
+
         source.stop()
     }
 
