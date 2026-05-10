@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import com.mustafanazeer.baselinems.battery.TestModule
 import com.mustafanazeer.baselinems.battery.TestResultPayload
 import com.mustafanazeer.baselinems.data.TestType
+import com.mustafanazeer.baselinems.dsp.GaitFeatures
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -45,7 +46,7 @@ class GaitTest(
                 is GaitTestState.Instructions -> GaitInstructionsScreen(
                     onStart = { viewModel.onStart() },
                     onSkip = {
-                        onComplete(skippedPayload())
+                        onComplete(SkippedGaitPayload)
                     }
                 )
                 is GaitTestState.Countdown -> GaitCountdownScreen(state = current)
@@ -58,26 +59,16 @@ class GaitTest(
                     onContinue = { viewModel.onContinue(onComplete) }
                 )
                 is GaitTestState.Cancelled -> GaitDoneScreen(
-                    state = GaitTestState.Done(features = emptyFeatures()),
-                    onContinue = { onComplete(skippedPayload()) }
+                    state = GaitTestState.Done(features = GaitFeatures.EMPTY),
+                    onContinue = { onComplete(SkippedGaitPayload) }
                 )
             }
         }
     }
 
-    private fun skippedPayload(): TestResultPayload = object : TestResultPayload {
+    private object SkippedGaitPayload : TestResultPayload {
         override val qualityScore: Double = 0.0
         override val features: Map<String, Double> = emptyMap()
         override val rawSensorRelativePath: String? = null
     }
-
-    private fun emptyFeatures() = com.mustafanazeer.baselinems.dsp.GaitFeatures(
-        cadenceStepsPerMinute = 0.0,
-        meanStrideLengthMeters = 0.0,
-        stepTimeCv = 0.0,
-        strideAsymmetryIndex = 0.0,
-        doubleSupportTimeSeconds = 0.0,
-        qualityScore = 0.0,
-        detectedStepCount = 0
-    )
 }
