@@ -1,9 +1,9 @@
 package com.mustafanazeer.baselinems.dsp
 
 /**
- * Zero velocity update (ZUPT) stride length integrator per SPEC.md Section 7.1 step 8 and the
- * Skog et al. 2010 ZUPT method (Skog I, Handel P, Nilsson J O, Rantakokko J. 2010. Zero velocity
- * detection: an algorithm evaluation. IEEE Trans Biomed Eng 57(11):2657 to 2666).
+ * Zero velocity update (ZUPT) stride length integrator following the Skog et al. 2010 method
+ * (Skog I, Handel P, Nilsson J O, Rantakokko J. 2010. Zero velocity detection: an algorithm
+ * evaluation. IEEE Trans Biomed Eng 57(11):2657 to 2666).
  *
  * Given a forward (world frame Y) linear acceleration time series and a list of mid stance
  * sample indices, integrate forward acceleration twice using trapezoidal integration with the

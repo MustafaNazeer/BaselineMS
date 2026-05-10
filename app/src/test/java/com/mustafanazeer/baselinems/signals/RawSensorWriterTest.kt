@@ -18,11 +18,9 @@ import java.io.IOException
 import java.util.zip.GZIPInputStream
 
 /**
- * Verifies the gzipped CSV trace persistence contract. The on disk format is set by
- * `docs/plans/phase-4-gait-test-module-integration.md` architectural rail 5: a 14 column header
- * line listing column names, then one row per sample. The two test cases mirror Task 5 of the
- * Phase 4 plan: round trip preservation within floating point precision, and exception propagation
- * with the file closed.
+ * Verifies the gzipped CSV trace persistence contract. The on disk format is a 14 column header
+ * line listing column names, then one row per sample. The two test cases cover round trip
+ * preservation within floating point precision, and exception propagation with the file closed.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class RawSensorWriterTest {

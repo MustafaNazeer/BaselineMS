@@ -6,22 +6,21 @@ import kotlin.math.min
 import kotlin.math.sqrt
 
 /**
- * Computes the five SPEC.md Section 7.1 step 8 features plus the quality score from step 9 from
- * the outputs of StepDetector, StridePairing, and Zupt.
+ * Computes the five gait features plus a quality score from the outputs of StepDetector,
+ * StridePairing, and Zupt.
  *
  * - Cadence: steps detected divided by trial duration in minutes.
  * - Mean stride length: arithmetic mean of supplied per stride lengths from Zupt.
  * - Step time CV: coefficient of variation (sd / mean) of inter step intervals.
- * - Stride asymmetry index: (meanLeftStepInterval - meanRightStepInterval) / meanOfMeans, the
- *   symmetric mean denominator convention ratified for the Tap Test in the Clinical Validator's
- *   2026-05-07 Phase 2 sign off (`docs/source/clinical-references.md`) and reused here for
- *   cross module consistency.
+ * - Stride asymmetry index: (meanLeftStepInterval - meanRightStepInterval) / meanOfMeans. The
+ *   symmetric mean denominator convention is reused from the tap test for cross module
+ *   consistency.
  * - Double support time: estimated as the mean overlap window between successive opposite foot
  *   steps. The synthetic generator does not model true double support phase boundaries, so this
  *   feature is computed as half the mean step interval, which approximates the published double
  *   support fraction (about 20 percent of stride time in healthy adults, slightly higher in MS).
  *
- * Quality score combines four factors per SPEC.md Section 7.1 step 9:
+ * Quality score combines four factors:
  *  1. At least 20 steps detected (binary: zero quality if not).
  *  2. Orientation residual stable (penalty if the mean residual angle between Madgwick and the
  *     platform rotation vector exceeds 5 degrees over the trial).
@@ -30,9 +29,9 @@ import kotlin.math.sqrt
  *  4. No inter peak gap exceeded the 800 ms maximum (penalty per flagged gap).
  *
  * The 5 degree residual threshold and the 30 degree yaw drift threshold are smartphone
- * adaptation choices not from a single MS paper; they are the heuristic values the SPE chose
- * for Phase 3 quality gating, subject to refinement after the Phase 5 real walking course
- * recordings calibrate the typical residual and drift distributions on a real device.
+ * adaptation choices, not values lifted from a single MS paper. They are heuristic and subject
+ * to refinement after the measured walking course recordings calibrate the typical residual and
+ * drift distributions on a real device.
  */
 class FeatureExtractor {
 

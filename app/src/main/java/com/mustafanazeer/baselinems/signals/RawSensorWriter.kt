@@ -10,18 +10,18 @@ import java.io.Writer
 import java.util.zip.GZIPOutputStream
 
 /**
- * Phase 4 raw sensor trace writer. Persists a `Flow<ImuSample>` as a gzipped CSV at a target file.
+ * Raw sensor trace writer. Persists a `Flow<ImuSample>` as a gzipped CSV at a target file.
  *
  * Format: a 14 column header line, then one row per sample. Columns are
  * `timestampNanos,accelerometerX,accelerometerY,accelerometerZ,gyroscopeX,gyroscopeY,gyroscopeZ,linearAccelerationX,linearAccelerationY,linearAccelerationZ,rotationVectorW,rotationVectorX,rotationVectorY,rotationVectorZ`.
  * Rows where `ImuSample.rotationVector` is null write `NaN` into the four rotation columns; the
- * `signals/AndroidImuSource` Phase 4 implementation always supplies a rotation (platform fused or
- * from scratch Madgwick fallback) so this only matters for non production callers.
+ * `signals/AndroidImuSource` implementation always supplies a rotation (platform fused or from
+ * scratch Madgwick fallback) so this only matters for non production callers.
  *
- * Stream layering follows `docs/plans/phase-4-gait-test-module-integration.md` Task 5: a
- * `GZIPOutputStream` wraps a `BufferedOutputStream` wraps a `FileOutputStream`. The writer flushes
- * and closes on completion; if the source flow throws, the writer closes the file and rethrows so
- * partial data is still recoverable from the gzip stream's last complete deflate block.
+ * Stream layering: a `GZIPOutputStream` wraps a `BufferedOutputStream` wraps a
+ * `FileOutputStream`. The writer flushes and closes on completion; if the source flow throws,
+ * the writer closes the file and rethrows so partial data is still recoverable from the gzip
+ * stream's last complete deflate block.
  */
 open class RawSensorWriter(private val target: File) {
 

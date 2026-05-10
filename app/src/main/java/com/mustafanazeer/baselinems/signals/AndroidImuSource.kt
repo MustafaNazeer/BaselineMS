@@ -17,7 +17,7 @@ import kotlin.math.max
 import kotlin.math.sqrt
 
 /**
- * Phase 4 SensorManager backed `ImuSource`. Registers `Sensor.TYPE_LINEAR_ACCELERATION`,
+ * SensorManager backed `ImuSource`. Registers `Sensor.TYPE_LINEAR_ACCELERATION`,
  * `Sensor.TYPE_GYROSCOPE`, and `Sensor.TYPE_ROTATION_VECTOR` at a 100 Hz target sampling period.
  *
  * The linear acceleration sensor is the primary clock. On every linear acceleration event the
@@ -26,11 +26,11 @@ import kotlin.math.sqrt
  *
  * Fallback path: when the device does not expose `Sensor.TYPE_ROTATION_VECTOR`, the source runs
  * the from scratch `Madgwick` filter (`dsp/Madgwick.kt`) inline using gyroscope plus raw
- * accelerometer (`Sensor.TYPE_ACCELEROMETER`) to produce a per sample quaternion. This addresses
- * the Phase 3 Resume notes item 1 ("rotationVector null fallback") without leaking sensor concerns
- * into the `dsp/` layer. The fallback registers a separate `Sensor.TYPE_ACCELEROMETER` listener
- * because `Sensor.TYPE_LINEAR_ACCELERATION` is gravity removed and would not let Madgwick observe
- * the gravity reference vector it needs for tilt correction.
+ * accelerometer (`Sensor.TYPE_ACCELEROMETER`) to produce a per sample quaternion, keeping the
+ * sensor concern out of the `dsp/` layer. The fallback registers a separate
+ * `Sensor.TYPE_ACCELEROMETER` listener because `Sensor.TYPE_LINEAR_ACCELERATION` is gravity
+ * removed and would not let Madgwick observe the gravity reference vector it needs for tilt
+ * correction.
  */
 class AndroidImuSource(
     context: Context,

@@ -65,12 +65,11 @@ class GaitPipelineIntegrationTest {
         assertWithin(90.0, f.cadenceStepsPerMinute, 0.05)
         assertWithin(1.05, f.meanStrideLengthMeters, 0.05)
         /*
-         * Asymmetry index assertion deferred to Phase 5 calibration per STATUS.md Resume notes
-         * items 8 and 10(a). Recovered asymmetry index for severeAsymmetry (0.1127) misses the
+         * Asymmetry index assertion deferred until the measured walking course recordings
+         * calibrate this. Recovered asymmetry index for severeAsymmetry (0.1127) misses the
          * ground truth (0.2609) by 5.9x the 0.025 absolute band; the divergence stems from the
          * synthetic generator's continuous half cadence lateral sway interacting with the
-         * pipeline's median step interval lateral sampler at high asymmetry. See
-         * docs/qa/fixtures.md Section 7 for the calibration log entry and resolution paths.
+         * pipeline's median step interval lateral sampler at high asymmetry.
          */
     }
 

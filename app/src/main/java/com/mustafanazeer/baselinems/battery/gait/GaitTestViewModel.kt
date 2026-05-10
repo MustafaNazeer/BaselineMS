@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 /**
- * Phase 4 view model that orchestrates the gait test state machine and the sensor capture.
+ * View model that orchestrates the gait test state machine and the sensor capture.
  *
  * The state sequence on the happy path is `Instructions` -> `Countdown(3)` -> `Countdown(2)` ->
  * `Countdown(1)` -> `Capturing(0)` -> ... -> `Capturing(30000)` -> `Done(features)`. From
@@ -71,9 +71,9 @@ class GaitTestViewModel(
             } catch (cancel: CancellationException) {
                 throw cancel
             } catch (other: Throwable) {
-                // The flow ended unexpectedly. Phase 4 surfaces the error through the
-                // pipeline's quality score, not through a separate UI state, because the
-                // recovery path is "process whatever samples we captured".
+                // The flow ended unexpectedly. The error surfaces through the pipeline's
+                // quality score rather than a separate UI state, because the recovery path is
+                // "process whatever samples we captured".
             }
         }
         captureJob = scope.launch {

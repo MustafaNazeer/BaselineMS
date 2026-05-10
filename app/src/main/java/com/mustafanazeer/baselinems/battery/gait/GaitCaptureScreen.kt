@@ -21,8 +21,7 @@ import androidx.compose.ui.unit.dp
  * Capture screen for the gait test. Shows a circular progress indicator wrapping a "Walking"
  * label, the elapsed and total seconds, and a Cancel button. The user is not expected to be
  * looking at this screen during the walk (the phone is in a front pocket), so the visual is
- * deliberately minimal: no animated map, no decorative motion, in line with
- * `docs/design/tokens.md` Section 9.2.
+ * deliberately minimal: no animated map, no decorative motion.
  */
 private const val TOTAL_DURATION_MILLIS = 30_000
 

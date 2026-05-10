@@ -16,14 +16,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 /**
- * Post test confirmation screen. Renders a thank you and a quality aware status line per
- * `docs/plans/phase-4-gait-test-module-integration.md` Task 6:
+ * Post test confirmation screen. Renders a thank you and a quality aware status line:
  *
  * - "Captured with high confidence" when the quality score exceeds 0.8.
  * - "Captured with limited confidence" when the score sits between 0.5 and 0.8 (inclusive).
  * - "Captured but quality is low" when the score is below 0.5.
  *
- * The plain language framing (no raw 0.78 number) follows `docs/design/tokens.md` Section 9.2.
+ * The plain language framing intentionally hides the raw 0.78 number.
  */
 @Composable
 fun GaitDoneScreen(

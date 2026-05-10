@@ -18,12 +18,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 /**
- * Instructions screen for the gait test. Body copy is fixed verbatim per
- * `docs/plans/phase-4-gait-test-module-integration.md` Task 6 (Patient Advocate driven safety
- * framing): straight line, front pocket, flat surface with wall in reach, opt out if unsafe.
- *
- * Sizing follows `docs/design/tokens.md` Section 5.1: primary action button at 64 dp height with
- * 32 dp horizontal margin, body in `bodyLarge` per Section 3.2.
+ * Instructions screen for the gait test. Safety framing is straight line, front pocket, flat
+ * surface with wall in reach, opt out if unsafe. Primary action button is 64 dp tall with 32 dp
+ * horizontal margin; body copy is `bodyLarge`.
  */
 @Composable
 fun GaitInstructionsScreen(

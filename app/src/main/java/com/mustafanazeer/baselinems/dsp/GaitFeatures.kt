@@ -1,9 +1,9 @@
 package com.mustafanazeer.baselinems.dsp
 
 /**
- * The five gait features named in SPEC.md Section 7.1 step 8 plus the quality score from step 9
- * plus the raw step count for downstream sanity checks. The toMap projection is the format the
- * Phase 4 persistence layer will hand to the Room TestResultEntity featuresJson column.
+ * The five gait features plus the quality score plus the raw step count for downstream sanity
+ * checks. The toMap projection is the format the persistence layer hands to the Room
+ * TestResultEntity featuresJson column.
  */
 data class GaitFeatures(
     val cadenceStepsPerMinute: Double,
