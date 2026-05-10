@@ -14,15 +14,14 @@ import com.mustafanazeer.baselinems.data.TestType
 import kotlinx.coroutines.CoroutineScope
 
 /**
- * Phase 4 `TestModule` implementation for the gait test. The Compose `Content(onComplete)`
- * builds a `GaitTestViewModel`, observes its state, and renders the appropriate screen.
+ * `TestModule` implementation for the gait test. The Compose `Content(onComplete)` builds a
+ * `GaitTestViewModel`, observes its state, and renders the appropriate screen.
  *
  * DI shape: the constructor takes a `viewModelFactory` lambda parameterized by the active
  * `CoroutineScope` (`rememberCoroutineScope` inside the composable). The factory is responsible
  * for resolving the sensor source, the DSP pipeline, the raw writer, the destination file, and
  * the application's `filesDir` at the moment Content composes. This keeps the module Hilt free
- * (matching the project's "light Hilt usage" stance per `SPEC.md` Section 12) while still
- * letting `BaselineMSApp` swap the wiring for tests if needed.
+ * while still letting `BaselineMSApp` swap the wiring for tests if needed.
  */
 class GaitTest(
     private val viewModelFactory: (CoroutineScope) -> GaitTestViewModel

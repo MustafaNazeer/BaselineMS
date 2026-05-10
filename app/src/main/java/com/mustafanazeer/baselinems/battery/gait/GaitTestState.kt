@@ -3,8 +3,8 @@ package com.mustafanazeer.baselinems.battery.gait
 import com.mustafanazeer.baselinems.dsp.GaitFeatures
 
 /**
- * Phase 4 gait test state machine. The view model in `GaitTestViewModel` transitions through
- * these states; the `GaitTest` `TestModule` renders one screen per state.
+ * Gait test state machine. The view model in `GaitTestViewModel` transitions through these
+ * states; the `GaitTest` `TestModule` renders one screen per state.
  *
  * Sequence on the happy path: `Instructions` (start, or skip) -> `Countdown(3)` -> `Countdown(2)` ->
  * `Countdown(1)` -> `Capturing(0)` -> ... -> `Capturing(30000)` -> `Done(features)`. From

@@ -24,14 +24,14 @@ import org.robolectric.shadows.ShadowSensorManager
 import java.io.File
 
 /**
- * Smoke test for the Phase 4 wiring in `BaselineMSApp` plus `RootScreen.composable("session")`.
+ * Smoke test for the gait test wiring in `BaselineMSApp` plus `RootScreen.composable("session")`.
  * Verifies that constructing a `GaitTest` with the production-shaped dependencies (the
  * `AndroidImuSource` reading from a Robolectric-backed `SensorManager`, a real `GaitPipeline`,
  * a real `RawSensorWriter` pointed at a temp file under a synthetic `filesDir`) does not throw.
  *
  * Mirrors `AndroidImuSourceTest`'s `AndroidJUnit4` plus `Config(sdk = [33])` pattern so the
- * module construction path is exercised on the same Robolectric SDK target as the other Phase 4
- * signals layer tests.
+ * module construction path is exercised on the same Robolectric SDK target as the other signals
+ * layer tests.
  */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [33])

@@ -13,17 +13,15 @@ import kotlin.math.tan
  * (Q1 = 1/(2 cos(pi/8)), Q2 = 1/(2 cos(3 pi/8))). Zero phase is achieved by running the
  * cascade forward over the input then again backward over the output (the filtfilt method).
  *
- * SPEC.md Section 7.1 step 4 fixes the design point at 20 Hz cutoff with a 100 Hz sample rate.
- * The constructor accepts cutoffHz and sampleRateHz to keep tests parameterizable, but the only
- * production design point this project ships is 20 Hz at 100 Hz.
+ * The design point this project ships is 20 Hz cutoff at a 100 Hz sample rate. The constructor
+ * accepts cutoffHz and sampleRateHz to keep tests parameterizable.
  *
  * Allocation behavior: per call to filtfilt, allocates two temporary DoubleArray buffers
  * sized to the input plus a small fixed amount of edge padding for transient suppression.
  * The biquad state itself lives in mutable fields and does not allocate during the per sample
  * inner loop. Callers that need allocation free per sample processing should provide their own
- * outer buffer; the Phase 4 capture path collects samples for 30 seconds before processing,
- * so a single batch allocation is acceptable per SPEC.md Section 7.1 and the docs/perf
- * latency budgets.
+ * outer buffer; the gait capture path collects samples for 30 seconds before processing, so a
+ * single batch allocation is acceptable.
  */
 class ButterworthLowPass(
     cutoffHz: Double,

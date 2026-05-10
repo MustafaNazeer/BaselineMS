@@ -3,23 +3,23 @@ package com.mustafanazeer.baselinems.dsp
 import kotlin.math.sqrt
 
 /**
- * Madgwick (2010) IMU orientation filter, implemented from scratch per SPEC.md Section 7.1
- * step 2 ("teaching exercise"). Reference: Madgwick S O H. 2010. An efficient orientation
- * filter for inertial and inertial / magnetic sensor arrays. University of Bristol technical
- * report. The IMU only variant (no magnetometer) is used here.
+ * Madgwick (2010) IMU orientation filter, implemented from scratch as a teaching exercise.
+ * Reference: Madgwick S O H. 2010. An efficient orientation filter for inertial and inertial /
+ * magnetic sensor arrays. University of Bristol technical report. The IMU only variant (no
+ * magnetometer) is used here.
  *
  * Convention: the filter's quaternion rotates device frame vectors into the world frame, i.e.
- * `orientation().rotate(deviceVec) = worldVec`. This matches the Android Sensor.TYPE_ROTATION_VECTOR
- * convention so the parallel platform fused estimate is a drop in reference for the quality score
- * residual computed in Phase 3 Task 13.
+ * `orientation().rotate(deviceVec) = worldVec`. This matches the Android
+ * Sensor.TYPE_ROTATION_VECTOR convention so the parallel platform fused estimate is a drop in
+ * reference for the quality score residual.
  *
  * State per instance: a single Quaternion (mutable through reassignment). The update method does
  * not allocate Vector3 or Quaternion objects on the per sample path apart from the one new
  * Quaternion that replaces the field; primitive Doubles carry the rest of the work.
  *
- * The default beta gain (0.1) is the project's chosen starting value (see ADR 0002 for the
- * tuning revisit conditions). The test suite runs at higher beta (0.5) for fast convergence on
- * the static test and at zero beta for pure gyro integration on the rotation test.
+ * The default beta gain (0.1) is the project's chosen starting value. The test suite runs at
+ * higher beta (0.5) for fast convergence on the static test and at zero beta for pure gyro
+ * integration on the rotation test.
  */
 class Madgwick(private val beta: Double = 0.1) {
 

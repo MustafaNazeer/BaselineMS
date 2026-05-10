@@ -19,9 +19,9 @@ object WorldFrame {
     /**
      * Estimate the gravity vector in the device frame from a static window of raw accelerometer
      * samples. The mean over the window cancels white sensor noise and yields the gravity
-     * vector that the device sees while at rest. Used in Phase 3 Task 13 quality scoring to
-     * confirm orientation tracking has not drifted: at rest the recovered gravity magnitude
-     * should remain near 9.80665 m per second squared.
+     * vector that the device sees while at rest. Used in quality scoring to confirm orientation
+     * tracking has not drifted: at rest the recovered gravity magnitude should remain near
+     * 9.80665 m per second squared.
      */
     fun estimateGravity(rawAccelerometerSamples: List<Vector3>): Vector3 {
         if (rawAccelerometerSamples.isEmpty()) return Vector3.ZERO

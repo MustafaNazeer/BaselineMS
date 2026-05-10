@@ -24,9 +24,6 @@ data class Stride(
  * label is not meaningful for asymmetry analysis. What matters is consistency: a same direction
  * lateral sign across two consecutive steps produces the same foot label, which lets the
  * pipeline detect when the alternation breaks (a real signal artifact) versus when it holds.
- *
- * Per SPEC.md Section 7.1 step 6 the sign of lateral acceleration at each step assigns left or
- * right; this module implements that rule.
  */
 class StridePairing {
 

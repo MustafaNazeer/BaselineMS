@@ -13,20 +13,19 @@ data class StepEvent(
 )
 
 /**
- * Peak finder over a low pass filtered vertical acceleration trace, configured per SPEC.md
- * Section 7.1 step 5. Two constraints fix the design:
+ * Peak finder over a low pass filtered vertical acceleration trace. Three constraints fix the
+ * design:
  *
  *  - Minimum peak prominence: peaks under this amplitude (in m/s^2) are rejected as wobbles.
  *    The default of 1.0 m/s^2 is a heuristic chosen to comfortably reject the lateral and
- *    forward sway baselines on the synthetic generator (1.0 and 0.5 m/s^2 respectively, per
- *    docs/qa/fixtures.md Section 5 item 5) while admitting heel strike spikes that scale with
- *    body mass.
+ *    forward sway baselines on the synthetic generator (1.0 and 0.5 m/s^2 respectively) while
+ *    admitting heel strike spikes that scale with body mass.
  *  - Minimum inter peak distance: peaks within this interval are non maximum suppressed. The
- *    SPEC.md value of 250 ms corresponds to a maximum cadence of 240 steps per minute, well
- *    above the brisk walk fixture's 130 steps per minute.
+ *    default of 250 ms corresponds to a maximum cadence of 240 steps per minute, well above
+ *    the brisk walk fixture's 130 steps per minute.
  *  - Maximum inter peak distance: peaks separated by more than this are emitted but the second
- *    peak is flagged with `gapToPreviousExceededMaxInterval = true` so the quality score in
- *    Task 12 can downgrade trials that contain pauses or stops.
+ *    peak is flagged with `gapToPreviousExceededMaxInterval = true` so quality scoring can
+ *    downgrade trials that contain pauses or stops.
  *
  * The detect method allocates a single output list. The internal state is method local; the
  * detector itself holds no per sample state and is safe to reuse.

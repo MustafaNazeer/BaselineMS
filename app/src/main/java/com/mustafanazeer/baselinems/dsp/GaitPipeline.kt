@@ -7,10 +7,9 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * End to end gait digital signal processing pipeline. Composes the seven Phase 3 stages defined
- * in `SPEC.md` Section 7.1 (Butterworth low pass, Madgwick orientation, world frame transform,
- * step detection, stride pairing, ZUPT stride length integration, feature extraction) into a
- * single class with one entry point.
+ * End to end gait digital signal processing pipeline. Composes seven stages (Butterworth low
+ * pass, Madgwick orientation, world frame transform, step detection, stride pairing, ZUPT
+ * stride length integration, feature extraction) into a single class with one entry point.
  *
  * Allocation discipline: each stage's per instance state (Madgwick filter, Butterworth filter,
  * step detector, stride pairing, ZUPT, feature extractor) is constructed once in the constructor
@@ -19,19 +18,17 @@ import kotlin.math.min
  *
  * Two implementation choices warrant explanation here.
  *
- * Mid stance localization. `SPEC.md` Section 7.1 step 8 specifies "Mid stance instants are
+ * Mid stance localization. The classical literature heuristic is "mid stance instants are
  * detected from local minima of acceleration magnitude." That heuristic mislocates mid stances
  * on this project's synthetic IMU fixtures because the forward propulsion peak amplitude
  * (about 16.7 m per second squared on `healthyControlNormal`) exceeds the heel strike Gaussian
  * peak (5 m per second squared), so magnitude minima fall AT heel strikes rather than between
- * them. See the "Caveat on amplitude" subsection of `docs/qa/fixtures.md` Section 2.1 for the
- * full derivation. The pipeline therefore localizes mid stances at the temporal midpoints
- * between successive detected steps, with the first and last mid stance extrapolated by half
- * the adjacent step interval beyond the trial's first and last step. This matches the
- * synthetic generator's construction (the same midpoint extrapolation produces the ground
- * truth mid stance times) and is the smartphone adaptation choice the Phase 3 SPE selected
- * over the SPEC.md Section 7.1 step 8 wording. Phase 5 will calibrate this against the real
- * walking course recordings; if real signals match the literature wording better, the pipeline
+ * them. The pipeline therefore localizes mid stances at the temporal midpoints between
+ * successive detected steps, with the first and last mid stance extrapolated by half the
+ * adjacent step interval beyond the trial's first and last step. This matches the synthetic
+ * generator's construction (the same midpoint extrapolation produces the ground truth mid
+ * stance times) and is a deliberate smartphone adaptation choice. The measured walking course
+ * recordings calibrate this; if real signals match the literature wording better, the pipeline
  * can switch to magnitude minima localization there.
  *
  * Madgwick initial state. The from scratch Madgwick filter starts at identity quaternion and,
@@ -42,8 +39,8 @@ import kotlin.math.min
  * accelerometer vector for a fixed number of virtual iterations before consuming the real
  * trial samples. After pre warm the filter is already aligned with the static gravity
  * direction, so the per sample residual reflects Madgwick versus platform tracking quality
- * during walking, not the startup transient. Phase 4 sensor capture provides a real standing
- * window before the walk that production code can use for the same purpose.
+ * during walking, not the startup transient. Real sensor capture provides a brief standing
+ * window before the walk that production code uses for the same purpose.
  */
 open class GaitPipeline {
 
@@ -111,12 +108,11 @@ open class GaitPipeline {
 
     /**
      * The raw lateral signal in the synthetic generator passes through zero at every detected
-     * step time by construction (`docs/qa/fixtures.md` Section 2.1 lateral sway formula), so a
-     * naive sample at the step's index is dominated by sample quantization noise. The lateral
-     * peaks at the temporal midpoint between consecutive steps. The pipeline therefore samples
-     * the lateral acceleration a quarter step interval before the step, which lies roughly at
-     * the preceding lateral peak. For the first step the offset is taken backward to zero or the
-     * trial start, whichever is later.
+     * step time by construction, so a naive sample at the step's index is dominated by sample
+     * quantization noise. The lateral peaks at the temporal midpoint between consecutive steps.
+     * The pipeline therefore samples the lateral acceleration a quarter step interval before the
+     * step, which lies roughly at the preceding lateral peak. For the first step the offset is
+     * taken backward to zero or the trial start, whichever is later.
      */
     private fun lateralAtStepIndex(
         lateral: DoubleArray,
@@ -177,9 +173,9 @@ open class GaitPipeline {
      * Recover stride lengths by feeding the ZUPT integrator with same foot mid stance pairs.
      * Mid stances at even indices `[m_0, m_2, m_4, ...]` are one foot; at odd indices the other.
      * Each pair `(m_k, m_{k+2})` brackets one full stride. Concatenating both foot lists yields
-     * one stride length per detected stride. Per the Test Fixture Engineer's note in the Phase
-     * 3 dispatch, feeding the integrator with all mid stances and treating each entry as a
-     * stride length would underestimate by a factor of two (each entry would be a step length).
+     * one stride length per detected stride. Note: feeding the integrator with all mid stances
+     * and treating each entry as a stride length would underestimate by a factor of two (each
+     * entry would be a step length).
      */
     private fun recoverStrideLengths(
         forward: DoubleArray,
@@ -220,9 +216,9 @@ open class GaitPipeline {
      * constant for `prewarmIterations` virtual samples before running the real input. By the
      * time the real input starts the filter is already aligned with the static gravity
      * direction, so the per sample residual measures Madgwick versus platform tracking quality
-     * during walking, not Madgwick's startup transient. This is a pragmatic Phase 3 choice;
-     * Phase 4 sensor capture provides a real standing window before the walk that production
-     * code can use for the same purpose.
+     * during walking, not Madgwick's startup transient. This is a pragmatic synthetic fixture
+     * accommodation; real sensor capture provides a brief standing window before the walk that
+     * production code uses for the same purpose.
      */
     private fun orientationQualitySignals(
         samples: List<ImuSample>,

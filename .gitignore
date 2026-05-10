@@ -41,12 +41,11 @@ Thumbs.db
 # Misc
 .kotlin/
 
-# Claude Code: maintainer's private files
+# Maintainer's private files and working scaffolding (kept local, never tracked)
 CLAUDE.md
 future-ideas.md
-
-# Claude Code: maintainer-private dirs and docs
-agents/
 STATUS.md
-docs/plan.md
 GETTING-STARTED.md
+SPEC.md
+agents/
+docs/
