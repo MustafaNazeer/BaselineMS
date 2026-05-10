@@ -44,3 +44,9 @@ Thumbs.db
 # Claude Code: maintainer's private files
 CLAUDE.md
 future-ideas.md
+
+# Claude Code: maintainer-private dirs and docs
+agents/
+STATUS.md
+docs/plan.md
+GETTING-STARTED.md
