@@ -17,8 +17,9 @@ import kotlin.math.sqrt
  *   consistency.
  * - Double support time: estimated as the mean overlap window between successive opposite foot
  *   steps. The synthetic generator does not model true double support phase boundaries, so this
- *   feature is computed as half the mean step interval, which approximates the published double
- *   support fraction (about 20 percent of stride time in healthy adults, slightly higher in MS).
+ *   feature is computed as 0.4 times the mean step interval (equivalently, 20 percent of stride
+ *   time, since stride time is twice the step interval), which approximates the published double
+ *   support fraction in healthy adults, slightly higher in MS.
  *
  * Quality score combines four factors:
  *  1. At least 20 steps detected (binary: zero quality if not).

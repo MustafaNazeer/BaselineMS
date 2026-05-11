@@ -3,7 +3,9 @@ package com.mustafanazeer.baselinems.dsp
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.cos
 
 class ZuptTest {
     @Test
@@ -13,12 +15,12 @@ class ZuptTest {
         // of v(t) = peakVelocity * sin(pi * t / T) from 0 to T, which is 2 * peakVelocity * T / pi.
         val strideDurationSeconds = 1.0
         val expected = 1.442
-        val peakVelocity = expected * Math.PI / (2.0 * strideDurationSeconds)
+        val peakVelocity = expected * PI / (2.0 * strideDurationSeconds)
         val sampleRateHz = 100.0
         val nSamples = (strideDurationSeconds * sampleRateHz).toInt() + 1
         val forwardAccel = DoubleArray(nSamples) { i ->
             val t = i / sampleRateHz
-            peakVelocity * (Math.PI / strideDurationSeconds) * kotlin.math.cos(Math.PI * t / strideDurationSeconds)
+            peakVelocity * (PI / strideDurationSeconds) * cos(PI * t / strideDurationSeconds)
         }
         val timestampSeconds = DoubleArray(nSamples) { it / sampleRateHz }
         val midStanceIndices = intArrayOf(0, nSamples - 1)
@@ -35,13 +37,13 @@ class ZuptTest {
         // computed from a half sine velocity profile.
         val strideDurationSeconds = 1.0
         val expected = 1.0
-        val peakVelocity = expected * Math.PI / (2.0 * strideDurationSeconds)
+        val peakVelocity = expected * PI / (2.0 * strideDurationSeconds)
         val sampleRateHz = 100.0
         val perStride = (strideDurationSeconds * sampleRateHz).toInt()
         val totalSamples = perStride * 3 + 1
         val forwardAccel = DoubleArray(totalSamples) { i ->
             val tInStride = (i % perStride).toDouble() / sampleRateHz
-            peakVelocity * (Math.PI / strideDurationSeconds) * kotlin.math.cos(Math.PI * tInStride / strideDurationSeconds)
+            peakVelocity * (PI / strideDurationSeconds) * cos(PI * tInStride / strideDurationSeconds)
         }
         val timestampSeconds = DoubleArray(totalSamples) { it / sampleRateHz }
         val midStanceIndices = intArrayOf(0, perStride, 2 * perStride, 3 * perStride)

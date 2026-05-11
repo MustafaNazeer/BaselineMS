@@ -2,7 +2,6 @@ package com.mustafanazeer.baselinems.dsp
 
 import kotlin.math.PI
 import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.math.tan
 
 /**
