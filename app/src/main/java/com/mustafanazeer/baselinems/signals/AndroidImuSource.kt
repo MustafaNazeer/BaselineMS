@@ -140,13 +140,17 @@ class AndroidImuSource(
         val gyroNow = lastGyro ?: Vector3.ZERO
 
         val rotationNow: Quaternion = lastRotation ?: run {
-            if (fallbackMadgwick != null) {
-                val accelForFilter = lastAccel ?: linear
+            val accel = lastAccel
+            if (fallbackMadgwick != null && accel != null) {
                 val dt = computeDtSeconds()
-                fallbackMadgwick.update(gyroNow, accelForFilter, dt)
+                fallbackMadgwick.update(gyroNow, accel, dt)
                 fallbackMadgwick.orientation()
             } else {
-                Quaternion.IDENTITY
+                // Either no fallback configured, or the raw accelerometer has not fired yet.
+                // Returning identity matches the Madgwick filter's untouched initial state and
+                // avoids feeding gravity-removed `linear` into a filter that expects gravity
+                // included input.
+                fallbackMadgwick?.orientation() ?: Quaternion.IDENTITY
             }
         }
 
@@ -196,12 +200,14 @@ class AndroidImuSource(
         val x = values[0].toDouble()
         val y = values[1].toDouble()
         val z = values[2].toDouble()
-        val w = if (values.size >= 4) {
+        val rawW = if (values.size >= 4) {
             values[3].toDouble()
         } else {
             val v2 = x * x + y * y + z * z
             sqrt(max(0.0, 1.0 - v2))
         }
-        return Quaternion(w, x, y, z).normalized()
+        val norm = sqrt(rawW * rawW + x * x + y * y + z * z)
+        if (norm == 0.0) return Quaternion.IDENTITY
+        return Quaternion(rawW / norm, x / norm, y / norm, z / norm)
     }
 }

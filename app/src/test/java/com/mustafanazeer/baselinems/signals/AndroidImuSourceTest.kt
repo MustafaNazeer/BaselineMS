@@ -7,6 +7,7 @@ import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mustafanazeer.baselinems.dsp.ImuSample
+import com.mustafanazeer.baselinems.dsp.Quaternion
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -161,6 +162,51 @@ class AndroidImuSourceTest {
         source.stop()
 
         assertEquals(0, shadow.listeners.size)
+    }
+
+    @Test
+    fun `fallback Madgwick returns identity when raw accelerometer has not fired yet`() = runTest {
+        // Reproduces the scenario where TYPE_ACCELEROMETER has not produced a reading by the
+        // time the first TYPE_LINEAR_ACCELERATION event arrives. Without the fix the code
+        // substituted the gravity-removed `linear` vector into Madgwick, which is semantically
+        // wrong (Madgwick expects gravity included input). With the fix the source returns the
+        // filter's untouched initial orientation (identity) for that first emission.
+        shadow.addSensor(linearSensor)
+        shadow.addSensor(gyroSensor)
+        // Rotation vector intentionally omitted so the source enters fallback mode and
+        // registers TYPE_ACCELEROMETER. The test still does not fire ACCELEROMETER events.
+
+        val source = AndroidImuSource(context)
+        source.start()
+
+        val collector = TestScope(StandardTestDispatcher(testScheduler))
+        val collected = mutableListOf<ImuSample>()
+        val job = collector.launch {
+            source.stream().collect { collected += it }
+        }
+        advanceUntilIdle()
+
+        // Fire gyro then linear with non-zero acceleration to simulate walking. No raw
+        // accelerometer event, so `lastAccel` stays null. Without the fix the source feeds
+        // the gravity-removed linear acceleration into Madgwick, which moves the filter off
+        // identity. With the fix the source returns the filter's untouched initial orientation.
+        shadow.sendSensorEventToListeners(
+            event(gyroSensor, floatArrayOf(0.0f, 0.0f, 0.0f), 1_000_000L)
+        )
+        shadow.sendSensorEventToListeners(
+            event(linearSensor, floatArrayOf(1.5f, 0.7f, 0.3f), 2_000_000L)
+        )
+        advanceUntilIdle()
+
+        assertEquals(1, collected.size)
+        assertEquals(
+            "first fallback emission must hold identity rather than feed gravity-removed input into Madgwick",
+            Quaternion.IDENTITY,
+            collected.first().rotationVector
+        )
+
+        job.cancel()
+        source.stop()
     }
 
     @Test

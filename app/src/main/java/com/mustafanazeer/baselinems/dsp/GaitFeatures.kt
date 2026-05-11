@@ -23,4 +23,16 @@ data class GaitFeatures(
         "quality_score" to qualityScore,
         "detected_step_count" to detectedStepCount.toDouble()
     )
+
+    companion object {
+        val EMPTY: GaitFeatures = GaitFeatures(
+            cadenceStepsPerMinute = 0.0,
+            meanStrideLengthMeters = 0.0,
+            stepTimeCv = 0.0,
+            strideAsymmetryIndex = 0.0,
+            doubleSupportTimeSeconds = 0.0,
+            qualityScore = 0.0,
+            detectedStepCount = 0
+        )
+    }
 }

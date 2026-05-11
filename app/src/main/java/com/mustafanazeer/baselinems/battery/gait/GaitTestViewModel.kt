@@ -1,5 +1,6 @@
 package com.mustafanazeer.baselinems.battery.gait
 
+import android.util.Log
 import com.mustafanazeer.baselinems.battery.TestResultPayload
 import com.mustafanazeer.baselinems.dsp.GaitPipeline
 import com.mustafanazeer.baselinems.dsp.ImuSample
@@ -76,7 +77,9 @@ class GaitTestViewModel(
             } catch (other: Throwable) {
                 // The flow ended unexpectedly. The error surfaces through the pipeline's
                 // quality score rather than a separate UI state, because the recovery path is
-                // "process whatever samples we captured".
+                // "process whatever samples we captured". Log to logcat so the failure is
+                // diagnosable from a captured trace even though it does not abort the test.
+                Log.w(TAG, "gait writer flow ended unexpectedly", other)
             }
         }
         captureJob = scope.launch {
@@ -131,5 +134,6 @@ class GaitTestViewModel(
         const val COUNTDOWN_SECONDS: Int = 3
         const val CAPTURE_DURATION_MILLIS: Int = 30_000
         const val TICK_INTERVAL_MILLIS: Int = 100
+        private const val TAG: String = "GaitTestViewModel"
     }
 }
