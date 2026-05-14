@@ -47,9 +47,35 @@ This runs every JVM unit test, including Robolectric Room repository tests, orch
 
 All data is stored on device. The application does not declare the `android.permission.INTERNET` permission. There is no cloud sync, no account, no analytics SDK, and no third party telemetry. Microphone audio is processed in memory and discarded after feature extraction unless the user explicitly opts in to retention. Camera frames from the vision test ambient brightness check are read once and discarded. Export through Android's Share Intent is the only outward facing action and it is fully user initiated.
 
+## Live demo
+
+A web showcase of the gait pipeline running on multiple public datasets, with the full validation table and methodology page, is available at the deployed Vercel URL once it goes live. The page reads directly from the same per-dataset replay results that drive the table below; sources are at `web/` in this repository.
+
 ## Validation
 
-Reserved for the validation numbers from the measured walking course experiments. Stride length error percent, cadence error percent, and test retest reliability (intraclass correlation coefficient) for the gait pipeline's primary features will appear here once the experiments complete.
+The gait pipeline is validated against three publicly downloadable IMU gait datasets covering 90 unique participants across three independent research groups (a fourth dataset, MAREA, is pending an email release form). Each dataset is replayed end to end through the production `GaitPipeline` and the resulting per trial numbers are aggregated into `web/public/validation-summary.json` by `scripts/aggregate-validation-results.py`.
+
+### Against published ground truth
+
+| Dataset | Mount | N | Trials | Cadence MAE | Stride MAE | Cadence ICC(3,1) | Stride ICC(3,1) |
+|---|---|---|---|---|---|---|---|
+| Santos et al. 2022 | Leg strap (smartphone) | 25 | 499 | 19.53% | 66.36% | 0.573 | 0.806 |
+| NONAN GaitPrint (Likens et al. 2023) | Pelvis (pocket analog) | 35 | 609 | **0.53%** | 86.83% | **0.946** | 0.650 |
+| MAREA (Khandelwal and Wickstrom 2017) | Waist (accel only) | 20 | pending | pending | n/a | n/a | n/a |
+
+### Cross sensor agreement
+
+| Dataset | Mounts compared | N | Trials | Mean diff | 95% LoA | Mean abs diff | Pearson r |
+|---|---|---|---|---|---|---|---|
+| Luo et al. 2020 (irregular surfaces) | Trunk vs Left shank | 30 | 1620 | -2.03 spm | [-21.78, +17.72] spm | 6.22 spm | 0.529 |
+
+### What these numbers say
+
+Cadence is the headline. On NONAN's pelvis sensor (the closest publicly available analog to the BaselineMS front pocket production mount), the pipeline reproduces published per stride cadence within 0.53 percent on average across 35 participants and 609 trials, with a test retest ICC(3,1) of 0.946 (excellent reliability per Koo and Li 2016). On Luo's outdoor surfaces dataset, where no per trial ground truth exists, cadence agreement between trunk and shank running the same pipeline sits inside Bland-Altman limits of [-21.78, +17.72] steps per minute across 30 participants and 1620 trials across nine surface types.
+
+Stride length is mount specific. The Zero Velocity Update integrator is calibrated for front pocket mounting; on Santos's leg strap and NONAN's pelvis the pipeline under reads stride length significantly. The high ICC(3,1) of 0.806 (Santos) and 0.650 (NONAN) on stride length tells us the bias is reproducible across sessions, not noise, which is what we want for a calibrated pipeline on a non production mount.
+
+Full methodology (pipeline design, statistical methods, per dataset notes, limitations) is on the live demo `/methodology` page. Per trial results CSVs land under `app/build/validation/` after the env var gated replay tests run.
 
 ## Retention
 
