@@ -49,7 +49,7 @@ All data is stored on device. The application does not declare the `android.perm
 
 ## Live demo
 
-A web showcase of the gait pipeline running on multiple public datasets, with the full validation table and methodology page, is available at the deployed Vercel URL once it goes live. The page reads directly from the same per-dataset replay results that drive the table below; sources are at `web/` in this repository.
+A web showcase of the gait pipeline running on multiple public datasets, with the full validation table and methodology page, is live at https://web-pi-one-62.vercel.app. The page reads directly from the same per-dataset replay results that drive the table below; sources are at `web/` in this repository.
 
 ## Validation
 
