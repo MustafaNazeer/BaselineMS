@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-05-14T05:12:25.229583+00:00",
+  "generated_at_utc": "2026-05-14T05:39:07.120099+00:00",
   "datasets": [
     {
       "key": "santos",
@@ -37,9 +37,17 @@
       "caveats": [
         "Pelvis sensor is the closest production analog (front-pocket mount). Test-retest ICC is reported across the dataset's two-session structure."
       ],
-      "status": "pending",
-      "n_trials_processed": 0,
-      "metrics": {}
+      "status": "complete",
+      "n_trials_processed": 609,
+      "metrics": {
+        "cadence_mae_pct": 0.53,
+        "cadence_median_pct": 0.46,
+        "cadence_p95_pct": 0.75,
+        "stride_length_mae_pct": 86.83,
+        "stride_length_median_pct": 89.4,
+        "cadence_icc_3_1": 0.946,
+        "stride_length_icc_3_1": 0.65
+      }
     },
     {
       "key": "marea",
