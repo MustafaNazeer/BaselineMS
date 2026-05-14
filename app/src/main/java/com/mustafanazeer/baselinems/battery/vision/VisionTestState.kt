@@ -21,4 +21,5 @@ sealed class VisionTestState {
     ) : VisionTestState()
     data class Done(val score: SloanScore) : VisionTestState()
     data object Cancelled : VisionTestState()
+    data object CameraDenied : VisionTestState()
 }

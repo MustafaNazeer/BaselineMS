@@ -46,6 +46,20 @@ class FaceDistanceAnalyzerTest {
         assertEquals(30.0, reported!!, 0.5)
     }
 
+    @Test
+    fun `analyze with null mediaImage returns without scheduling async work`() {
+        val analyzer = FaceDistanceAnalyzer(focalLengthPx = 1500.0)
+        var reported: Double? = -1.0
+        analyzer.onDistanceEstimated = { reported = it }
+
+        val proxy = mockk<androidx.camera.core.ImageProxy>(relaxed = true)
+        every { proxy.image } returns null
+
+        analyzer.analyze(proxy)
+
+        assertEquals(-1.0, reported)
+    }
+
     private fun makeFaceWithWidth(width: Int): Face {
         val rect = mockk<Rect>()
         every { rect.width() } returns width

@@ -49,6 +49,10 @@ class VisionTestViewModel(sessionId: String) : ViewModel() {
         _state.value = VisionTestState.Cancelled
     }
 
+    fun onCameraDenied() {
+        _state.value = VisionTestState.CameraDenied
+    }
+
     private fun advance(cur: VisionTestState.Running, newSkipCount: Int) {
         val nextLetterIndex = cur.letterIndex + 1
         if (nextLetterIndex < LETTERS_PER_LINE) {
@@ -111,6 +115,8 @@ class VisionTestViewModel(sessionId: String) : ViewModel() {
         const val LINES_PER_CHART = 8
         const val LETTERS_PER_LINE = 5
         const val LUX_ACCEPT_MIN = 30.0
+        const val LUX_TARGET_MIN = 100.0
+        const val LUX_TARGET_MAX = 500.0
         const val LUX_ACCEPT_MAX = 1000.0
         const val DIST_ACCEPT_MIN = 30.0
         const val DIST_ACCEPT_MAX = 50.0

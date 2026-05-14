@@ -1,13 +1,23 @@
 package com.mustafanazeer.baselinems.battery.vision
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.core.content.ContextCompat
 import com.mustafanazeer.baselinems.battery.TestModule
 import com.mustafanazeer.baselinems.battery.TestResultPayload
 import com.mustafanazeer.baselinems.data.TestType
@@ -28,59 +38,104 @@ class VisionTest(
 
     @Composable
     override fun Content(onComplete: (TestResultPayload) -> Unit) {
-        val context = LocalContext.current
-        val lifecycleOwner = LocalLifecycleOwner.current
-        val sessionId = remember { UUID.randomUUID().toString() }
-        val viewModel = remember { VisionTestViewModel(sessionId) }
-        val state by viewModel.state.collectAsState()
-        val cameraSource = remember { AndroidCameraSource(context.applicationContext) }
-        val ambient = remember {
-            AmbientLightAnalyzer().apply { onLuxEstimated = { viewModel.onLuxEstimated(it) } }
-        }
-        val face = remember {
-            FaceDistanceAnalyzer(focalLengthPx).apply { onDistanceEstimated = { viewModel.onDistanceEstimated(it) } }
-        }
-
-        LaunchedEffect(state is VisionTestState.QualityCheck) {
-            if (state is VisionTestState.QualityCheck) {
-                cameraSource.start(lifecycleOwner, listOf(ambient, face))
-            }
-        }
-        LaunchedEffect(state) {
-            if (state is VisionTestState.Running || state is VisionTestState.Done || state is VisionTestState.Cancelled) {
-                cameraSource.stop()
-            }
-        }
-        DisposableEffect(Unit) {
-            onDispose { cameraSource.stop() }
-        }
-
-        when (val s = state) {
-            VisionTestState.Instructions -> VisionInstructionsScreen(
-                onStart = { viewModel.onStart() },
-                onCancel = { onComplete(emptyPayload(qualityScore = 0.0)) }
-            )
-            is VisionTestState.QualityCheck -> VisionQualityCheckScreen(
-                state = s,
-                onContinue = { viewModel.onQualityCheckPassed() },
-                onCancel = { viewModel.onCancel() }
-            )
-            is VisionTestState.Running -> VisionRunnerScreen(
-                state = s,
-                onTap = { viewModel.onLetterTapped(it) },
-                onCancel = { viewModel.onCancel() }
-            )
-            is VisionTestState.Done -> VisionDoneScreen(
-                score = s.score,
-                onDone = { onComplete(visionPayload(s.score)) }
-            )
-            VisionTestState.Cancelled -> VisionDoneScreen(
-                score = SloanScore(0, 0, 0, 0),
-                onDone = { onComplete(emptyPayload(qualityScore = 0.0)) }
-            )
+        MaterialTheme(
+            colorScheme = HighContrastVisionScheme,
+            typography = MaterialTheme.typography
+        ) {
+            VisionTestBody(focalLengthPx = focalLengthPx, onComplete = onComplete)
         }
     }
 }
+
+@Composable
+private fun VisionTestBody(focalLengthPx: Double, onComplete: (TestResultPayload) -> Unit) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val sessionId = remember { UUID.randomUUID().toString() }
+    val viewModel = remember { VisionTestViewModel(sessionId) }
+    val state by viewModel.state.collectAsState()
+    val cameraSource = remember { AndroidCameraSource(context.applicationContext) }
+    val ambient = remember {
+        AmbientLightAnalyzer().apply { onLuxEstimated = { viewModel.onLuxEstimated(it) } }
+    }
+    val face = remember {
+        FaceDistanceAnalyzer(focalLengthPx).apply { onDistanceEstimated = { viewModel.onDistanceEstimated(it) } }
+    }
+
+    var cameraPermissionGranted by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        cameraPermissionGranted = granted
+        if (!granted) viewModel.onCameraDenied()
+    }
+
+    LaunchedEffect(state, cameraPermissionGranted) {
+        if (state is VisionTestState.QualityCheck) {
+            if (cameraPermissionGranted) {
+                cameraSource.start(lifecycleOwner, listOf(ambient, face))
+            } else {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        }
+    }
+    LaunchedEffect(state) {
+        if (state is VisionTestState.Running ||
+            state is VisionTestState.Done ||
+            state is VisionTestState.Cancelled ||
+            state is VisionTestState.CameraDenied
+        ) {
+            cameraSource.stop()
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose { cameraSource.stop() }
+    }
+
+    when (val s = state) {
+        VisionTestState.Instructions -> VisionInstructionsScreen(
+            onStart = { viewModel.onStart() },
+            onCancel = { onComplete(emptyPayload(qualityScore = 0.0)) }
+        )
+        is VisionTestState.QualityCheck -> VisionQualityCheckScreen(
+            state = s,
+            onContinue = { viewModel.onQualityCheckPassed() },
+            onCancel = { viewModel.onCancel() }
+        )
+        is VisionTestState.Running -> VisionRunnerScreen(
+            state = s,
+            onTap = { viewModel.onLetterTapped(it) },
+            onCancel = { viewModel.onCancel() }
+        )
+        is VisionTestState.Done -> VisionDoneScreen(
+            score = s.score,
+            onDone = { onComplete(visionPayload(s.score)) }
+        )
+        VisionTestState.Cancelled -> VisionCancelledScreen(
+            onDone = { onComplete(emptyPayload(qualityScore = 0.0)) }
+        )
+        VisionTestState.CameraDenied -> VisionCameraDeniedScreen(
+            onDone = { onComplete(emptyPayload(qualityScore = 0.0)) }
+        )
+    }
+}
+
+private val HighContrastVisionScheme = lightColorScheme(
+    background = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    surfaceVariant = Color.White,
+    onSurfaceVariant = Color.Black,
+    primary = Color.Black,
+    onPrimary = Color.White,
+    secondary = Color.Black,
+    onSecondary = Color.White
+)
 
 private fun visionPayload(score: SloanScore): TestResultPayload {
     return object : TestResultPayload {

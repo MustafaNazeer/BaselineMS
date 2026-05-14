@@ -21,7 +21,9 @@ fun VisionQualityCheckScreen(
     val luxCopy = when {
         state.lux == null -> "Measuring lighting..."
         state.lux < VisionTestViewModel.LUX_ACCEPT_MIN -> "Too dim. Move to a brighter spot."
+        state.lux < VisionTestViewModel.LUX_TARGET_MIN -> "Lighting is dim but acceptable. Move to a brighter spot if you can."
         state.lux > VisionTestViewModel.LUX_ACCEPT_MAX -> "Too bright. Move out of direct light."
+        state.lux > VisionTestViewModel.LUX_TARGET_MAX -> "Lighting is bright but acceptable. Move out of direct light if you can."
         else -> "Lighting looks good."
     }
     val distanceCopy = when {
