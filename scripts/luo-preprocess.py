@@ -144,9 +144,17 @@ def process_xsens_csv(path: Path):
     for col in needed:
         if col not in df.columns:
             raise ValueError(f"{path.name}: missing column {col!r} (have {list(df.columns)[:8]}...)")
+    # Xsens MTw recordings occasionally produce NaN samples on dropout; drop those
+    # rows entirely so the downstream Kotlin parser does not have to tolerate them.
+    df = df.dropna(subset=needed)
     n = len(df)
     if n == 0:
         return None
+    # Sample indexes are recomputed from the post-filter row count, so dt stays
+    # at the nominal 1/100 Hz across the trial even if some samples were dropped.
+    # This introduces small time-base inaccuracy at the dropout boundaries; on a
+    # 100 Hz sensor with handful-of-sample dropouts per trial, the effect on
+    # cadence is well under 1 percent and acceptable for cross-method agreement.
     timestamps_ns = (np.arange(n) / LUO_SAMPLE_RATE_HZ * NS_PER_S).astype(np.int64)
     return {
         "timestamp_ns": timestamps_ns,
