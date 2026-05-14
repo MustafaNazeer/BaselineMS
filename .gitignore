@@ -49,3 +49,9 @@ GETTING-STARTED.md
 SPEC.md
 agents/
 docs/
+
+# Web showcase
+web/node_modules/
+web/.next/
+web/out/
+web/.vercel/
