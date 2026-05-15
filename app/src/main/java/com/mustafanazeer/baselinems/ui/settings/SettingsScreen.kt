@@ -2,6 +2,7 @@ package com.mustafanazeer.baselinems.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -19,8 +21,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.mustafanazeer.baselinems.battery.sdmt.SdmtSettings
 import com.mustafanazeer.baselinems.data.UserProfileDao
 import com.mustafanazeer.baselinems.data.UserProfileEntity
 import com.mustafanazeer.baselinems.ui.common.displayLabel
@@ -32,7 +37,9 @@ fun SettingsScreen(
     userProfileDao: UserProfileDao,
     onEditProfile: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
     var profile by remember { mutableStateOf<UserProfileEntity?>(null) }
+    var showSdmtCountdown by remember { mutableStateOf(SdmtSettings.showCountdown(context)) }
     LaunchedEffect(Unit) { profile = userProfileDao.getFirst() }
 
     Scaffold(topBar = { TopAppBar(title = { Text("Settings") }) }) { padding ->
@@ -56,6 +63,28 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) { Text("Edit profile") }
                 }
+            }
+            Spacer(Modifier.height(16.dp))
+            Text("Cognitive tests", style = MaterialTheme.typography.titleMedium)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.padding(end = 16.dp)) {
+                    Text("Show timer during cognitive tests")
+                    Text(
+                        "Off by default. A visible countdown can be distracting during a paced task.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                Switch(
+                    checked = showSdmtCountdown,
+                    onCheckedChange = { newValue ->
+                        showSdmtCountdown = newValue
+                        SdmtSettings.setShowCountdown(context, newValue)
+                    }
+                )
             }
             Spacer(Modifier.height(16.dp))
             Text("About", style = MaterialTheme.typography.titleMedium)

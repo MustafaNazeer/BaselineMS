@@ -21,6 +21,7 @@ import com.mustafanazeer.baselinems.BaselineMSApp
 import com.mustafanazeer.baselinems.battery.BatteryOrchestrator
 import com.mustafanazeer.baselinems.battery.gait.GaitTest
 import com.mustafanazeer.baselinems.battery.gait.GaitTestViewModel
+import com.mustafanazeer.baselinems.battery.sdmt.SdmtTest
 import com.mustafanazeer.baselinems.battery.tap.BilateralTapTest
 import com.mustafanazeer.baselinems.battery.vision.VisionTest
 import com.mustafanazeer.baselinems.data.TestType
@@ -120,7 +121,7 @@ fun RootScreen() {
                     }
                 )
                 built = BatteryOrchestrator(
-                    modules = listOf(BilateralTapTest(), gaitTest, VisionTest()),
+                    modules = listOf(BilateralTapTest(), gaitTest, VisionTest(), SdmtTest()),
                     sessionDao = app.database.sessionDao(),
                     testResultDao = app.database.testResultDao(),
                     deviceInfo = DeviceInfo.summary
