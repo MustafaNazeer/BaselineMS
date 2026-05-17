@@ -28,6 +28,8 @@ private class FakeSessionDao : SessionDao {
     override suspend fun delete(session: SessionEntity) { sessions.removeAll { it.id == session.id } }
     override fun observeAll(): Flow<List<SessionEntity>> = flowOf(sessions.toList())
     override suspend fun getById(id: String): SessionEntity? = sessions.find { it.id == id }
+    override fun observeCompletedSessionCount(): Flow<Int> =
+        flowOf(sessions.count { it.completedAtEpochMs != null })
 }
 
 private class FakeTestResultDao : TestResultDao {
@@ -35,6 +37,10 @@ private class FakeTestResultDao : TestResultDao {
     override suspend fun insert(result: TestResultEntity) { results.add(result) }
     override suspend fun getForSession(sessionId: String): List<TestResultEntity> =
         results.filter { it.sessionId == sessionId }.sortedBy { it.startedAtEpochMs }
+    override fun observeByType(testType: TestType): Flow<List<TestResultEntity>> =
+        flowOf(results.filter { it.testType == testType }.sortedBy { it.startedAtEpochMs })
+    override fun observeAll(): Flow<List<TestResultEntity>> =
+        flowOf(results.sortedBy { it.startedAtEpochMs })
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

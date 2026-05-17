@@ -50,7 +50,7 @@ class BatteryOrchestrator(
 
         viewModelScope.launch {
             val now = System.currentTimeMillis()
-            val featuresJson = Json.encodeToString(payload.features)
+            val featuresJson = payload.featuresJsonOverride ?: Json.encodeToString(payload.features)
             testResultDao.insert(
                 TestResultEntity(
                     sessionId = sessionId,

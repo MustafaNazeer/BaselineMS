@@ -1,5 +1,9 @@
 package com.mustafanazeer.baselinems.battery.voice
 
+import com.mustafanazeer.baselinems.dsp.voice.FeatureQualityFlag
+import com.mustafanazeer.baselinems.dsp.voice.VoiceFeatureSet
+import com.mustafanazeer.baselinems.dsp.voice.VoiceQuality
+import com.mustafanazeer.baselinems.dsp.voice.VoiceQualityScore
 import com.mustafanazeer.baselinems.signals.AudioCapture
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -9,6 +13,12 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -230,5 +240,185 @@ class VoiceTestViewModelTest {
         val before = vm.state.value
         vm.onStart()
         assertEquals(before, vm.state.value)
+    }
+
+    @Test
+    fun `persistedFeaturesJsonContainsQualityFlagsAndSessionFlags`() {
+        val features = sampleFeatures()
+        val quality = sampleQuality(allOk = true)
+
+        val json = buildVoiceFeaturesJson(features = features, quality = quality)
+        val root = Json.parseToJsonElement(json).jsonObject
+
+        assertEquals(0.0123, root[VoiceQuality.FEATURE_KEY_JITTER]!!.jsonPrimitive.double, 1e-12)
+        assertEquals(0.0456, root[VoiceQuality.FEATURE_KEY_SHIMMER]!!.jsonPrimitive.double, 1e-12)
+        assertEquals(20.3, root[VoiceQuality.FEATURE_KEY_HNR]!!.jsonPrimitive.double, 1e-12)
+        assertEquals(8.2, root[VoiceQuality.FEATURE_KEY_F0_SD]!!.jsonPrimitive.double, 1e-12)
+        assertEquals(
+            153.0,
+            root[VoiceQuality.FEATURE_KEY_SPEAKING_RATE]!!.jsonPrimitive.double,
+            1e-12
+        )
+        assertEquals(
+            0.18,
+            root[VoiceQuality.FEATURE_KEY_PAUSE_FRACTION]!!.jsonPrimitive.double,
+            1e-12
+        )
+
+        val qFlags = root[KEY_QUALITY_FLAGS] as JsonObject
+        assertEquals(true, qFlags[VoiceQuality.FEATURE_KEY_JITTER]!!.jsonPrimitive.boolean)
+        assertEquals(true, qFlags[VoiceQuality.FEATURE_KEY_SHIMMER]!!.jsonPrimitive.boolean)
+        assertEquals(true, qFlags[VoiceQuality.FEATURE_KEY_HNR]!!.jsonPrimitive.boolean)
+        assertEquals(true, qFlags[VoiceQuality.FEATURE_KEY_F0_SD]!!.jsonPrimitive.boolean)
+        assertEquals(true, qFlags[VoiceQuality.FEATURE_KEY_SPEAKING_RATE]!!.jsonPrimitive.boolean)
+        assertEquals(true, qFlags[VoiceQuality.FEATURE_KEY_PAUSE_FRACTION]!!.jsonPrimitive.boolean)
+
+        val sFlags = root[KEY_SESSION_FLAGS] as JsonObject
+        assertEquals(true, sFlags[KEY_ENGAGEMENT_OK]!!.jsonPrimitive.boolean)
+        assertEquals(false, sFlags[KEY_CLIPPING_DETECTED]!!.jsonPrimitive.boolean)
+        assertEquals(true, sFlags[KEY_SNR_ADEQUATE]!!.jsonPrimitive.boolean)
+    }
+
+    @Test
+    fun `persistedFeaturesJsonReflectsClippedAndDegradedFlags`() {
+        val features = sampleFeatures()
+        val quality = VoiceQualityScore(
+            qualityScore = 0.0,
+            perFeatureFlags = mapOf(
+                VoiceQuality.FEATURE_KEY_JITTER to FeatureQualityFlag.CLIPPED,
+                VoiceQuality.FEATURE_KEY_SHIMMER to FeatureQualityFlag.CLIPPED,
+                VoiceQuality.FEATURE_KEY_HNR to FeatureQualityFlag.INSUFFICIENT_VOICING,
+                VoiceQuality.FEATURE_KEY_F0_MEAN to FeatureQualityFlag.OK,
+                VoiceQuality.FEATURE_KEY_F0_SD to FeatureQualityFlag.INSUFFICIENT_PERIODS,
+                VoiceQuality.FEATURE_KEY_SPEAKING_RATE to FeatureQualityFlag.OK,
+                VoiceQuality.FEATURE_KEY_PAUSE_FRACTION to FeatureQualityFlag.CLIPPED,
+            ),
+            engagementOk = false,
+            clippingDetected = true,
+            snrAdequate = false,
+        )
+
+        val json = buildVoiceFeaturesJson(features = features, quality = quality)
+        val root = Json.parseToJsonElement(json).jsonObject
+        val qFlags = root[KEY_QUALITY_FLAGS] as JsonObject
+
+        assertEquals(false, qFlags[VoiceQuality.FEATURE_KEY_JITTER]!!.jsonPrimitive.boolean)
+        assertEquals(false, qFlags[VoiceQuality.FEATURE_KEY_HNR]!!.jsonPrimitive.boolean)
+        assertEquals(false, qFlags[VoiceQuality.FEATURE_KEY_F0_SD]!!.jsonPrimitive.boolean)
+        assertEquals(true, qFlags[VoiceQuality.FEATURE_KEY_SPEAKING_RATE]!!.jsonPrimitive.boolean)
+
+        val sFlags = root[KEY_SESSION_FLAGS] as JsonObject
+        assertEquals(false, sFlags[KEY_ENGAGEMENT_OK]!!.jsonPrimitive.boolean)
+        assertEquals(true, sFlags[KEY_CLIPPING_DETECTED]!!.jsonPrimitive.boolean)
+        assertEquals(false, sFlags[KEY_SNR_ADEQUATE]!!.jsonPrimitive.boolean)
+    }
+
+    @Test
+    fun `persistedFeaturesJsonRoundTripsViaKotlinxSerialization`() {
+        val features = sampleFeatures()
+        val quality = sampleQuality(allOk = true)
+
+        val json = buildVoiceFeaturesJson(features = features, quality = quality)
+        val parsed = Json.parseToJsonElement(json).jsonObject
+        val reEmitted = parsed.toString()
+
+        val reParsed = Json.parseToJsonElement(reEmitted).jsonObject
+        assertEquals(parsed, reParsed)
+        assertEquals(
+            features.jitterLocal!!,
+            reParsed[VoiceQuality.FEATURE_KEY_JITTER]!!.jsonPrimitive.double,
+            1e-12
+        )
+    }
+
+    @Test
+    fun `legacyFeaturesJsonWithoutReservedKeysParsesCleanly`() {
+        val legacy = """{"jitter_local":0.0123,"shimmer_local":0.0456,"hnr_db":20.3}"""
+
+        val root = Json.parseToJsonElement(legacy).jsonObject
+
+        assertEquals(0.0123, root[VoiceQuality.FEATURE_KEY_JITTER]!!.jsonPrimitive.double, 1e-12)
+        assertNull(root[KEY_QUALITY_FLAGS])
+        assertNull(root[KEY_SESSION_FLAGS])
+    }
+
+    @Test
+    fun `omitsNullFeaturesButAlwaysIncludesPauseFractionAndVoicedSeconds`() {
+        val features = VoiceFeatureSet(
+            jitterLocal = null,
+            shimmerLocal = null,
+            hnrDb = null,
+            f0MeanHz = null,
+            f0SdHz = null,
+            speakingRateWpm = null,
+            pauseFraction = 1.0,
+            voicedSeconds = 0.0,
+            totalSeconds = 30.0,
+            periodCount = 0,
+        )
+        val quality = VoiceQualityScore(
+            qualityScore = 0.0,
+            perFeatureFlags = mapOf(
+                VoiceQuality.FEATURE_KEY_JITTER to FeatureQualityFlag.INSUFFICIENT_VOICING,
+                VoiceQuality.FEATURE_KEY_SHIMMER to FeatureQualityFlag.INSUFFICIENT_VOICING,
+                VoiceQuality.FEATURE_KEY_HNR to FeatureQualityFlag.INSUFFICIENT_VOICING,
+                VoiceQuality.FEATURE_KEY_F0_MEAN to FeatureQualityFlag.INSUFFICIENT_VOICING,
+                VoiceQuality.FEATURE_KEY_F0_SD to FeatureQualityFlag.INSUFFICIENT_VOICING,
+                VoiceQuality.FEATURE_KEY_SPEAKING_RATE to FeatureQualityFlag.INSUFFICIENT_VOICING,
+                VoiceQuality.FEATURE_KEY_PAUSE_FRACTION to FeatureQualityFlag.OK,
+            ),
+            engagementOk = false,
+            clippingDetected = false,
+            snrAdequate = false,
+        )
+
+        val json = buildVoiceFeaturesJson(features = features, quality = quality)
+        val root = Json.parseToJsonElement(json).jsonObject
+
+        assertNull(root[VoiceQuality.FEATURE_KEY_JITTER])
+        assertNull(root[VoiceQuality.FEATURE_KEY_SHIMMER])
+        assertNull(root[VoiceQuality.FEATURE_KEY_HNR])
+        assertNull(root[VoiceQuality.FEATURE_KEY_F0_SD])
+        assertNull(root[VoiceQuality.FEATURE_KEY_SPEAKING_RATE])
+        assertEquals(
+            1.0,
+            root[VoiceQuality.FEATURE_KEY_PAUSE_FRACTION]!!.jsonPrimitive.double,
+            1e-12
+        )
+        assertEquals(0.0, root[KEY_VOICED_SECONDS]!!.jsonPrimitive.double, 1e-12)
+        assertNotNull(root[KEY_QUALITY_FLAGS])
+        assertNotNull(root[KEY_SESSION_FLAGS])
+    }
+
+    private fun sampleFeatures(): VoiceFeatureSet = VoiceFeatureSet(
+        jitterLocal = 0.0123,
+        shimmerLocal = 0.0456,
+        hnrDb = 20.3,
+        f0MeanHz = 120.0,
+        f0SdHz = 8.2,
+        speakingRateWpm = 153.0,
+        pauseFraction = 0.18,
+        voicedSeconds = 24.6,
+        totalSeconds = 30.0,
+        periodCount = 250,
+    )
+
+    private fun sampleQuality(allOk: Boolean): VoiceQualityScore {
+        val flag = if (allOk) FeatureQualityFlag.OK else FeatureQualityFlag.INSUFFICIENT_VOICING
+        return VoiceQualityScore(
+            qualityScore = if (allOk) 1.0 else 0.0,
+            perFeatureFlags = mapOf(
+                VoiceQuality.FEATURE_KEY_JITTER to flag,
+                VoiceQuality.FEATURE_KEY_SHIMMER to flag,
+                VoiceQuality.FEATURE_KEY_HNR to flag,
+                VoiceQuality.FEATURE_KEY_F0_MEAN to flag,
+                VoiceQuality.FEATURE_KEY_F0_SD to flag,
+                VoiceQuality.FEATURE_KEY_SPEAKING_RATE to flag,
+                VoiceQuality.FEATURE_KEY_PAUSE_FRACTION to flag,
+            ),
+            engagementOk = allOk,
+            clippingDetected = false,
+            snrAdequate = allOk,
+        )
     }
 }
