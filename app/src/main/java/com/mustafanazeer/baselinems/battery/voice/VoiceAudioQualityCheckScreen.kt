@@ -11,6 +11,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.mustafanazeer.baselinems.R
 
@@ -35,7 +38,11 @@ fun VoiceAudioQualityCheckScreen(
             stringResource(R.string.voice_test_audio_quality_title),
             style = MaterialTheme.typography.headlineMedium
         )
-        Text(bandCopy, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            bandCopy,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+        )
         if (state.band == NoiseBand.Red) {
             Text(
                 stringResource(R.string.voice_test_audio_quality_red_helper),

@@ -13,11 +13,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.invisibleToUser
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.mustafanazeer.baselinems.R
@@ -25,6 +27,7 @@ import com.mustafanazeer.baselinems.R
 private val ChartLineColor = Color(0xFF1F3C88)
 private val ReferenceBandColor = Color(0xFF1F3C88)
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TrendLineChart(
     series: FeatureSeries,
@@ -56,13 +59,16 @@ fun TrendLineChart(
                     if (contentDescription.isNotEmpty()) {
                         Modifier.semantics { this.contentDescription = contentDescription }
                     } else {
-                        Modifier
+                        Modifier.semantics { invisibleToUser() }
                     }
                 )
         ) {
             if (visiblePoints.isEmpty()) return@Canvas
             val axisRange = computeAxisRange(visiblePoints, referenceBand)
             val span = (axisRange.max - axisRange.min).takeIf { it > 0.0 } ?: 1.0
+            val lineWidthPx = 2.dp.toPx()
+            val markerRadiusPx = 4.dp.toPx()
+            val markerStrokeWidthPx = 1.5.dp.toPx()
 
             referenceBand?.let { band ->
                 val bandLowNorm = ((band.mean - band.sd - axisRange.min) / span)
@@ -95,7 +101,7 @@ fun TrendLineChart(
                     color = ChartLineColor,
                     start = offsets[i - 1],
                     end = offsets[i],
-                    strokeWidth = 4f
+                    strokeWidth = lineWidthPx
                 )
             }
             if (!isSparkline) {
@@ -106,14 +112,14 @@ fun TrendLineChart(
                     if (isLow) {
                         drawCircle(
                             color = pointColor,
-                            radius = 8f,
+                            radius = markerRadiusPx,
                             center = offset,
-                            style = Stroke(width = 3f)
+                            style = Stroke(width = markerStrokeWidthPx)
                         )
                     } else {
                         drawCircle(
                             color = pointColor,
-                            radius = 8f,
+                            radius = markerRadiusPx,
                             center = offset
                         )
                     }
