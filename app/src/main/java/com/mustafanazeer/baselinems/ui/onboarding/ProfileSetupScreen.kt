@@ -105,8 +105,9 @@ fun ProfileSetupScreen(
             )
             Button(
                 onClick = {
+                    val year = dobYearText.toIntOrNull() ?: return@Button
+                    val heightCm = heightCmText.toDoubleOrNull() ?: return@Button
                     scope.launch {
-                        val year = dobYearText.toInt()
                         val cal = java.util.Calendar.getInstance().apply { set(year, 0, 1) }
                         userProfileDao.insert(
                             UserProfileEntity(
@@ -114,7 +115,7 @@ fun ProfileSetupScreen(
                                 biologicalSex = sex,
                                 dominantHand = hand,
                                 msTypeDisclosed = msType,
-                                heightCm = heightCmText.toDouble()
+                                heightCm = heightCm
                             )
                         )
                         onComplete()
