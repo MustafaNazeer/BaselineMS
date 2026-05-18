@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -19,10 +22,57 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val keystorePropsFile = rootProject.file("app/keystore.properties")
+            if (keystorePropsFile.exists()) {
+                val props = Properties().apply {
+                    FileInputStream(keystorePropsFile).use { stream -> load(stream) }
+                }
+                val storeFileProp = props.getProperty("storeFile")
+                    ?: throw GradleException("app/keystore.properties is missing the storeFile property.")
+                val storePasswordProp = props.getProperty("storePassword")
+                    ?: throw GradleException("app/keystore.properties is missing the storePassword property.")
+                val keyAliasProp = props.getProperty("keyAlias")
+                    ?: throw GradleException("app/keystore.properties is missing the keyAlias property.")
+                val keyPasswordProp = props.getProperty("keyPassword")
+                    ?: throw GradleException("app/keystore.properties is missing the keyPassword property.")
+                storeFile = rootProject.file(storeFileProp)
+                storePassword = storePasswordProp
+                keyAlias = keyAliasProp
+                keyPassword = keyPasswordProp
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            val keystorePropsFile = rootProject.file("app/keystore.properties")
+            if (keystorePropsFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                signingConfig = null
+            }
+        }
+    }
+
+    gradle.taskGraph.whenReady {
+        val hasReleaseTask = allTasks.any { task ->
+            val name = task.name
+            name.contains("Release", ignoreCase = true) &&
+                (name.startsWith("assemble") || name.startsWith("bundle") || name.startsWith("package"))
+        }
+        if (hasReleaseTask) {
+            val keystorePropsFile = rootProject.file("app/keystore.properties")
+            if (!keystorePropsFile.exists()) {
+                throw GradleException(
+                    "Missing app/keystore.properties for the release signing config. " +
+                        "Copy app/keystore.properties.example to app/keystore.properties and fill in the four values. " +
+                        "See docs/observability/signing-runbook.md for the keystore generation steps."
+                )
+            }
         }
     }
 
