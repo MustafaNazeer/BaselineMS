@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mustafanazeer.baselinems.R
 import com.mustafanazeer.baselinems.report.ReportExporter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,8 @@ class ReportsExportViewModel(
             try {
                 val result = exporter.export()
                 _state.value = ReportsExportState.Ready(result.pdfUri, result.csvUri)
+            } catch (e: CancellationException) {
+                throw e
             } catch (t: Throwable) {
                 _state.value = ReportsExportState.Error(R.string.phase10_export_error_generic)
             }

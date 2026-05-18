@@ -3,24 +3,33 @@ package com.mustafanazeer.baselinems.ui.reports
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -41,6 +50,14 @@ fun ReportsScreen(
     onShareClicked: () -> Unit,
     onShareConsumed: () -> Unit
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val errorMessage = (exportState as? ReportsExportState.Error)?.let { stringResource(it.messageResId) }
+    LaunchedEffect(errorMessage) {
+        if (errorMessage != null) {
+            snackbarHostState.showSnackbar(errorMessage)
+            onShareConsumed()
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -51,6 +68,14 @@ fun ReportsScreen(
                     }
                 }
             )
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+            ) { data ->
+                Snackbar(snackbarData = data)
+            }
         }
     ) { padding ->
         Column(
@@ -85,38 +110,28 @@ fun ReportsScreen(
                 }
             }
 
+            val isRendering = exportState is ReportsExportState.Rendering
+            val buttonLabel = if (isRendering) {
+                stringResource(R.string.phase10_export_rendering)
+            } else {
+                stringResource(R.string.phase10_share_button)
+            }
             Button(
                 onClick = onShareClicked,
-                enabled = state !is ReportsScreenState.Empty &&
-                    exportState !is ReportsExportState.Rendering,
+                enabled = state !is ReportsScreenState.Empty && !isRendering,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.phase10_share_button))
-            }
-
-            // Access MF3: announce Rendering and Error transitions politely so TalkBack
-            // users receive the same affordance as sighted users.
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics { liveRegion = LiveRegionMode.Polite }
-            ) {
-                when (exportState) {
-                    is ReportsExportState.Rendering -> {
-                        Text(
-                            text = stringResource(R.string.phase10_export_rendering),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isRendering) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
                         )
                     }
-                    is ReportsExportState.Error -> {
-                        Text(
-                            text = stringResource(exportState.messageResId),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                    else -> Unit
+                    Text(buttonLabel)
                 }
             }
 

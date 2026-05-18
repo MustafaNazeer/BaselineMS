@@ -5,7 +5,9 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
 import com.mustafanazeer.baselinems.data.TestType
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,5 +65,29 @@ class ReportsScreenShareTest {
         composeRule.onNodeWithText("Share report")
             .assertIsDisplayed()
             .assertIsNotEnabled()
+    }
+
+    @Test
+    fun share_button_label_swaps_to_rendering_copy_during_rendering() {
+        composeRule.setContent {
+            ReportsScreen(
+                state = readyState,
+                exportState = ReportsExportState.Rendering,
+                onBack = {},
+                onCardSelected = {},
+                onRunFirstCheckIn = {},
+                onShareClicked = {},
+                onShareConsumed = {}
+            )
+        }
+        val renderingLabel = "Preparing your report…"
+        composeRule.onNodeWithText(renderingLabel)
+            .assertIsDisplayed()
+            .assertIsNotEnabled()
+        val originalLabel = composeRule.onAllNodesWithText("Share report").fetchSemanticsNodes()
+        assertTrue(
+            "Original Share report label must not be on screen while Rendering",
+            originalLabel.isEmpty()
+        )
     }
 }
