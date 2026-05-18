@@ -28,6 +28,10 @@ private class EmptySessionDao : SessionDao {
     override fun observeAll(): Flow<List<SessionEntity>> = flowOf(emptyList())
     override suspend fun getById(id: String): SessionEntity? = null
     override fun observeCompletedSessionCount(): Flow<Int> = flowOf(0)
+    override suspend fun reclaimStrandedSessions(
+        nowEpochMs: Long,
+        strandedBeforeEpochMs: Long
+    ): Int = 0
 }
 
 @RunWith(AndroidJUnit4::class)

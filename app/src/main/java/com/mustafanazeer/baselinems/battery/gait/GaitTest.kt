@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import com.mustafanazeer.baselinems.battery.TestModule
 import com.mustafanazeer.baselinems.battery.TestResultPayload
 import com.mustafanazeer.baselinems.data.TestType
-import com.mustafanazeer.baselinems.dsp.GaitFeatures
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -58,9 +57,8 @@ class GaitTest(
                     state = current,
                     onContinue = { viewModel.onContinue(onComplete) }
                 )
-                is GaitTestState.Cancelled -> GaitDoneScreen(
-                    state = GaitTestState.Done(features = GaitFeatures.EMPTY),
-                    onContinue = { onComplete(SkippedGaitPayload) }
+                is GaitTestState.Cancelled -> GaitCancelledScreen(
+                    onDone = { onComplete(SkippedGaitPayload) }
                 )
             }
         }

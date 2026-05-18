@@ -28,3 +28,11 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
         db.execSQL("ALTER TABLE user_profile_new RENAME TO user_profile")
     }
 }
+
+val MIGRATION_2_3: Migration = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE session ADD COLUMN wasCancelled INTEGER NOT NULL DEFAULT 0"
+        )
+    }
+}

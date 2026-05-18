@@ -9,5 +9,6 @@ data class SessionEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val startedAtEpochMs: Long = System.currentTimeMillis(),
     val completedAtEpochMs: Long? = null,
-    val deviceInfo: String
+    val deviceInfo: String,
+    val wasCancelled: Boolean = false
 )

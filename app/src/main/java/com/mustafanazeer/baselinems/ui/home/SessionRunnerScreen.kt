@@ -16,10 +16,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +37,15 @@ fun SessionRunnerScreen(
 ) {
     val state by orchestrator.state.collectAsState()
     var confirmingCancel by remember { mutableStateOf(false) }
+
+    val currentOrchestrator by rememberUpdatedState(orchestrator)
+    DisposableEffect(currentOrchestrator) {
+        onDispose {
+            if (currentOrchestrator.state.value is BatteryOrchestrator.State.Running) {
+                currentOrchestrator.cancelSession()
+            }
+        }
+    }
 
     Scaffold(
         topBar = {

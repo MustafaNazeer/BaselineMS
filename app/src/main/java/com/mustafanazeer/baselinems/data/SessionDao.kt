@@ -25,6 +25,12 @@ interface SessionDao {
     @Query("SELECT * FROM session WHERE id = :id")
     suspend fun getById(id: String): SessionEntity?
 
-    @Query("SELECT COUNT(*) FROM session WHERE completedAtEpochMs IS NOT NULL")
+    @Query("SELECT COUNT(*) FROM session WHERE completedAtEpochMs IS NOT NULL AND wasCancelled = 0")
     fun observeCompletedSessionCount(): Flow<Int>
+
+    @Query(
+        "UPDATE session SET completedAtEpochMs = :nowEpochMs, wasCancelled = 1 " +
+            "WHERE completedAtEpochMs IS NULL AND startedAtEpochMs < :strandedBeforeEpochMs"
+    )
+    suspend fun reclaimStrandedSessions(nowEpochMs: Long, strandedBeforeEpochMs: Long): Int
 }

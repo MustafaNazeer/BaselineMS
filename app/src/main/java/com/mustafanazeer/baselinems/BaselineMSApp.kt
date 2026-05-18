@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.mustafanazeer.baselinems.data.AppDatabase
 import com.mustafanazeer.baselinems.data.MIGRATION_1_2
+import com.mustafanazeer.baselinems.data.MIGRATION_2_3
 import com.mustafanazeer.baselinems.signals.AndroidImuSource
 
 class BaselineMSApp : Application() {
@@ -25,6 +26,6 @@ class BaselineMSApp : Application() {
             applicationContext,
             AppDatabase::class.java,
             "baselinems.db"
-        ).addMigrations(MIGRATION_1_2).build()
+        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
     }
 }

@@ -48,7 +48,7 @@ fun GaitDoneScreen(
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Your gait test is complete.",
+            text = "Walk recorded. Trends are most reliable across several weeks.",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )

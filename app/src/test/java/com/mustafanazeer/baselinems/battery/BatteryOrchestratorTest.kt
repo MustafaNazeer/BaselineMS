@@ -29,7 +29,22 @@ private class FakeSessionDao : SessionDao {
     override fun observeAll(): Flow<List<SessionEntity>> = flowOf(sessions.toList())
     override suspend fun getById(id: String): SessionEntity? = sessions.find { it.id == id }
     override fun observeCompletedSessionCount(): Flow<Int> =
-        flowOf(sessions.count { it.completedAtEpochMs != null })
+        flowOf(sessions.count { it.completedAtEpochMs != null && !it.wasCancelled })
+
+    override suspend fun reclaimStrandedSessions(
+        nowEpochMs: Long,
+        strandedBeforeEpochMs: Long
+    ): Int {
+        var count = 0
+        for (i in sessions.indices) {
+            val s = sessions[i]
+            if (s.completedAtEpochMs == null && s.startedAtEpochMs < strandedBeforeEpochMs) {
+                sessions[i] = s.copy(completedAtEpochMs = nowEpochMs, wasCancelled = true)
+                count += 1
+            }
+        }
+        return count
+    }
 }
 
 private class FakeTestResultDao : TestResultDao {
