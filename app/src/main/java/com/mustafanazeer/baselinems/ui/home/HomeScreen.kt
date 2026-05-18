@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -23,7 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.mustafanazeer.baselinems.R
 import com.mustafanazeer.baselinems.data.SessionDao
 import com.mustafanazeer.baselinems.data.SessionEntity
 import java.text.SimpleDateFormat
@@ -36,7 +39,8 @@ import java.util.Locale
 fun HomeScreen(
     sessionDao: SessionDao,
     onStartSession: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onViewTrends: () -> Unit
 ) {
     val sessions by sessionDao.observeAll().collectAsState(initial = emptyList())
 
@@ -60,6 +64,9 @@ fun HomeScreen(
                 Icon(Icons.Default.PlayArrow, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text("Start this week's check in", style = MaterialTheme.typography.titleMedium)
+            }
+            OutlinedButton(onClick = onViewTrends) {
+                Text(stringResource(R.string.phase9_reports_view_trends))
             }
             Text("History", style = MaterialTheme.typography.titleMedium)
             if (sessions.isEmpty()) {

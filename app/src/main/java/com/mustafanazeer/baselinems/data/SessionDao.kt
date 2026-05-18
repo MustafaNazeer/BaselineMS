@@ -24,4 +24,7 @@ interface SessionDao {
 
     @Query("SELECT * FROM session WHERE id = :id")
     suspend fun getById(id: String): SessionEntity?
+
+    @Query("SELECT COUNT(*) FROM session WHERE completedAtEpochMs IS NOT NULL")
+    fun observeCompletedSessionCount(): Flow<Int>
 }

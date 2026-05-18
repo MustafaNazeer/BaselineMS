@@ -14,6 +14,7 @@ import com.mustafanazeer.baselinems.battery.TestModule
 import com.mustafanazeer.baselinems.battery.TestResultPayload
 import com.mustafanazeer.baselinems.data.TestType
 import com.mustafanazeer.baselinems.dsp.voice.VoiceFeatureSet
+import com.mustafanazeer.baselinems.dsp.voice.VoiceQuality
 import com.mustafanazeer.baselinems.dsp.voice.VoiceQualityScore
 import com.mustafanazeer.baselinems.signals.AndroidAudioCapture
 import com.mustafanazeer.baselinems.signals.AudioCapture
@@ -145,18 +146,21 @@ private fun voicePayload(
     features: VoiceFeatureSet,
     quality: VoiceQualityScore
 ): TestResultPayload {
+    val flatFeatures: Map<String, Double> = buildMap {
+        features.jitterLocal?.let { put(VoiceQuality.FEATURE_KEY_JITTER, it) }
+        features.shimmerLocal?.let { put(VoiceQuality.FEATURE_KEY_SHIMMER, it) }
+        features.hnrDb?.let { put(VoiceQuality.FEATURE_KEY_HNR, it) }
+        features.f0MeanHz?.let { put(VoiceQuality.FEATURE_KEY_F0_MEAN, it) }
+        features.f0SdHz?.let { put(VoiceQuality.FEATURE_KEY_F0_SD, it) }
+        features.speakingRateWpm?.let { put(VoiceQuality.FEATURE_KEY_SPEAKING_RATE, it) }
+        put(VoiceQuality.FEATURE_KEY_PAUSE_FRACTION, features.pauseFraction)
+        put(KEY_VOICED_SECONDS, features.voicedSeconds)
+    }
+    val nestedJson = buildVoiceFeaturesJson(features = features, quality = quality)
     return object : TestResultPayload {
         override val qualityScore: Double = quality.qualityScore
-        override val features: Map<String, Double> = buildMap {
-            features.jitterLocal?.let { put("voice_jitter_local", it) }
-            features.shimmerLocal?.let { put("voice_shimmer_local", it) }
-            features.hnrDb?.let { put("voice_hnr_db", it) }
-            features.f0MeanHz?.let { put("voice_f0_mean_hz", it) }
-            features.f0SdHz?.let { put("voice_f0_sd_hz", it) }
-            features.speakingRateWpm?.let { put("voice_speaking_rate_wpm", it) }
-            put("voice_pause_fraction", features.pauseFraction)
-            put("voice_voiced_seconds", features.voicedSeconds)
-        }
+        override val features: Map<String, Double> = flatFeatures
+        override val featuresJsonOverride: String = nestedJson
     }
 }
 

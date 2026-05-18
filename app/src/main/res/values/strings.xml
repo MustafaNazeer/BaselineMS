@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">BaselineMS</string>
 
     <string name="voice_test_display_name">Voice Test</string>
@@ -47,4 +47,164 @@
     <string name="settings_voice_save_audio_dialog_off_title">Turn off recording retention? Existing recordings will be deleted from this phone immediately.</string>
     <string name="settings_voice_save_audio_dialog_off_confirm">Turn off and delete</string>
     <string name="settings_voice_save_audio_dialog_cancel">Cancel</string>
+
+    <!-- Phase 9 Reports -->
+    <string name="phase9_reports_title">Trends</string>
+    <string name="phase9_reports_warmth_line">These trends are personal to you. They will vary day to day. Look at the longer pattern.</string>
+    <string name="phase9_reports_empty_body">You have not run a check in yet. The trends here will fill in after your first session.</string>
+    <string name="phase9_reports_run_first_check_in">Run my first check in</string>
+    <string name="phase9_reports_back_to_home">Back to home</string>
+    <string name="phase9_reports_view_trends">View trends</string>
+
+    <string name="phase9_quality_chip_reliable">Reliable</string>
+    <string name="phase9_quality_chip_mostly_reliable">Mostly reliable</string>
+    <string name="phase9_quality_chip_less_reliable">Less reliable</string>
+
+    <string name="phase9_reports_card_tap">Bilateral Tap Test</string>
+    <string name="phase9_reports_card_gait">Gait Test</string>
+    <string name="phase9_reports_card_vision">Vision Test</string>
+    <string name="phase9_reports_card_sdmt">Symbol Digit Modalities Test</string>
+    <string name="phase9_reports_card_voice">Voice Reading Test</string>
+
+    <string name="phase9_test_detail_empty_body">No sessions recorded for this test yet. Run a check in to start seeing your trends.</string>
+    <string name="phase9_test_detail_empty_back_to_trends">Back to trends</string>
+
+    <string name="phase9_reports_sessions_recorded_template">%1$d sessions recorded; trend below shows latest %2$d.</string>
+    <string name="phase9_reports_sessions_recorded_single">1 session recorded.</string>
+
+    <string name="phase9_test_detail_title_tap">Bilateral Tap Test</string>
+    <string name="phase9_test_detail_title_gait">Gait Test</string>
+    <string name="phase9_test_detail_title_vision">Vision Test</string>
+    <string name="phase9_test_detail_title_sdmt">Symbol Digit Modalities Test</string>
+    <string name="phase9_test_detail_title_voice">Voice Reading Test</string>
+
+    <string name="phase9_test_detail_last_session_prefix">Last session: %1$s</string>
+    <string name="phase9_test_detail_session_count_template">%1$d sessions recorded since %2$s</string>
+    <string name="phase9_test_detail_session_count_single">1 session recorded.</string>
+    <string name="phase9_test_detail_session_count_no_anchor">%1$d sessions recorded.</string>
+    <string name="phase9_test_detail_show_all_voice_measures">Show all voice measures</string>
+    <string name="phase9_test_detail_show_all_sessions">Show all sessions</string>
+    <string name="phase9_test_detail_about_link">About these charts</string>
+    <string name="phase9_test_detail_run_another">Run another check in to see how this changes over time.</string>
+    <string name="phase9_test_detail_no_overlay_disclaimer">Personal trends only. Not a clinical assessment.</string>
+
+    <string name="phase9_summary_table_column_date">Date</string>
+    <string name="phase9_summary_table_column_quality">Quality</string>
+    <string name="phase9_summary_table_column_notes">Notes</string>
+    <string name="phase9_summary_table_column_steadiness">Steadiness</string>
+    <string name="phase9_summary_table_em_dash_placeholder">—</string>
+
+    <string name="phase9_context_cell_default_low">Less reliable capture. Variability is normal; longer trends matter more than single sessions.</string>
+    <string name="phase9_context_cell_voice_short">Short capture. Try the full duration next time.</string>
+    <string name="phase9_context_cell_voice_noisy">Noisy capture. The data is kept; try a quieter room next time.</string>
+    <string name="phase9_context_cell_tap_short">Short capture. Fewer than 10 valid taps; the data is kept.</string>
+    <string name="phase9_context_cell_gait_short">Short capture. Fewer than 20 detected steps; the data is kept.</string>
+
+    <string name="phase9_about_citations_title">About these charts</string>
+    <string name="phase9_about_back_content_description">Back</string>
+    <string name="phase9_about_section_trends_heading">About the trends</string>
+    <string name="phase9_about_section_trends_body">The Trends screens show your own values over time. They are personal to you. This app does not compare your values against clinical norms or population averages in this version; trends here are personal trends only.</string>
+    <string name="phase9_about_section_quality_heading">About the quality bands</string>
+    <string name="phase9_about_section_quality_body">The quality band on each session (Reliable, Mostly reliable, Less reliable) reflects how cleanly the recording was captured, not how well you did. Less reliable sessions still count; longer trends matter more than single sessions.</string>
+    <string name="phase9_about_section_privacy_heading">About data privacy</string>
+    <string name="phase9_about_section_privacy_body">All of your data stays on this device. Nothing is sent to a cloud or to anyone else unless you choose to export a report and share it yourself.</string>
+    <string name="phase9_about_section_disclaimer_heading">Disclaimer</string>
+    <string name="phase9_about_section_disclaimer_body">This is not a medical device. It does not diagnose or treat any condition. Do not change your treatment based on these results. Share with your neurologist for clinical decisions.</string>
+
+    <string name="phase9_chart_axis_tap_dominant">Taps per second (dominant hand)</string>
+    <string name="phase9_chart_axis_tap_non_dominant">Taps per second (non dominant hand)</string>
+    <string name="phase9_chart_axis_tap_inter_tap_cv">Tap rhythm consistency (lower is steadier)</string>
+    <string name="phase9_chart_axis_tap_asymmetry">Hand to hand asymmetry</string>
+    <string name="phase9_chart_axis_tap_off_target">Taps that missed both targets</string>
+    <string name="phase9_chart_axis_tap_miss_rate">Miss rate</string>
+
+    <string name="phase9_chart_axis_gait_cadence">Cadence (steps per minute)</string>
+    <string name="phase9_chart_axis_gait_stride_length">Stride length (cm)</string>
+    <string name="phase9_chart_axis_gait_step_time_variability">Step rhythm consistency (lower is steadier)</string>
+    <string name="phase9_chart_axis_gait_stride_asymmetry">Left to right step asymmetry</string>
+    <string name="phase9_chart_axis_gait_double_support">Double support time (s)</string>
+    <string name="phase9_chart_caveat_stride_length">Stride length values are calibrated for within device trend comparison only; they are not directly comparable to clinical gait laboratory measurements.</string>
+
+    <string name="phase9_chart_axis_vision_100pct">Letters correct out of 40 (100 percent contrast)</string>
+    <string name="phase9_chart_axis_vision_2pt5pct">Letters correct out of 40 (2.5 percent contrast)</string>
+    <string name="phase9_chart_axis_vision_1pt25pct">Letters correct out of 40 (1.25 percent contrast)</string>
+    <string name="phase9_chart_axis_vision_total">Total letters correct (out of 120)</string>
+
+    <string name="phase9_chart_axis_sdmt_correct">Symbols matched in 90 seconds</string>
+    <string name="phase9_chart_axis_sdmt_rt_mean">Response time per symbol (seconds, mean)</string>
+    <string name="phase9_chart_axis_sdmt_rt_sd">Response time per symbol (seconds, standard deviation)</string>
+    <string name="phase9_chart_axis_sdmt_error_rate">Errors as a fraction of attempts</string>
+
+    <string name="phase9_chart_axis_voice_jitter">Voice cycle to cycle frequency variation</string>
+    <string name="phase9_chart_axis_voice_shimmer">Voice cycle to cycle amplitude variation</string>
+    <string name="phase9_chart_axis_voice_hnr">Voice harmonics to noise ratio (dB)</string>
+    <string name="phase9_chart_axis_voice_f0_sd">Voice pitch variability across the passage</string>
+    <string name="phase9_chart_axis_voice_speaking_rate">Speaking rate (wpm over voiced regions)</string>
+    <string name="phase9_chart_axis_voice_pause_fraction">Pause time as a fraction of the recording</string>
+
+    <string name="phase9_voice_directive_clipping">Voice was too loud. Try a normal speaking volume next time.</string>
+    <string name="phase9_voice_directive_noisy">Background was noisy. Try a quieter room next time.</string>
+    <string name="phase9_voice_directive_short">Reading was too short. Try reading the full passage next time.</string>
+
+    <string name="phase9_voice_steadiness_steady">Steady</string>
+    <string name="phase9_voice_steadiness_mostly_steady">Mostly steady</string>
+    <string name="phase9_voice_steadiness_varied">Varied</string>
+    <string name="phase9_voice_steadiness_unmeasurable">Unmeasurable</string>
+
+    <string name="phase9_voice_flag_jitter_unreliable">Pitch variation measurement was unreliable this session.</string>
+    <string name="phase9_voice_flag_shimmer_unreliable">Amplitude variation measurement was unreliable this session.</string>
+    <string name="phase9_voice_flag_hnr_unreliable">Voice clarity measurement was unreliable this session.</string>
+    <string name="phase9_voice_flag_f0_sd_unreliable">Pitch variability measurement was unreliable this session.</string>
+    <string name="phase9_voice_flag_pause_fraction_unreliable">Pause measurement was unreliable this session.</string>
+
+    <string name="phase9_summary_line_one_session">Your latest %1$s: %2$s.</string>
+    <string name="phase9_summary_line_2_3_sessions">Your latest %1$s: %2$s. Past %3$d sessions: median %4$s. Range: %5$s to %6$s.</string>
+    <string name="phase9_summary_line_4plus_sessions">Your latest %1$s: %2$s. Last 4 sessions: median %3$s. Range: %4$s to %5$s.</string>
+
+    <string name="phase9_unit_phrase_tap_dominant">tap rate (dominant hand)</string>
+    <string name="phase9_unit_phrase_tap_non_dominant">tap rate (non dominant hand)</string>
+    <string name="phase9_unit_phrase_tap_inter_tap_cv">tap rhythm consistency</string>
+    <string name="phase9_unit_phrase_tap_asymmetry">hand to hand asymmetry</string>
+    <string name="phase9_unit_phrase_tap_off_target">off target tap count</string>
+    <string name="phase9_unit_phrase_tap_miss_rate">miss rate</string>
+
+    <string name="phase9_unit_phrase_gait_cadence">cadence</string>
+    <string name="phase9_unit_phrase_gait_stride_length">stride length</string>
+    <string name="phase9_unit_phrase_gait_step_time_variability">step rhythm consistency</string>
+    <string name="phase9_unit_phrase_gait_stride_asymmetry">left to right step asymmetry</string>
+    <string name="phase9_unit_phrase_gait_double_support">double support time</string>
+
+    <string name="phase9_unit_phrase_vision_100pct">letters correct at 100 percent contrast</string>
+    <string name="phase9_unit_phrase_vision_2pt5pct">letters correct at 2.5 percent contrast</string>
+    <string name="phase9_unit_phrase_vision_1pt25pct">letters correct at 1.25 percent contrast</string>
+    <string name="phase9_unit_phrase_vision_total">Sloan total score</string>
+
+    <string name="phase9_unit_phrase_sdmt_correct">symbols matched in 90 seconds</string>
+    <string name="phase9_unit_phrase_sdmt_rt_mean">response time per symbol (mean)</string>
+    <string name="phase9_unit_phrase_sdmt_rt_sd">response time per symbol (standard deviation)</string>
+    <string name="phase9_unit_phrase_sdmt_error_rate">error rate</string>
+
+    <string name="phase9_unit_phrase_voice_jitter">voice cycle to cycle frequency variation</string>
+    <string name="phase9_unit_phrase_voice_shimmer">voice cycle to cycle amplitude variation</string>
+    <string name="phase9_unit_phrase_voice_hnr">voice harmonics to noise ratio</string>
+    <string name="phase9_unit_phrase_voice_f0_sd">voice pitch variability</string>
+    <string name="phase9_unit_phrase_voice_speaking_rate">speaking rate</string>
+    <string name="phase9_unit_phrase_voice_pause_fraction">pause fraction</string>
+
+    <string name="phase9_unit_suffix_steps_per_minute">steps per minute</string>
+    <string name="phase9_unit_suffix_centimeters">cm</string>
+    <string name="phase9_unit_suffix_seconds">seconds</string>
+    <string name="phase9_unit_suffix_taps_per_second">taps per second</string>
+    <string name="phase9_unit_suffix_milliseconds">milliseconds</string>
+    <string name="phase9_unit_suffix_decibels">dB</string>
+    <string name="phase9_unit_suffix_words_per_minute">words per minute</string>
+    <string name="phase9_unit_suffix_hertz">Hz</string>
+
+    <string name="phase9_chart_content_description">%1$s over %2$d sessions: %3$s %4$s.</string>
+
+    <!-- Reserved for ADR 0007 Section 2 v1.1 cadence overlay (Givon 2009); pending Phase 9 Task 7 full text retrieval of the healthy control cadence SD. -->
+    <string name="phase9_reference_band_givon_caption" tools:ignore="UnusedResources">Healthy adult average plus or minus one SD (Givon 2009, n equals 25)</string>
+    <string name="phase9_reference_band_givon_footnote">Personal trends are the main signal here. The reference band shows healthy adult averages from one published study; it does not represent a clinical assessment. The band reflects measurement variability on the Givon 2009 walking test, not on this phone in your pocket. Your own values may scatter wider.</string>
+
+    <string name="phase9_loading_placeholder">Loading…</string>
 </resources>
