@@ -3,25 +3,38 @@ package com.mustafanazeer.baselinems.ui.reports
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.mustafanazeer.baselinems.R
 import com.mustafanazeer.baselinems.data.TestType
@@ -30,10 +43,21 @@ import com.mustafanazeer.baselinems.data.TestType
 @Composable
 fun ReportsScreen(
     state: ReportsScreenState,
+    exportState: ReportsExportState,
     onBack: () -> Unit,
     onCardSelected: (TestType) -> Unit,
-    onRunFirstCheckIn: () -> Unit
+    onRunFirstCheckIn: () -> Unit,
+    onShareClicked: () -> Unit,
+    onShareConsumed: () -> Unit
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val errorMessage = (exportState as? ReportsExportState.Error)?.let { stringResource(it.messageResId) }
+    LaunchedEffect(errorMessage) {
+        if (errorMessage != null) {
+            snackbarHostState.showSnackbar(errorMessage)
+            onShareConsumed()
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -44,6 +68,14 @@ fun ReportsScreen(
                     }
                 }
             )
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+            ) { data ->
+                Snackbar(snackbarData = data)
+            }
         }
     ) { padding ->
         Column(
@@ -77,6 +109,33 @@ fun ReportsScreen(
                     }
                 }
             }
+
+            val isRendering = exportState is ReportsExportState.Rendering
+            val buttonLabel = if (isRendering) {
+                stringResource(R.string.phase10_export_rendering)
+            } else {
+                stringResource(R.string.phase10_share_button)
+            }
+            Button(
+                onClick = onShareClicked,
+                enabled = state !is ReportsScreenState.Empty && !isRendering,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isRendering) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    }
+                    Text(buttonLabel)
+                }
+            }
+
+            ShareReportLauncher(state = exportState, onLaunched = onShareConsumed)
         }
     }
 }

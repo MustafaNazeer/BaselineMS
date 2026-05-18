@@ -28,15 +28,18 @@ import com.mustafanazeer.baselinems.battery.sdmt.SdmtTest
 import com.mustafanazeer.baselinems.battery.tap.BilateralTapTest
 import com.mustafanazeer.baselinems.battery.vision.VisionTest
 import com.mustafanazeer.baselinems.battery.voice.VoiceTestModule
+import com.mustafanazeer.baselinems.data.PdfReportDataSource
 import com.mustafanazeer.baselinems.data.TestType
 import com.mustafanazeer.baselinems.data.TrendsRepository
 import com.mustafanazeer.baselinems.dsp.GaitPipeline
+import com.mustafanazeer.baselinems.report.ReportExporter
 import com.mustafanazeer.baselinems.signals.RawSensorWriter
 import com.mustafanazeer.baselinems.ui.home.HomeScreen
 import com.mustafanazeer.baselinems.ui.home.SessionRunnerScreen
 import com.mustafanazeer.baselinems.ui.onboarding.DisclaimerScreen
 import com.mustafanazeer.baselinems.ui.onboarding.ProfileSetupScreen
 import com.mustafanazeer.baselinems.ui.reports.AboutCitationsScreen
+import com.mustafanazeer.baselinems.ui.reports.ReportsExportViewModel
 import com.mustafanazeer.baselinems.ui.reports.ReportsRoute
 import com.mustafanazeer.baselinems.ui.reports.TestDetailRoute
 import com.mustafanazeer.baselinems.ui.settings.SettingsScreen
@@ -108,6 +111,19 @@ fun RootScreen() {
             visionDisplayName = context.getString(R.string.phase9_reports_card_vision),
             sdmtDisplayName = context.getString(R.string.phase9_reports_card_sdmt),
             voiceDisplayName = context.getString(R.string.phase9_reports_card_voice)
+        )
+    }
+
+    val reportsExportViewModel = remember(app, trendsRepository) {
+        ReportsExportViewModel(
+            exporter = ReportExporter(
+                context = context.applicationContext,
+                source = PdfReportDataSource(
+                    sessionDao = app.database.sessionDao(),
+                    testResultDao = app.database.testResultDao(),
+                    trendsRepository = trendsRepository
+                )
+            )
         )
     }
 
@@ -187,6 +203,7 @@ fun RootScreen() {
         composable(Routes.Reports) {
             ReportsRoute(
                 repository = trendsRepository,
+                exportViewModel = reportsExportViewModel,
                 onBack = { nav.popBackStack() },
                 onCardSelected = { testType ->
                     nav.navigate(Routes.testDetail(testType))

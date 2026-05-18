@@ -207,4 +207,26 @@
     <string name="phase9_reference_band_givon_footnote">Personal trends are the main signal here. The reference band shows healthy adult averages from one published study; it does not represent a clinical assessment. The band reflects measurement variability on the Givon 2009 walking test, not on this phone in your pocket. Your own values may scatter wider.</string>
 
     <string name="phase9_loading_placeholder">Loading…</string>
+
+    <!-- Phase 10 Export -->
+    <string name="phase10_share_button">Share report</string>
+    <string name="phase10_share_chooser_title">Share your BaselineMS report</string>
+    <string name="phase10_export_rendering">Preparing your report&#8230;</string>
+    <string name="phase10_export_error_generic">Could not prepare your report. Please try again.</string>
+    <string name="phase10_export_error_disk_full">Not enough storage space to prepare your report.</string>
+
+    <string name="phase10_pdf_cover_title">BaselineMS personal report</string>
+    <string name="phase10_pdf_cover_generated_on">Prepared on %1$s</string>
+    <string name="phase10_pdf_cover_date_range">Sessions from %1$s to %2$s</string>
+    <string name="phase10_pdf_cover_session_count_template">%1$d sessions across %2$d tests</string>
+    <string name="phase10_pdf_cover_session_count_single">1 session across 1 test</string>
+    <string name="phase10_pdf_cover_user_facing_role">This is a personal record. It is not a medical document. Share it with your neurologist for context when you see them next.</string>
+
+    <string name="phase10_pdf_page_heading_template">%1$s</string>
+    <string name="phase10_pdf_section_latest_session">Latest session</string>
+    <string name="phase10_pdf_section_trend">Trend over the last %1$d sessions</string>
+    <string name="phase10_pdf_section_summary_table">Recent sessions</string>
+    <string name="phase10_pdf_footer_page_template">Page %1$d of %2$d</string>
+
+    <string name="phase10_csv_header_template">session_id,session_started_at_iso,test_type,test_result_id,test_started_at_iso,test_completed_at_iso,quality_score,quality_band,feature_key,feature_value</string>
 </resources>

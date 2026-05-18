@@ -10,17 +10,22 @@ import com.mustafanazeer.baselinems.data.TrendsRepository
 @Composable
 fun ReportsRoute(
     repository: TrendsRepository,
+    exportViewModel: ReportsExportViewModel,
     onBack: () -> Unit,
     onCardSelected: (TestType) -> Unit,
     onRunFirstCheckIn: () -> Unit
 ) {
     val viewModel = remember(repository) { ReportsViewModel(repository = repository) }
     val state by viewModel.reportsState.collectAsState()
+    val exportState by exportViewModel.state.collectAsState()
     ReportsScreen(
         state = state,
+        exportState = exportState,
         onBack = onBack,
         onCardSelected = onCardSelected,
-        onRunFirstCheckIn = onRunFirstCheckIn
+        onRunFirstCheckIn = onRunFirstCheckIn,
+        onShareClicked = { exportViewModel.onShareClicked() },
+        onShareConsumed = { exportViewModel.onShareConsumed() }
     )
 }
 

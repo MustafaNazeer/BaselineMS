@@ -18,7 +18,7 @@ This application is not a medical device. It does not diagnose or treat any cond
 
 ## Status
 
-The data layer, the test module abstraction, the weekly battery orchestrator, and the Compose UI shell are in place. The bilateral tap test is implemented as the first concrete instrument. The gait analysis pipeline (IMU capture, orientation tracking, world frame projection, feature extraction) is implemented and wired into the weekly battery; it is mid validation against a measured 25 meter walking course. The vision test, the Symbol Digit Modalities Test, the voice test, the longitudinal reporting screens, the PDF export, and the accessibility and beta polish work are next.
+The data layer, the test module abstraction, the weekly battery orchestrator, and the Compose UI shell are in place. All five tests are implemented and wired into the weekly battery: the bilateral tap test, the gait analysis pipeline (IMU capture, orientation tracking, world frame projection, feature extraction), the low contrast vision test, the Symbol Digit Modalities Test smartphone variant, and the 30 second voice reading test with Praat compatible acoustic features. A longitudinal Reports screen surfaces per test trends with drill in detail screens for each instrument. PDF and CSV export through the Android Share Intent ships from that same Reports screen on demand. Remaining work is the accessibility audit, the beta cohort recruitment and run, and the Play Store internal testing track polish pass.
 
 ## How it is built
 
@@ -46,6 +46,10 @@ This runs every JVM unit test, including Robolectric Room repository tests, orch
 ## Privacy
 
 All data is stored on device. The application does not declare the `android.permission.INTERNET` permission. There is no cloud sync, no account, no analytics SDK, and no third party telemetry. Microphone audio is processed in memory and discarded after feature extraction unless the user explicitly opts in to retention. Camera frames from the vision test ambient brightness check are read once and discarded. Export through Android's Share Intent is the only outward facing action and it is fully user initiated.
+
+## Export
+
+From the Reports screen, the user can generate a PDF report and a long format CSV on demand. The PDF cover mirrors the disclaimer language in SPEC Section 10 (this is not a medical device, results are not validated for any clinical use, share with a neurologist for clinical decisions) and is followed by per test trend charts and a summary table of recent sessions. The CSV is long format with one row per feature value per test result, which suits spreadsheet pivots and direct ingestion into R or Python. Both files are written to the application's private `cacheDir` and offered through the Android Share Intent via a scoped `FileProvider`. Nothing is written to shared or external storage automatically.
 
 ## Live demo
 
