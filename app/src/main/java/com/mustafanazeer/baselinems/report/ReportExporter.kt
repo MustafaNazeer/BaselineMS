@@ -37,7 +37,7 @@ class ReportExporter(
         pdfTmp.renameTo(pdfFile)
 
         val csvTmp = File(dir, csvFile.name + ".tmp")
-        csvTmp.writeText(csvExporter.toCsv(snap, sessionIdByResultId = emptyMap()))
+        csvTmp.writeText(csvExporter.toCsv(snap))
         if (csvFile.exists()) csvFile.delete()
         csvTmp.renameTo(csvFile)
 

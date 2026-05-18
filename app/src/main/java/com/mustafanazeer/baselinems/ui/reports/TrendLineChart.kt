@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -160,20 +161,29 @@ internal fun computeAxisRange(
 @Composable
 private fun buildChartContentDescription(series: FeatureSeries, displayLabel: String): String {
     val context = LocalContext.current
-    val included = series.points.filterNot { it.omittedFromChart }
-    if (included.isEmpty()) return ""
-    val valueStrings = included.joinToString(", ") { point ->
-        series.valueFormatter?.invoke(point.value) ?: formatValueForDescription(point.value)
-    }
-    val unitSuffix = series.unitSuffixResId?.let { context.getString(it) } ?: series.unit
+    val payload = remember(series, displayLabel, context) {
+        val included = series.points.filterNot { it.omittedFromChart }
+        if (included.isEmpty()) return@remember null
+        val valueStrings = included.joinToString(", ") { point ->
+            series.valueFormatter?.invoke(point.value) ?: formatValueForDescription(point.value)
+        }
+        val unitSuffix = series.unitSuffixResId?.let { context.getString(it) } ?: series.unit
+        ChartContentDescriptionPayload(included.size, valueStrings, unitSuffix)
+    } ?: return ""
     return stringResource(
         R.string.phase9_chart_content_description,
         displayLabel,
-        included.size,
-        valueStrings,
-        unitSuffix
+        payload.pointCount,
+        payload.valueStrings,
+        payload.unitSuffix
     )
 }
+
+private data class ChartContentDescriptionPayload(
+    val pointCount: Int,
+    val valueStrings: String,
+    val unitSuffix: String
+)
 
 internal fun formatValueForDescription(value: Double): String {
     return if (value == value.toLong().toDouble()) {

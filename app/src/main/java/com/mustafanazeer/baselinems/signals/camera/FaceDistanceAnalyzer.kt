@@ -38,10 +38,10 @@ class FaceDistanceAnalyzer(
         } catch (e: Exception) {
             emptyList()
         }
-        processFaces(faces, image.width)
+        processFaces(faces)
     }
 
-    fun processFaces(faces: List<Face>, frameWidth: Int) {
+    fun processFaces(faces: List<Face>) {
         val biggest = faces.maxByOrNull { it.boundingBox.width() }
         if (biggest == null) {
             onDistanceEstimated?.invoke(null)

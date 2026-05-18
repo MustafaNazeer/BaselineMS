@@ -10,6 +10,25 @@ import com.mustafanazeer.baselinems.ui.reports.QualityBand
 
 class PdfChartRenderer {
 
+    private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.BLACK
+        strokeWidth = PdfPageLayout.CHART_LINE_WIDTH
+        style = Paint.Style.STROKE
+    }
+
+    private val markerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.BLACK }
+
+    private val markerNotchPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        style = Paint.Style.FILL
+    }
+
+    private val axisPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.BLACK
+        textSize = PdfPageLayout.FONT_SIZE_CHART_AXIS
+        typeface = Typeface.SANS_SERIF
+    }
+
     fun render(canvas: Canvas, bounds: RectF, series: FeatureSeries, axisLabel: String) {
         val plottable = series.points.filter { !it.omittedFromChart && !it.value.isNaN() }
         drawAxisLabel(canvas, bounds, axisLabel)
@@ -25,11 +44,6 @@ class PdfChartRenderer {
             bounds.bottom - PdfPageLayout.CHART_INNER_PADDING
         )
 
-        val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.BLACK
-            strokeWidth = PdfPageLayout.CHART_LINE_WIDTH
-            style = Paint.Style.STROKE
-        }
         var previousX: Float? = null
         var previousY: Float? = null
         plottable.forEachIndexed { index, point ->
@@ -47,38 +61,33 @@ class PdfChartRenderer {
     }
 
     private fun drawMarker(canvas: Canvas, x: Float, y: Float, band: QualityBand) {
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.BLACK }
         when (band) {
             QualityBand.HIGH -> {
-                paint.style = Paint.Style.FILL
-                canvas.drawCircle(x, y, PdfPageLayout.CHART_MARKER_RADIUS_HIGH, paint)
+                markerPaint.style = Paint.Style.FILL
+                markerPaint.strokeWidth = 0f
+                canvas.drawCircle(x, y, PdfPageLayout.CHART_MARKER_RADIUS_HIGH, markerPaint)
             }
             QualityBand.MEDIUM -> {
-                paint.style = Paint.Style.FILL
-                canvas.drawCircle(x, y, PdfPageLayout.CHART_MARKER_RADIUS_MEDIUM, paint)
-                val notch = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; style = Paint.Style.FILL }
+                markerPaint.style = Paint.Style.FILL
+                markerPaint.strokeWidth = 0f
+                canvas.drawCircle(x, y, PdfPageLayout.CHART_MARKER_RADIUS_MEDIUM, markerPaint)
                 canvas.drawRect(
                     x,
                     y - PdfPageLayout.CHART_MARKER_RADIUS_MEDIUM,
                     x + PdfPageLayout.CHART_MARKER_RADIUS_MEDIUM,
                     y + PdfPageLayout.CHART_MARKER_RADIUS_MEDIUM,
-                    notch
+                    markerNotchPaint
                 )
             }
             QualityBand.LOW -> {
-                paint.style = Paint.Style.STROKE
-                paint.strokeWidth = 1.5f
-                canvas.drawCircle(x, y, PdfPageLayout.CHART_MARKER_RADIUS_LOW, paint)
+                markerPaint.style = Paint.Style.STROKE
+                markerPaint.strokeWidth = 1.5f
+                canvas.drawCircle(x, y, PdfPageLayout.CHART_MARKER_RADIUS_LOW, markerPaint)
             }
         }
     }
 
     private fun drawAxisLabel(canvas: Canvas, bounds: RectF, axisLabel: String) {
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.BLACK
-            textSize = PdfPageLayout.FONT_SIZE_CHART_AXIS
-            typeface = Typeface.SANS_SERIF
-        }
-        canvas.drawText(axisLabel, bounds.left, bounds.top + PdfPageLayout.FONT_SIZE_CHART_AXIS, paint)
+        canvas.drawText(axisLabel, bounds.left, bounds.top + PdfPageLayout.FONT_SIZE_CHART_AXIS, axisPaint)
     }
 }

@@ -16,7 +16,7 @@ class FaceDistanceAnalyzerTest {
         var reported: Double? = -1.0
         analyzer.onDistanceEstimated = { reported = it }
 
-        analyzer.processFaces(emptyList(), frameWidth = 1920)
+        analyzer.processFaces(emptyList())
 
         assertNull(reported)
     }
@@ -28,7 +28,7 @@ class FaceDistanceAnalyzerTest {
         analyzer.onDistanceEstimated = { reported = it }
 
         val face = makeFaceWithWidth(562)
-        analyzer.processFaces(listOf(face), frameWidth = 1920)
+        analyzer.processFaces(listOf(face))
 
         assertEquals(40.0, reported!!, 0.5)
     }
@@ -41,7 +41,7 @@ class FaceDistanceAnalyzerTest {
 
         val far = makeFaceWithWidth(200)
         val near = makeFaceWithWidth(750)
-        analyzer.processFaces(listOf(far, near), frameWidth = 1920)
+        analyzer.processFaces(listOf(far, near))
 
         assertEquals(30.0, reported!!, 0.5)
     }
