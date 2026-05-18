@@ -1,5 +1,6 @@
 package com.mustafanazeer.baselinems.data
 
+import com.mustafanazeer.baselinems.report.PdfReportSnapshotProvider
 import com.mustafanazeer.baselinems.ui.reports.ReportsScreenState
 import com.mustafanazeer.baselinems.ui.reports.TestDetailScreenState
 import kotlinx.coroutines.flow.first
@@ -9,9 +10,9 @@ class PdfReportDataSource(
     private val testResultDao: TestResultDao,
     private val trendsRepository: TrendsRepository,
     private val nowProvider: () -> Long = { System.currentTimeMillis() }
-) {
+) : PdfReportSnapshotProvider {
 
-    suspend fun snapshot(): PdfReportSnapshot {
+    override suspend fun snapshot(): PdfReportSnapshot {
         val completedCount = sessionDao.observeCompletedSessionCount().first()
         val allResults = testResultDao.observeAll().first()
         val reportsState = trendsRepository.observeReportsState().first()

@@ -66,9 +66,12 @@ class ReportsScreenRenderTest {
         composeRule.setContent {
             ReportsScreen(
                 state = ReportsScreenState.Empty,
+                exportState = ReportsExportState.Idle,
                 onBack = {},
                 onCardSelected = {},
-                onRunFirstCheckIn = {}
+                onRunFirstCheckIn = {},
+                onShareClicked = {},
+                onShareConsumed = {}
             )
         }
         composeRule.onNodeWithText("Run my first check in").assertIsDisplayed()
@@ -79,9 +82,12 @@ class ReportsScreenRenderTest {
         composeRule.setContent {
             ReportsScreen(
                 state = ReportsScreenState.Empty,
+                exportState = ReportsExportState.Idle,
                 onBack = {},
                 onCardSelected = {},
-                onRunFirstCheckIn = {}
+                onRunFirstCheckIn = {},
+                onShareClicked = {},
+                onShareConsumed = {}
             )
         }
         composeRule.onNodeWithText("Back to home").assertIsDisplayed()
@@ -92,9 +98,12 @@ class ReportsScreenRenderTest {
         composeRule.setContent {
             ReportsScreen(
                 state = ReportsScreenState.Empty,
+                exportState = ReportsExportState.Idle,
                 onBack = {},
                 onCardSelected = {},
-                onRunFirstCheckIn = {}
+                onRunFirstCheckIn = {},
+                onShareClicked = {},
+                onShareConsumed = {}
             )
         }
         composeRule.onNodeWithText(
@@ -108,9 +117,12 @@ class ReportsScreenRenderTest {
         composeRule.setContent {
             ReportsScreen(
                 state = ReportsScreenState.Empty,
+                exportState = ReportsExportState.Idle,
                 onBack = {},
                 onCardSelected = {},
-                onRunFirstCheckIn = { fired = true }
+                onRunFirstCheckIn = { fired = true },
+                onShareClicked = {},
+                onShareConsumed = {}
             )
         }
         composeRule.onNodeWithText("Run my first check in").performClick()
@@ -122,9 +134,12 @@ class ReportsScreenRenderTest {
         composeRule.setContent {
             ReportsScreen(
                 state = readyState,
+                exportState = ReportsExportState.Idle,
                 onBack = {},
                 onCardSelected = {},
-                onRunFirstCheckIn = {}
+                onRunFirstCheckIn = {},
+                onShareClicked = {},
+                onShareConsumed = {}
             )
         }
         composeRule.onNodeWithText(
@@ -137,9 +152,12 @@ class ReportsScreenRenderTest {
         composeRule.setContent {
             ReportsScreen(
                 state = readyState,
+                exportState = ReportsExportState.Idle,
                 onBack = {},
                 onCardSelected = {},
-                onRunFirstCheckIn = {}
+                onRunFirstCheckIn = {},
+                onShareClicked = {},
+                onShareConsumed = {}
             )
         }
         composeRule.onNodeWithText("Bilateral Tap Test").assertExists()
@@ -155,9 +173,12 @@ class ReportsScreenRenderTest {
         composeRule.setContent {
             ReportsScreen(
                 state = readyState,
+                exportState = ReportsExportState.Idle,
                 onBack = {},
                 onCardSelected = { selected = it },
-                onRunFirstCheckIn = {}
+                onRunFirstCheckIn = {},
+                onShareClicked = {},
+                onShareConsumed = {}
             )
         }
         composeRule.onNodeWithText("Gait Test").performScrollTo().performClick()
@@ -169,9 +190,12 @@ class ReportsScreenRenderTest {
         composeRule.setContent {
             ReportsScreen(
                 state = readyState,
+                exportState = ReportsExportState.Idle,
                 onBack = {},
                 onCardSelected = {},
-                onRunFirstCheckIn = {}
+                onRunFirstCheckIn = {},
+                onShareClicked = {},
+                onShareConsumed = {}
             )
         }
         composeRule.onAllNodesWithText("3 sessions recorded; trend below shows latest 3.")

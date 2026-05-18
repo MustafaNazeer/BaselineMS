@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,6 +23,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.mustafanazeer.baselinems.R
 import com.mustafanazeer.baselinems.data.TestType
@@ -30,9 +34,12 @@ import com.mustafanazeer.baselinems.data.TestType
 @Composable
 fun ReportsScreen(
     state: ReportsScreenState,
+    exportState: ReportsExportState,
     onBack: () -> Unit,
     onCardSelected: (TestType) -> Unit,
-    onRunFirstCheckIn: () -> Unit
+    onRunFirstCheckIn: () -> Unit,
+    onShareClicked: () -> Unit,
+    onShareConsumed: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -77,6 +84,43 @@ fun ReportsScreen(
                     }
                 }
             }
+
+            Button(
+                onClick = onShareClicked,
+                enabled = state !is ReportsScreenState.Empty &&
+                    exportState !is ReportsExportState.Rendering,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.phase10_share_button))
+            }
+
+            // Access MF3: announce Rendering and Error transitions politely so TalkBack
+            // users receive the same affordance as sighted users.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { liveRegion = LiveRegionMode.Polite }
+            ) {
+                when (exportState) {
+                    is ReportsExportState.Rendering -> {
+                        Text(
+                            text = stringResource(R.string.phase10_export_rendering),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    is ReportsExportState.Error -> {
+                        Text(
+                            text = stringResource(exportState.messageResId),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    else -> Unit
+                }
+            }
+
+            ShareReportLauncher(state = exportState, onLaunched = onShareConsumed)
         }
     }
 }
