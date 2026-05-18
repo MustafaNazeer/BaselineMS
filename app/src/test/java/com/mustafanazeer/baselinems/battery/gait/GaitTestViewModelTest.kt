@@ -6,8 +6,8 @@ import com.mustafanazeer.baselinems.dsp.GaitPipeline
 import com.mustafanazeer.baselinems.dsp.ImuSample
 import com.mustafanazeer.baselinems.dsp.Quaternion
 import com.mustafanazeer.baselinems.dsp.Vector3
+import com.mustafanazeer.baselinems.signals.FakeSensorTraceWriter
 import com.mustafanazeer.baselinems.signals.ImuSource
-import com.mustafanazeer.baselinems.signals.RawSensorWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
@@ -54,16 +54,6 @@ class GaitTestViewModelTest {
         }
     }
 
-    private class CountingRawSensorWriter(target: File) : RawSensorWriter(target) {
-        var writeCalls: Int = 0
-        var collectedSampleCount: Int = 0
-        override suspend fun write(samples: Flow<ImuSample>): Long {
-            writeCalls += 1
-            samples.collect { collectedSampleCount += 1 }
-            return collectedSampleCount.toLong()
-        }
-    }
-
     private fun makeFiles(): Pair<File, File> {
         val filesDir = File.createTempFile("gait_files_dir", "").also {
             it.delete()
@@ -104,7 +94,7 @@ class GaitTestViewModelTest {
         val vm = GaitTestViewModel(
             imuSource = FakeImuSource(),
             gaitPipeline = FakeGaitPipeline(cannedFeatures()),
-            rawSensorWriter = CountingRawSensorWriter(target),
+            rawSensorWriter = FakeSensorTraceWriter(),
             destinationFile = target,
             filesDir = filesDir,
             scope = this
@@ -122,7 +112,7 @@ class GaitTestViewModelTest {
         val (filesDir, target) = makeFiles()
         val source = FakeImuSource()
         val pipeline = FakeGaitPipeline(cannedFeatures())
-        val writer = CountingRawSensorWriter(target)
+        val writer = FakeSensorTraceWriter()
         val vm = GaitTestViewModel(
             imuSource = source,
             gaitPipeline = pipeline,
@@ -149,7 +139,7 @@ class GaitTestViewModelTest {
         val (filesDir, target) = makeFiles()
         val source = FakeImuSource()
         val pipeline = FakeGaitPipeline(cannedFeatures())
-        val writer = CountingRawSensorWriter(target)
+        val writer = FakeSensorTraceWriter()
         val vm = GaitTestViewModel(
             imuSource = source,
             gaitPipeline = pipeline,
@@ -183,7 +173,7 @@ class GaitTestViewModelTest {
         val (filesDir, target) = makeFiles()
         val source = FakeImuSource()
         val pipeline = FakeGaitPipeline(cannedFeatures())
-        val writer = CountingRawSensorWriter(target)
+        val writer = FakeSensorTraceWriter()
         val vm = GaitTestViewModel(
             imuSource = source,
             gaitPipeline = pipeline,
@@ -200,7 +190,6 @@ class GaitTestViewModelTest {
         assertEquals(GaitTestState.Capturing(progressMillis = 0), vm.state.value)
 
         assertEquals("ImuSource start should be invoked at capture entry", 1, source.startCount)
-        assertEquals("RawSensorWriter write should be invoked at capture entry", 1, writer.writeCalls)
 
         // Inject a few samples; advance just under 30 s so the capture coroutine does not
         // transition to Done before the assertion runs.
@@ -210,8 +199,8 @@ class GaitTestViewModelTest {
         }
         advanceTimeBy(500); runCurrent()
         assertTrue(
-            "writer should have collected the emitted samples (got ${writer.collectedSampleCount})",
-            writer.collectedSampleCount >= 5
+            "writer should have collected the emitted samples (got ${writer.appendCount})",
+            writer.appendCount >= 5
         )
 
         // progressMillis advances at the 100 ms tick interval.
@@ -233,7 +222,7 @@ class GaitTestViewModelTest {
         val source = FakeImuSource()
         val canned = cannedFeatures()
         val pipeline = FakeGaitPipeline(canned)
-        val writer = CountingRawSensorWriter(target)
+        val writer = FakeSensorTraceWriter()
         val vm = GaitTestViewModel(
             imuSource = source,
             gaitPipeline = pipeline,
@@ -277,7 +266,7 @@ class GaitTestViewModelTest {
         val (filesDir, target) = makeFiles()
         val source = FakeImuSource()
         val pipeline = FakeGaitPipeline(cannedFeatures())
-        val writer = CountingRawSensorWriter(target)
+        val writer = FakeSensorTraceWriter()
         val vm = GaitTestViewModel(
             imuSource = source,
             gaitPipeline = pipeline,
@@ -306,7 +295,7 @@ class GaitTestViewModelTest {
         val (filesDir, target) = makeFiles()
         val source = FakeImuSource()
         val pipeline = FakeGaitPipeline(cannedFeatures())
-        val writer = CountingRawSensorWriter(target)
+        val writer = FakeSensorTraceWriter()
         val vm = GaitTestViewModel(
             imuSource = source,
             gaitPipeline = pipeline,

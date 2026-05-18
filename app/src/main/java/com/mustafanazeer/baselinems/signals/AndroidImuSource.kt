@@ -37,7 +37,8 @@ import kotlin.math.sqrt
  */
 class AndroidImuSource(
     context: Context,
-    private val samplingPeriodMicros: Int = 10_000
+    private val samplingPeriodMicros: Int = 10_000,
+    private val nowMs: () -> Long = { System.currentTimeMillis() }
 ) : ImuSource {
 
     private val sensorManager =
@@ -77,6 +78,13 @@ class AndroidImuSource(
     private var lastRotation: Quaternion? = null
     private var lastLinearTimestampNanos: Long = 0L
     private var prevLinearTimestampNanos: Long = 0L
+
+    // SPE Phase 4 I2: on the very first fallback emission `lastAccel` may be null because
+    // TYPE_ACCELEROMETER has not fired yet. Hold emission for up to FIRST_SAMPLE_HOLD_MS to let
+    // the raw accelerometer catch up so Madgwick sees the gravity reference it expects; if the
+    // hold window elapses without an accel reading, fall back to feeding `lastLinear` (gravity
+    // removed) into the filter so the pipeline does not stall.
+    private var firstSampleHoldStartedAtMs: Long? = null
 
     private val listener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
@@ -139,19 +147,41 @@ class AndroidImuSource(
         val linear = lastLinear ?: return
         val gyroNow = lastGyro ?: Vector3.ZERO
 
-        val rotationNow: Quaternion = lastRotation ?: run {
+        val platformRotation = lastRotation
+        val rotationNow: Quaternion
+        if (platformRotation != null) {
+            rotationNow = platformRotation
+        } else if (fallbackMadgwick != null) {
             val accel = lastAccel
-            if (fallbackMadgwick != null && accel != null) {
+            if (accel != null) {
+                // Real accelerometer reading is available; clear any pending hold and step the
+                // filter normally so the first emission carries the gravity included observation.
+                firstSampleHoldStartedAtMs = null
                 val dt = computeDtSeconds()
                 fallbackMadgwick.update(gyroNow, accel, dt)
-                fallbackMadgwick.orientation()
+                rotationNow = fallbackMadgwick.orientation()
             } else {
-                // Either no fallback configured, or the raw accelerometer has not fired yet.
-                // Returning identity matches the Madgwick filter's untouched initial state and
-                // avoids feeding gravity-removed `linear` into a filter that expects gravity
-                // included input.
-                fallbackMadgwick?.orientation() ?: Quaternion.IDENTITY
+                // SPE Phase 4 I2: hold up to FIRST_SAMPLE_HOLD_MS for the raw accelerometer to
+                // arrive before falling back to the gravity removed surrogate.
+                val startedAt = firstSampleHoldStartedAtMs
+                if (startedAt == null) {
+                    firstSampleHoldStartedAtMs = nowMs()
+                    return
+                }
+                val elapsed = nowMs() - startedAt
+                if (elapsed < FIRST_SAMPLE_HOLD_MS) {
+                    return
+                }
+                // Hold window elapsed without an accelerometer reading. Step the filter with the
+                // gravity removed `linear` as a degraded surrogate so the pipeline does not stall.
+                val dt = computeDtSeconds()
+                fallbackMadgwick.update(gyroNow, linear, dt)
+                rotationNow = fallbackMadgwick.orientation()
             }
+        } else {
+            // No fallback configured (platform rotation sensor was present at construction time
+            // but has not fired yet). Identity matches the prior behavior.
+            rotationNow = Quaternion.IDENTITY
         }
 
         // ImuSample.accelerometer carries the raw, gravity included acceleration. The fallback
@@ -209,5 +239,9 @@ class AndroidImuSource(
         val norm = sqrt(rawW * rawW + x * x + y * y + z * z)
         if (norm == 0.0) return Quaternion.IDENTITY
         return Quaternion(rawW / norm, x / norm, y / norm, z / norm)
+    }
+
+    companion object {
+        private const val FIRST_SAMPLE_HOLD_MS: Long = 50L
     }
 }
