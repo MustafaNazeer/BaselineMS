@@ -65,7 +65,7 @@ class GaitTestRenderTest {
         composeRule.setContent {
             GaitDoneScreen(state = GaitTestState.Done(features = features), onContinue = {})
         }
-        composeRule.onNodeWithText("Captured with high confidence").assertIsDisplayed()
+        composeRule.onNodeWithText("Reliable").assertIsDisplayed()
         composeRule.onNodeWithText("Continue").assertIsDisplayed()
     }
 }

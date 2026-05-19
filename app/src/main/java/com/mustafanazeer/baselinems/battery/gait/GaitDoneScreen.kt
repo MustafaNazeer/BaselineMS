@@ -12,15 +12,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.mustafanazeer.baselinems.R
 
 /**
- * Post test confirmation screen. Renders a thank you and a quality aware status line:
+ * Post test confirmation screen. Renders a thank you and a quality aware status line that uses
+ * the Phase 9 ratified Reports chip vocabulary verbatim so the same recording reads the same
+ * across the Done screen and the Reports screen:
  *
- * - "Captured with high confidence" when the quality score exceeds 0.8.
- * - "Captured with limited confidence" when the score sits between 0.5 and 0.8 (inclusive).
- * - "Captured but quality is low" when the score is below 0.5.
+ * - "Reliable" when the quality score exceeds 0.8.
+ * - "Mostly reliable" when the score sits between 0.5 and 0.8 (inclusive).
+ * - "Less reliable" when the score is below 0.5.
  *
  * The plain language framing intentionally hides the raw 0.78 number.
  */
@@ -31,9 +35,9 @@ fun GaitDoneScreen(
     modifier: Modifier = Modifier
 ) {
     val confidenceLine = when {
-        state.features.qualityScore > 0.8 -> "Captured with high confidence"
-        state.features.qualityScore >= 0.5 -> "Captured with limited confidence"
-        else -> "Captured but quality is low"
+        state.features.qualityScore > 0.8 -> stringResource(R.string.phase9_quality_chip_reliable)
+        state.features.qualityScore >= 0.5 -> stringResource(R.string.phase9_quality_chip_mostly_reliable)
+        else -> stringResource(R.string.phase9_quality_chip_less_reliable)
     }
     Column(
         modifier = modifier
