@@ -19,9 +19,9 @@ fun VisionDoneScreen(score: SloanScore, onDone: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Vision test recorded", style = MaterialTheme.typography.headlineMedium)
-        Text("At 100% contrast, you read ${score.correctAt100Pct} of 40 letters.")
-        Text("At 2.5% contrast, you read ${score.correctAt2Pt5Pct} of 40 letters.")
-        Text("At 1.25% contrast, you read ${score.correctAt1Pt25Pct} of 40 letters.")
+        Text("At 100 percent contrast, you read ${score.correctAt100Pct} of 40 letters.")
+        Text("At 2.5 percent contrast, you read ${score.correctAt2Pt5Pct} of 40 letters.")
+        Text("At 1.25 percent contrast, you read ${score.correctAt1Pt25Pct} of 40 letters.")
         Text(
             "Low contrast vision changes over time. These numbers will be most useful when " +
                 "compared against your own past tests on this phone, not against anyone else's results.",

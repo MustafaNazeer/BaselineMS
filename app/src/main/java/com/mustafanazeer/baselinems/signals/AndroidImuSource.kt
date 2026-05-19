@@ -79,6 +79,15 @@ class AndroidImuSource(
     private var lastLinearTimestampNanos: Long = 0L
     private var prevLinearTimestampNanos: Long = 0L
 
+    // PE M2 (Phase 4 review, carried to v1.1 polish): debug only sample rate accounting.
+    // The runbook driven `adb pull` plus awk pipeline at `docs/observability/sensor-runbook.md`
+    // remains the source of truth for per device sample rate validation; these counters surface
+    // the same mean rate in app for a future debug or About screen so a user can verify their
+    // device's sample rate against the nominal 100 Hz target without pulling the trace by hand.
+    // Two `Long` fields keep the allocation footprint at zero on the capture hot path.
+    @Volatile private var emittedSampleCount: Long = 0L
+    @Volatile private var firstEmittedTimestampNanos: Long = 0L
+
     // SPE Phase 4 I2: on the very first fallback emission `lastAccel` may be null because
     // TYPE_ACCELEROMETER has not fired yet. Hold emission for up to FIRST_SAMPLE_HOLD_MS to let
     // the raw accelerometer catch up so Madgwick sees the gravity reference it expects; if the
@@ -123,6 +132,8 @@ class AndroidImuSource(
     }
 
     override fun start() {
+        emittedSampleCount = 0L
+        firstEmittedTimestampNanos = 0L
         if (linearAccel != null) {
             sensorManager.registerListener(listener, linearAccel, samplingPeriodMicros, sensorHandler)
         }
@@ -199,6 +210,10 @@ class AndroidImuSource(
                 rotationVector = rotationNow
             )
         )
+        if (emittedSampleCount == 0L) {
+            firstEmittedTimestampNanos = lastLinearTimestampNanos
+        }
+        emittedSampleCount += 1L
     }
 
     /**
@@ -240,6 +255,43 @@ class AndroidImuSource(
         if (norm == 0.0) return Quaternion.IDENTITY
         return Quaternion(rawW / norm, x / norm, y / norm, z / norm)
     }
+
+    /**
+     * Returns the mean observed sample rate, in hertz, across every `ImuSample` emitted on
+     * `stream()` since the most recent `start()` invocation. Returns `0.0` when fewer than two
+     * samples have been emitted or when the span between the first and the latest sample is
+     * non positive (an edge case that only occurs if the platform delivers a non monotonic
+     * timestamp on the very first event).
+     *
+     * The accessor is debug only. The Performance Engineer's Phase 4 review listed the missing
+     * in app sample rate accessor as finding PE M2 so a future Settings debug screen can surface
+     * the same numbers the runbook pipeline at `docs/observability/sensor-runbook.md` produces
+     * via `adb pull` plus an `awk` reduction. It is not wired into any production user facing
+     * surface in v1.1; the captured CSV remains the source of truth for cross device sample
+     * rate validation.
+     *
+     * Thread safety: the two backing counters are `@Volatile` reads; the value reflects samples
+     * emitted up to the most recent atomic publication of the count. Concurrent emission may
+     * race the read by at most one sample, which is acceptable for a debug surface.
+     */
+    fun debugMeanSampleRateHz(): Double {
+        val count = emittedSampleCount
+        if (count < 2L) return 0.0
+        val first = firstEmittedTimestampNanos
+        val last = lastLinearTimestampNanos
+        val spanNanos = last - first
+        if (spanNanos <= 0L) return 0.0
+        val intervals = count - 1L
+        return intervals.toDouble() * 1_000_000_000.0 / spanNanos.toDouble()
+    }
+
+    /**
+     * Returns the number of `ImuSample` values emitted on `stream()` since the most recent
+     * `start()` invocation. Pairs with `debugMeanSampleRateHz()` to let a debug screen surface
+     * both the rate and the sample count, mirroring the headline numbers the
+     * `docs/observability/sensor-runbook.md` `awk` pipeline reports.
+     */
+    fun debugEmittedSampleCount(): Long = emittedSampleCount
 
     companion object {
         private const val FIRST_SAMPLE_HOLD_MS: Long = 50L

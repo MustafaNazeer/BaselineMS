@@ -48,7 +48,7 @@ class VisionScreenRenderTest {
         composeRule.setContent {
             VisionDoneScreen(score = score, onDone = {})
         }
-        composeRule.onNodeWithText("At 100% contrast, you read 40 of 40 letters.").assertIsDisplayed()
-        composeRule.onNodeWithText("At 1.25% contrast, you read 12 of 40 letters.").assertIsDisplayed()
+        composeRule.onNodeWithText("At 100 percent contrast, you read 40 of 40 letters.").assertIsDisplayed()
+        composeRule.onNodeWithText("At 1.25 percent contrast, you read 12 of 40 letters.").assertIsDisplayed()
     }
 }

@@ -29,7 +29,7 @@ fun VisionRunnerScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Contrast ${state.contrast.percent}%", style = MaterialTheme.typography.titleMedium)
+        Text("Contrast ${formatContrastPercent(state.contrast.percent)} percent", style = MaterialTheme.typography.titleMedium)
         SloanLetter(letter = state.currentLetter, contrast = state.contrast)
 
         if (state.consecutiveSkipCount >= 4) {
@@ -62,5 +62,13 @@ fun VisionRunnerScreen(
         Spacer(Modifier.height(8.dp))
         OutlinedButton(onClick = { onTap(null) }, modifier = Modifier.fillMaxWidth()) { Text("Skip") }
         TextButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) { Text("Cancel") }
+    }
+}
+
+internal fun formatContrastPercent(percent: Double): String {
+    return if (percent % 1.0 == 0.0) {
+        percent.toInt().toString()
+    } else {
+        percent.toString()
     }
 }

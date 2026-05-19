@@ -30,9 +30,29 @@ import kotlin.math.sqrt
  * empirical evidence backing this choice is the Phase 3 GaitPipelineIntegrationTest fixture
  * accuracy (healthyControlNormal 1.01 percent cadence error, msTypicalNormal 2.51 percent,
  * noisyMsNormal 0.39 percent) and the Phase 5 NONAN GaitPrint result (cadence MAE 0.53 percent,
- * ICC(3,1) 0.946 across n = 35 participants), both produced at β = 0.1. Re evaluating β = 0.1
- * against β = 0.033 on the synthetic fixtures is an optional Phase 11 polish item; see ADR 0002
- * for the tuning revisit conditions.
+ * ICC(3,1) 0.946 across n = 35 participants), both produced at β = 0.1.
+ *
+ * v1.1 polish empirical re evaluation (2026-05-19). Per the Citation Auditor's optional polish
+ * recommendation in audit log entry P11.2, the production pipeline was run against the seven
+ * synthetic gait fixtures at both β = 0.1 and β = 0.033 using a temporary harness wired to a
+ * one shot constructor parameter on GaitPipeline. The cadence and stride length numbers were
+ * identical to four decimal places across all seven fixtures (healthyControlNormal 1.0087
+ * percent cadence and 0.2556 percent stride at both betas; msTypicalNormal 2.5099 and 0.1810
+ * at both; noisyMsNormal 0.3905 and 0.3912 at both; slowWalk 2.4675 and 0.2707 at both;
+ * briskWalk 1.5056 and 0.3885 at both; mildAsymmetry 1.9673 and 29.7708 at both; severeAsymmetry
+ * 2.1896 and 0.7825 at both). The quality score residual against the platform rotationVector
+ * differs slightly between the two betas on five of the seven fixtures (within ±0.06 of each
+ * other) but neither direction is uniform. The comparison is therefore a wash on the load
+ * bearing fixture accuracy metrics; β = 0.1 is retained as the least disruptive choice because
+ * (a) the Phase 5 NONAN GaitPrint headline number (cadence MAE 0.53 percent, ICC 0.946) was
+ * computed at β = 0.1 and the NONAN raw data is staged for disk reclamation per STATUS.md, so
+ * re running NONAN at β = 0.033 is not free, and (b) the synthetic fixtures evidently do not
+ * generate enough gyro signal divergence to discriminate between the two β values on the
+ * accelerometer corrected outputs. The deliberate deviation framing above is preserved as
+ * historical context; the empirical re evaluation closes the optional P11.2 polish item with a
+ * "kept β = 0.1 with documentation update" verdict. See ADR 0002 for the tuning revisit
+ * conditions; the next real device run that flags a Madgwick tracking gap can re open the
+ * tuning question with NONAN re run as a follow up.
  *
  * The test suite runs at higher beta (0.5) for fast convergence on the static test and at zero
  * beta for pure gyro integration on the rotation test.

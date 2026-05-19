@@ -29,6 +29,9 @@ class BilateralTapTestDoneTest {
             )
         }
         composeRule.onNodeWithText("Tap test recorded.").assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "Hand performance varies with energy and fatigue. Longer trends matter more than single sessions."
+        ).assertIsDisplayed()
         composeRule.onNodeWithText("Continue").assertIsDisplayed()
     }
 

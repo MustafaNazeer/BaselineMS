@@ -291,6 +291,161 @@ class AndroidImuSourceTest {
     }
 
     @Test
+    fun `debugMeanSampleRateHz returns zero before start and reports observed rate after a synthetic 100 Hz stream`() = runTest {
+        // PE M2 (Phase 4 review, v1.1 polish): a debug only accessor surfaces the mean observed
+        // sample rate against the nominal 100 Hz target. With 10 ms inter sample deltas the
+        // accessor must return ~100 Hz; the count and span accessors must agree.
+        addAllSensors()
+        val source = AndroidImuSource(context)
+
+        assertEquals(
+            "no emissions before start, accessor must report zero",
+            0.0,
+            source.debugMeanSampleRateHz(),
+            1e-9
+        )
+        assertEquals(0L, source.debugEmittedSampleCount())
+
+        source.start()
+
+        val collector = TestScope(StandardTestDispatcher(testScheduler))
+        val collected = mutableListOf<ImuSample>()
+        val job = collector.launch {
+            source.stream().collect { collected += it }
+        }
+        advanceUntilIdle()
+
+        // Seed gyro and rotation so each linear event produces a valid emission.
+        shadow.sendSensorEventToListeners(
+            event(gyroSensor, floatArrayOf(0.0f, 0.0f, 0.0f), 0L)
+        )
+        shadow.sendSensorEventToListeners(
+            event(rotationSensor, floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f), 0L)
+        )
+
+        // 50 linear acceleration events spaced exactly 10 ms apart on the event timestamp
+        // (Android SensorEvent timestamps are nanoseconds). The first sample lands at t = 10 ms;
+        // the last at t = 500 ms; 49 intervals span 490 ms = 0.49 s; rate = 49 / 0.49 = 100 Hz.
+        val sampleCount = 50
+        val intervalNanos = 10_000_000L
+        for (i in 1..sampleCount) {
+            shadow.sendSensorEventToListeners(
+                event(linearSensor, floatArrayOf(0.0f, 0.0f, 0.0f), i.toLong() * intervalNanos)
+            )
+        }
+        advanceUntilIdle()
+
+        assertEquals(
+            "every linear event produced an emission",
+            sampleCount,
+            collected.size
+        )
+        assertEquals(
+            "debug sample counter matches emitted samples",
+            sampleCount.toLong(),
+            source.debugEmittedSampleCount()
+        )
+        assertEquals(
+            "mean observed sample rate matches the synthetic 100 Hz stream",
+            100.0,
+            source.debugMeanSampleRateHz(),
+            1e-6
+        )
+
+        job.cancel()
+        source.stop()
+    }
+
+    @Test
+    fun `debugMeanSampleRateHz returns zero with a single emitted sample because no interval has been observed`() = runTest {
+        // PE M2 edge case: the mean rate is undefined when only one sample has been emitted (no
+        // inter sample interval exists). The accessor must report 0.0 rather than crash or
+        // return a nonsensical value derived from a span of zero.
+        addAllSensors()
+        val source = AndroidImuSource(context)
+        source.start()
+
+        val collector = TestScope(StandardTestDispatcher(testScheduler))
+        val collected = mutableListOf<ImuSample>()
+        val job = collector.launch {
+            source.stream().collect { collected += it }
+        }
+        advanceUntilIdle()
+
+        shadow.sendSensorEventToListeners(
+            event(gyroSensor, floatArrayOf(0.0f, 0.0f, 0.0f), 0L)
+        )
+        shadow.sendSensorEventToListeners(
+            event(rotationSensor, floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f), 0L)
+        )
+        shadow.sendSensorEventToListeners(
+            event(linearSensor, floatArrayOf(0.0f, 0.0f, 0.0f), 10_000_000L)
+        )
+        advanceUntilIdle()
+
+        assertEquals(1, collected.size)
+        assertEquals(1L, source.debugEmittedSampleCount())
+        assertEquals(
+            "single sample gives no interval, rate is reported as 0.0",
+            0.0,
+            source.debugMeanSampleRateHz(),
+            1e-9
+        )
+
+        job.cancel()
+        source.stop()
+    }
+
+    @Test
+    fun `start resets the debug sample rate counters across sessions`() = runTest {
+        // PE M2: each `start()` invocation begins a fresh measurement window so the accessor
+        // reflects the current session, not a cumulative count across all sessions since
+        // construction.
+        addAllSensors()
+        val source = AndroidImuSource(context)
+        source.start()
+
+        val collector = TestScope(StandardTestDispatcher(testScheduler))
+        val collected = mutableListOf<ImuSample>()
+        val job = collector.launch {
+            source.stream().collect { collected += it }
+        }
+        advanceUntilIdle()
+
+        shadow.sendSensorEventToListeners(
+            event(gyroSensor, floatArrayOf(0.0f, 0.0f, 0.0f), 0L)
+        )
+        shadow.sendSensorEventToListeners(
+            event(rotationSensor, floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f), 0L)
+        )
+        for (i in 1..10) {
+            shadow.sendSensorEventToListeners(
+                event(linearSensor, floatArrayOf(0.0f, 0.0f, 0.0f), i.toLong() * 10_000_000L)
+            )
+        }
+        advanceUntilIdle()
+        assertEquals(10L, source.debugEmittedSampleCount())
+
+        source.stop()
+        source.start()
+
+        assertEquals(
+            "counter resets to zero on the new session",
+            0L,
+            source.debugEmittedSampleCount()
+        )
+        assertEquals(
+            "mean rate resets to zero on the new session",
+            0.0,
+            source.debugMeanSampleRateHz(),
+            1e-9
+        )
+
+        job.cancel()
+        source.stop()
+    }
+
+    @Test
     fun `when rotation vector sensor is absent, fallback Madgwick fills rotationVector`() = runTest {
         // Add linear acceleration, gyroscope, and the raw accelerometer (the fallback path
         // registers TYPE_ACCELEROMETER when TYPE_ROTATION_VECTOR is absent); intentionally omit
