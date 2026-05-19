@@ -64,7 +64,7 @@ The gait pipeline is validated against three publicly downloadable IMU gait data
 | Dataset | Mount | N | Trials | Cadence MAE | Stride MAE | Cadence ICC(3,1) | Stride ICC(3,1) |
 |---|---|---|---|---|---|---|---|
 | Santos et al. 2022 | Leg strap (smartphone) | 25 | 499 | 19.53% | 66.36% | 0.573 | 0.806 |
-| NONAN GaitPrint (Likens et al. 2023) | Pelvis (pocket analog) | 35 | 609 | **0.53%** | 86.83% | **0.946** | 0.650 |
+| NONAN GaitPrint (Wiles et al. 2023) | Pelvis (pocket analog) | 35 | 609 | **0.53%** | 86.83% | **0.946** | 0.650 |
 | MAREA (Khandelwal and Wickstrom 2017) | Waist (accel only) | 20 | pending | pending | n/a | n/a | n/a |
 
 ### Cross sensor agreement
@@ -89,7 +89,7 @@ Reserved for the beta cohort retention numbers. Day 1, day 7, day 14, and day 30
 
 The retention design and the gait pipeline rationale draw on two published analyses of the Floodlight Open dataset:
 
-- Oh et al. 2024, *Scientific Reports*, "Floodlight Open, an open access global longitudinal smartphone based study of multiple sclerosis: Cohort characteristics and study design" (DOI 10.1038/s41598-023-49299-4).
+- Oh et al. 2024, *Scientific Reports*, "Use of smartphone-based remote assessments of multiple sclerosis in Floodlight Open, a global, prospective, open-access study" (DOI 10.1038/s41598-023-49299-4).
 - Galati et al. 2024, *JMIR Human Factors* 11:e57033, on retention and engagement in the Floodlight Open US cohort.
 
 ## Repository

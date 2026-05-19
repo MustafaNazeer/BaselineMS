@@ -28,7 +28,7 @@
     {
       "key": "nonan",
       "name": "NONAN GaitPrint young adults",
-      "citation": "Likens et al., NONAN GaitPrint, Sci Data 2023.",
+      "citation": "Wiles et al., NONAN GaitPrint, Sci Data 2023.",
       "doi": "10.1038/s41597-023-02704-z",
       "mount": "Pelvis (sacrum, near-pocket analog)",
       "n_participants": 35,
@@ -53,7 +53,7 @@
       "key": "marea",
       "name": "MAREA",
       "citation": "Khandelwal and Wickstrom, Gait Posture 2017.",
-      "doi": "10.1016/j.gaitpost.2016.09.027",
+      "doi": "10.1016/j.gaitpost.2016.09.023",
       "mount": "Waist (accelerometer-only)",
       "n_participants": 20,
       "sample_rate_hz": 128,

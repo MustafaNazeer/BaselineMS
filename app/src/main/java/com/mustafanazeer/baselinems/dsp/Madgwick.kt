@@ -17,9 +17,25 @@ import kotlin.math.sqrt
  * not allocate Vector3 or Quaternion objects on the per sample path apart from the one new
  * Quaternion that replaces the field; primitive Doubles carry the rest of the work.
  *
- * The default beta gain (0.1) is the project's chosen starting value. The test suite runs at
- * higher beta (0.5) for fast convergence on the static test and at zero beta for pure gyro
- * integration on the rotation test.
+ * The default beta gain (0.1) is the project's chosen default, deliberately above the paper's
+ * IMU optimal value. Madgwick (2010) Section 5 "Results" reports β = 0.033 for the IMU
+ * implementation and β = 0.041 for the MARG implementation as the optimal steady state values,
+ * with an initial β = 2.5 used for the first 10 seconds of any experiment to accelerate
+ * convergence of algorithm states from initial conditions. The project's β = 0.1 sits between
+ * the paper's optimal and warm up values; it was retained because the GaitPipeline pre warms
+ * the filter with the time averaged static gravity vector for 5000 virtual samples before the
+ * real input runs (see GaitPipeline.orientationQualitySignals), so the run time filter starts
+ * already aligned with gravity and the slightly higher β trades a small amount of gyro tracking
+ * smoothness for faster correction against accelerometer drift during walking. The load bearing
+ * empirical evidence backing this choice is the Phase 3 GaitPipelineIntegrationTest fixture
+ * accuracy (healthyControlNormal 1.01 percent cadence error, msTypicalNormal 2.51 percent,
+ * noisyMsNormal 0.39 percent) and the Phase 5 NONAN GaitPrint result (cadence MAE 0.53 percent,
+ * ICC(3,1) 0.946 across n = 35 participants), both produced at β = 0.1. Re evaluating β = 0.1
+ * against β = 0.033 on the synthetic fixtures is an optional Phase 11 polish item; see ADR 0002
+ * for the tuning revisit conditions.
+ *
+ * The test suite runs at higher beta (0.5) for fast convergence on the static test and at zero
+ * beta for pure gyro integration on the rotation test.
  */
 class Madgwick(private val beta: Double = 0.1) {
 
