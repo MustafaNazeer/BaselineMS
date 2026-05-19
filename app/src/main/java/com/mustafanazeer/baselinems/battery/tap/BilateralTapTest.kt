@@ -227,6 +227,11 @@ internal fun BilateralTapTestContent(
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center
                 )
+                Text(
+                    stringResource(R.string.tap_test_done_trend_warmth),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
                 Button(onClick = { onComplete(p.result) }) {
                     Text(stringResource(R.string.tap_test_continue))
                 }

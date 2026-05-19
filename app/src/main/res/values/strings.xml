@@ -7,6 +7,7 @@
     <string name="tap_test_pre_instructions_body">You will do two 30 second rounds. Tap with the hand you usually write or text with first, then the other hand.</string>
     <string name="tap_test_rest_copy">Rest for a moment, then we will start the other hand.</string>
     <string name="tap_test_continue">Continue</string>
+    <string name="tap_test_done_trend_warmth">Hand performance varies with energy and fatigue. Longer trends matter more than single sessions.</string>
 
     <string name="voice_test_display_name">Voice Test</string>
     <string name="voice_test_instructions_title">Voice Test</string>
