@@ -14,8 +14,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.mustafanazeer.baselinems.R
 
 /**
  * Instructions screen for the gait test. Safety framing is straight line, front pocket, flat
@@ -44,6 +46,11 @@ fun GaitInstructionsScreen(
             text = "Walk in a straight line for 30 seconds. Place your phone in a front pocket. " +
                 "Use a flat, unobstructed surface; have a wall or counter within reach if you " +
                 "need it. If you do not feel safe walking right now, you can skip this test.",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = stringResource(R.string.gait_test_instructions_mobility_aid_body),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )

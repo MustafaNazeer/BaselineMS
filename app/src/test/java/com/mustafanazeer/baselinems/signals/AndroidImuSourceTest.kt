@@ -28,6 +28,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowSensor
 import org.robolectric.shadows.ShadowSensorManager
 import org.robolectric.shadows.SensorEventBuilder
+import kotlin.math.sqrt
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -165,18 +166,21 @@ class AndroidImuSourceTest {
     }
 
     @Test
-    fun `fallback Madgwick returns identity when raw accelerometer has not fired yet`() = runTest {
-        // Reproduces the scenario where TYPE_ACCELEROMETER has not produced a reading by the
-        // time the first TYPE_LINEAR_ACCELERATION event arrives. Without the fix the code
-        // substituted the gravity-removed `linear` vector into Madgwick, which is semantically
-        // wrong (Madgwick expects gravity included input). With the fix the source returns the
-        // filter's untouched initial orientation (identity) for that first emission.
+    fun `fallback Madgwick holds first emission until raw accelerometer arrives within 50 ms`() = runTest {
+        // SPE Phase 4 I2: on the first fallback emission `lastAccel` may be null because
+        // TYPE_ACCELEROMETER has not fired yet. The source must hold emission for up to
+        // FIRST_SAMPLE_HOLD_MS so the filter sees the real gravity reference on the very first
+        // step. Once the accelerometer arrives within the hold window, the held emission is
+        // released using the real accel observation (not the gravity removed linear surrogate).
         shadow.addSensor(linearSensor)
         shadow.addSensor(gyroSensor)
         // Rotation vector intentionally omitted so the source enters fallback mode and
-        // registers TYPE_ACCELEROMETER. The test still does not fire ACCELEROMETER events.
+        // registers TYPE_ACCELEROMETER.
+        val accelSensor = ShadowSensor.newInstance(Sensor.TYPE_ACCELEROMETER)
+        shadow.addSensor(accelSensor)
 
-        val source = AndroidImuSource(context)
+        var virtualNowMs = 0L
+        val source = AndroidImuSource(context, nowMs = { virtualNowMs })
         source.start()
 
         val collector = TestScope(StandardTestDispatcher(testScheduler))
@@ -186,10 +190,75 @@ class AndroidImuSourceTest {
         }
         advanceUntilIdle()
 
-        // Fire gyro then linear with non-zero acceleration to simulate walking. No raw
-        // accelerometer event, so `lastAccel` stays null. Without the fix the source feeds
-        // the gravity-removed linear acceleration into Madgwick, which moves the filter off
-        // identity. With the fix the source returns the filter's untouched initial orientation.
+        // Fire gyro and linear first, before any accelerometer event.
+        shadow.sendSensorEventToListeners(
+            event(gyroSensor, floatArrayOf(0.0f, 0.0f, 0.0f), 1_000_000L)
+        )
+        shadow.sendSensorEventToListeners(
+            event(linearSensor, floatArrayOf(0.0f, 0.0f, 0.0f), 2_000_000L)
+        )
+        advanceUntilIdle()
+        assertEquals(
+            "no emission while the first sample hold is active and accelerometer has not arrived",
+            0,
+            collected.size
+        )
+
+        // Accel arrives 10 ms later (within the 50 ms hold window). The next linear acceleration
+        // event releases the held emission with the real gravity reference.
+        virtualNowMs = 10L
+        shadow.sendSensorEventToListeners(
+            event(accelSensor, floatArrayOf(0.0f, 0.0f, 9.81f), 11_000_000L)
+        )
+        shadow.sendSensorEventToListeners(
+            event(linearSensor, floatArrayOf(0.0f, 0.0f, 0.0f), 12_000_000L)
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            "first emission lands once the real accelerometer reading is available",
+            1,
+            collected.size
+        )
+        val rot = collected.first().rotationVector
+        assertNotNull(rot)
+        rot!!
+        // The Madgwick filter saw a non degenerate gravity reading (9.81 m/s^2 on +z) on its
+        // first step, so the resulting orientation must be unit norm (a valid quaternion) and
+        // must not be the surrogate-driven output. We verify the quaternion is unit norm; exact
+        // values depend on the Madgwick beta and dt, which are filter internals.
+        val norm = sqrt(rot.w * rot.w + rot.x * rot.x + rot.y * rot.y + rot.z * rot.z)
+        assertEquals("first fallback rotation must be a unit norm quaternion", 1.0, norm, 1e-6)
+        // Sanity: the accelerometer column on the emitted sample reflects the real accel reading.
+        assertEquals(9.81, collected.first().accelerometer.z, 1e-6)
+
+        job.cancel()
+        source.stop()
+    }
+
+    @Test
+    fun `fallback Madgwick falls back to linear surrogate after 50 ms with no accelerometer`() = runTest {
+        // SPE Phase 4 I2 fallback preserved: when the raw accelerometer never arrives, the
+        // source still steps the Madgwick filter using `lastLinear` as a degraded gravity
+        // surrogate after the FIRST_SAMPLE_HOLD_MS hold window elapses. The pipeline must not
+        // stall.
+        shadow.addSensor(linearSensor)
+        shadow.addSensor(gyroSensor)
+        val accelSensor = ShadowSensor.newInstance(Sensor.TYPE_ACCELEROMETER)
+        shadow.addSensor(accelSensor)
+
+        var virtualNowMs = 0L
+        val source = AndroidImuSource(context, nowMs = { virtualNowMs })
+        source.start()
+
+        val collector = TestScope(StandardTestDispatcher(testScheduler))
+        val collected = mutableListOf<ImuSample>()
+        val job = collector.launch {
+            source.stream().collect { collected += it }
+        }
+        advanceUntilIdle()
+
+        // First linear event: starts the hold timer at virtualNowMs == 0.
         shadow.sendSensorEventToListeners(
             event(gyroSensor, floatArrayOf(0.0f, 0.0f, 0.0f), 1_000_000L)
         )
@@ -197,13 +266,25 @@ class AndroidImuSourceTest {
             event(linearSensor, floatArrayOf(1.5f, 0.7f, 0.3f), 2_000_000L)
         )
         advanceUntilIdle()
+        assertEquals("hold window blocks the first emission", 0, collected.size)
 
-        assertEquals(1, collected.size)
-        assertEquals(
-            "first fallback emission must hold identity rather than feed gravity-removed input into Madgwick",
-            Quaternion.IDENTITY,
-            collected.first().rotationVector
+        // Advance the virtual clock past the hold window without sending an accelerometer event.
+        virtualNowMs = 60L
+        shadow.sendSensorEventToListeners(
+            event(linearSensor, floatArrayOf(1.5f, 0.7f, 0.3f), 12_000_000L)
         )
+        advanceUntilIdle()
+
+        assertEquals(
+            "after the hold window the source emits using linear as the gravity surrogate",
+            1,
+            collected.size
+        )
+        val rot = collected.first().rotationVector
+        assertNotNull("fallback rotation must be filled even with no accel", rot)
+        rot!!
+        val norm = sqrt(rot.w * rot.w + rot.x * rot.x + rot.y * rot.y + rot.z * rot.z)
+        assertEquals("rotation quaternion must be unit norm", 1.0, norm, 1e-6)
 
         job.cancel()
         source.stop()
@@ -211,9 +292,13 @@ class AndroidImuSourceTest {
 
     @Test
     fun `when rotation vector sensor is absent, fallback Madgwick fills rotationVector`() = runTest {
-        // Add only linear acceleration and gyroscope; intentionally omit the rotation vector sensor.
+        // Add linear acceleration, gyroscope, and the raw accelerometer (the fallback path
+        // registers TYPE_ACCELEROMETER when TYPE_ROTATION_VECTOR is absent); intentionally omit
+        // the rotation vector sensor so the fallback Madgwick filter drives orientation.
         shadow.addSensor(linearSensor)
         shadow.addSensor(gyroSensor)
+        val accelSensor = ShadowSensor.newInstance(Sensor.TYPE_ACCELEROMETER)
+        shadow.addSensor(accelSensor)
 
         val source = AndroidImuSource(context)
         source.start()
@@ -225,15 +310,19 @@ class AndroidImuSourceTest {
         }
         advanceUntilIdle()
 
-        // Feed a static gravity reading on the +z axis (m/s^2) and zero rotation rate. The fallback
-        // Madgwick should converge toward identity quickly because the device sits flat.
+        // Feed a static gravity reading on the +z axis (m/s^2) on TYPE_ACCELEROMETER and zero
+        // rotation rate. The fallback Madgwick should converge toward identity quickly because
+        // the device sits flat. TYPE_LINEAR_ACCELERATION is gravity removed, so it stays at 0.
         repeat(20) { i ->
             val ts = (i + 1) * 10_000_000L
             shadow.sendSensorEventToListeners(
                 event(gyroSensor, floatArrayOf(0.0f, 0.0f, 0.0f), ts)
             )
             shadow.sendSensorEventToListeners(
-                event(linearSensor, floatArrayOf(0.0f, 0.0f, 9.81f), ts)
+                event(accelSensor, floatArrayOf(0.0f, 0.0f, 9.81f), ts)
+            )
+            shadow.sendSensorEventToListeners(
+                event(linearSensor, floatArrayOf(0.0f, 0.0f, 0.0f), ts)
             )
         }
         advanceUntilIdle()

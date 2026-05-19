@@ -22,7 +22,7 @@ class CsvExporterTest {
             latestSessionEpochMs = null,
             perTestSections = emptyList()
         )
-        val csv = CsvExporter().toCsv(snap, sessionIdByResultId = emptyMap())
+        val csv = CsvExporter().toCsv(snap)
         val lines = csv.lines().filter { it.isNotEmpty() }
         assertEquals(1, lines.size)
         assertTrue(lines.first().startsWith("session_id,session_started_at_iso,"))
@@ -59,10 +59,7 @@ class CsvExporterTest {
                 )
             )
         )
-        val csv = CsvExporter().toCsv(
-            snap,
-            sessionIdByResultId = mapOf("derived" to "sess-1")
-        )
+        val csv = CsvExporter().toCsv(snap)
         val lines = csv.lines().filter { it.isNotEmpty() }
         assertEquals(3, lines.size)
     }

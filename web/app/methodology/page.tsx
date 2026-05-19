@@ -77,7 +77,7 @@ export default function MethodologyPage() {
         one week apart, Noraxon Ultium IMUs at 10 body locations at 200 Hz.
         Pelvis sensor stands in for the BaselineMS front-pocket production mount.
         The dataset publishes per-stride cadence and stride length directly.
-        Citation: Likens et al., NONAN GaitPrint, Sci Data 2023 (DOI{" "}
+        Citation: Wiles et al., NONAN GaitPrint, Sci Data 2023 (DOI{" "}
         <code>10.1038/s41597-023-02704-z</code>).
       </p>
 
@@ -195,8 +195,8 @@ export default function MethodologyPage() {
           Data 9, DOI 10.6084/m9.figshare.14727231.
         </li>
         <li>
-          Likens AD et al. 2023. NONAN GaitPrint: An IMU gait database of
-          healthy young adults. Scientific Data 10, DOI{" "}
+          Wiles TM, Mangalam M, Sommerfeld JH et al. 2023. NONAN GaitPrint: An
+          IMU gait database of healthy young adults. Scientific Data 10, DOI{" "}
           10.1038/s41597-023-02704-z.
         </li>
         <li>

@@ -94,7 +94,11 @@ private fun SessionRow(session: SessionEntity) {
             style = MaterialTheme.typography.bodyLarge
         )
         Text(
-            if (session.completedAtEpochMs != null) "Completed" else "In progress",
+            when {
+                session.wasCancelled -> "Cancelled"
+                session.completedAtEpochMs != null -> "Completed"
+                else -> "In progress"
+            },
             style = MaterialTheme.typography.bodySmall
         )
     }

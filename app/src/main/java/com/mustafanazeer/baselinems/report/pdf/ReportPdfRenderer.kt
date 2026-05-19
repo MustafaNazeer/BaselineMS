@@ -21,13 +21,13 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ReportPdfRenderer(
+open class ReportPdfRenderer(
     private val context: Context,
     private val locale: Locale = Locale.getDefault(),
     private val chartRenderer: PdfChartRenderer = PdfChartRenderer()
 ) {
 
-    fun render(snapshot: PdfReportSnapshot, output: OutputStream) {
+    open fun render(snapshot: PdfReportSnapshot, output: OutputStream) {
         val pdfDoc = PdfDocument()
         try {
             val pageNumbers = mutableMapOf<Int, Int>()

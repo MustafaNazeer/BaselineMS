@@ -77,4 +77,29 @@ class SessionDaoTest {
         assertNotNull(fetched)
         assertEquals("B", fetched!!.deviceInfo)
     }
+
+    @Test
+    fun observeCompletedSessionCountExcludesCancelledSessions() = runTest {
+        val completed = SessionEntity(
+            startedAtEpochMs = 1L,
+            completedAtEpochMs = 2L,
+            deviceInfo = "Completed"
+        )
+        val cancelled = SessionEntity(
+            startedAtEpochMs = 3L,
+            completedAtEpochMs = 4L,
+            deviceInfo = "Cancelled",
+            wasCancelled = true
+        )
+        val inFlight = SessionEntity(
+            startedAtEpochMs = 5L,
+            completedAtEpochMs = null,
+            deviceInfo = "InFlight"
+        )
+        sessionDao.insert(completed)
+        sessionDao.insert(cancelled)
+        sessionDao.insert(inFlight)
+
+        assertEquals(1, sessionDao.observeCompletedSessionCount().first())
+    }
 }

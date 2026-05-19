@@ -46,7 +46,7 @@ fun VoiceRunnerScreen(
         ) {
             Icon(
                 imageVector = Icons.Filled.Mic,
-                contentDescription = stringResource(R.string.voice_test_runner_recording_affordance)
+                contentDescription = null
             )
             Text(stringResource(R.string.voice_test_runner_recording_affordance))
             Spacer(Modifier.fillMaxWidth(0.6f))

@@ -11,7 +11,7 @@ private const val HEADER = "session_id,session_started_at_iso,test_type,test_res
 
 class CsvExporter {
 
-    fun toCsv(snapshot: PdfReportSnapshot, sessionIdByResultId: Map<String, String>): String {
+    fun toCsv(snapshot: PdfReportSnapshot): String {
         val sb = StringBuilder()
         sb.append(HEADER).append('\n')
         val iso = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ROOT).apply {

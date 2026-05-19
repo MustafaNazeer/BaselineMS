@@ -13,7 +13,7 @@ object PdfPageLayout {
     const val FONT_SIZE_COVER_BODY: Float = 14f
     const val FONT_SIZE_PAGE_HEADING: Float = 16f
     const val FONT_SIZE_PAGE_BODY: Float = 12f
-    const val FONT_SIZE_CHART_AXIS: Float = 10f
+    const val FONT_SIZE_CHART_AXIS: Float = 11f
     const val FONT_SIZE_FOOTER: Float = 9f
 
     const val LINE_HEIGHT_MULTIPLIER: Float = 1.4f

@@ -192,18 +192,20 @@ private fun TestSummaryCardView(
             }
             card.latestQualityBand?.let { QualityBandChip(band = it) }
             if (card.primaryFeatureSparkline.size >= 2) {
-                val series = FeatureSeries(
-                    key = "sparkline",
-                    displayName = card.displayName,
-                    unit = "",
-                    points = card.primaryFeatureSparkline.mapIndexed { index, value ->
-                        TimedPoint(
-                            epochMs = index.toLong(),
-                            value = value,
-                            qualityBand = QualityBand.HIGH
-                        )
-                    }
-                )
+                val series = remember(card.primaryFeatureSparkline, card.displayName) {
+                    FeatureSeries(
+                        key = "sparkline",
+                        displayName = card.displayName,
+                        unit = "",
+                        points = card.primaryFeatureSparkline.mapIndexed { index, value ->
+                            TimedPoint(
+                                epochMs = index.toLong(),
+                                value = value,
+                                qualityBand = QualityBand.HIGH
+                            )
+                        }
+                    )
+                }
                 TrendLineChart(series = series, isSparkline = true)
             }
         }

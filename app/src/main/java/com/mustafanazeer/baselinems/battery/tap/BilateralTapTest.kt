@@ -29,8 +29,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.mustafanazeer.baselinems.R
 import com.mustafanazeer.baselinems.battery.TestModule
 import com.mustafanazeer.baselinems.battery.TestResultPayload
 import com.mustafanazeer.baselinems.data.TestType
@@ -47,8 +49,8 @@ class BilateralTapTest : TestModule {
     override val displayName: String = "Bilateral Tap"
     override val instructions: String =
         "Hold your phone with both hands. Tap the left and right circles, alternating, " +
-            "as fast as you can manage. You will do one round with your dominant hand " +
-            "and one round with your non dominant hand. Each round lasts 30 seconds."
+            "as fast as you can manage. Tap with the hand you usually write or text with " +
+            "first, then the other hand. Each round lasts 30 seconds."
     override val estimatedDurationSeconds: Int = 70
 
     @Composable
@@ -59,19 +61,22 @@ class BilateralTapTest : TestModule {
 
 private const val ROUND_DURATION_MS = 30_000L
 private const val COUNTDOWN_SECONDS = 5
-private const val REST_SECONDS = 5
+internal const val INTER_ROUND_REST_SECONDS = 5
 
-private sealed class TapPhase {
+internal sealed class TapPhase {
     data object PreInstructions : TapPhase()
     data class Countdown(val role: HandRole, val secondsRemaining: Int) : TapPhase()
     data class Active(val role: HandRole, val startedAtMs: Long) : TapPhase()
-    data object Rest : TapPhase()
-    data object Done : TapPhase()
+    data class RestingBetweenRounds(val secondsRemaining: Int) : TapPhase()
+    data class Done(val result: BilateralTapTest.TapTestResult) : TapPhase()
 }
 
 @Composable
-internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
-    var phase by remember { mutableStateOf<TapPhase>(TapPhase.PreInstructions) }
+internal fun BilateralTapTestContent(
+    onComplete: (TestResultPayload) -> Unit,
+    initialPhase: TapPhase = TapPhase.PreInstructions
+) {
+    var phase by remember { mutableStateOf(initialPhase) }
     var dominantEvents by remember { mutableStateOf<List<TapEvent>>(emptyList()) }
     var nonDominantEvents by remember { mutableStateOf<List<TapEvent>>(emptyList()) }
     var dominantOffTarget by remember { mutableStateOf(0) }
@@ -97,7 +102,7 @@ internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
                     elapsedSec += 1
                 }
                 if (p.role == HandRole.DOMINANT) {
-                    phase = TapPhase.Rest
+                    phase = TapPhase.RestingBetweenRounds(secondsRemaining = INTER_ROUND_REST_SECONDS)
                 } else {
                     val dominantRound = TapRound(
                         role = HandRole.DOMINANT,
@@ -112,23 +117,21 @@ internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
                         offTargetTaps = nonDominantOffTarget
                     )
                     val features = TapFeatures.computeSession(dominantRound, nonDominantRound)
-                    onComplete(
-                        BilateralTapTest.TapTestResult(
-                            qualityScore = features.qualityScore,
-                            features = features.toFeatureMap()
-                        )
+                    val result = BilateralTapTest.TapTestResult(
+                        qualityScore = features.qualityScore,
+                        features = features.toFeatureMap()
                     )
-                    phase = TapPhase.Done
+                    phase = TapPhase.Done(result = result)
                 }
             }
-            is TapPhase.Rest -> {
-                var seconds = REST_SECONDS
-                while (seconds > 0) {
-                    delay(1000)
-                    seconds -= 1
+            is TapPhase.RestingBetweenRounds -> {
+                delay(1000)
+                phase = if (p.secondsRemaining > 1) {
+                    p.copy(secondsRemaining = p.secondsRemaining - 1)
+                } else {
+                    liveTapCount = 0
+                    TapPhase.Countdown(role = HandRole.NON_DOMINANT, secondsRemaining = COUNTDOWN_SECONDS)
                 }
-                liveTapCount = 0
-                phase = TapPhase.Countdown(role = HandRole.NON_DOMINANT, secondsRemaining = COUNTDOWN_SECONDS)
             }
             else -> Unit
         }
@@ -148,7 +151,7 @@ internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
         when (val p = phase) {
             is TapPhase.PreInstructions -> {
                 Text(
-                    "You will do two 30 second rounds. Dominant hand first, then non dominant.",
+                    stringResource(R.string.tap_test_pre_instructions_body),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
@@ -206,19 +209,27 @@ internal fun BilateralTapTestContent(onComplete: (TestResultPayload) -> Unit) {
                     }
                 )
             }
-            is TapPhase.Rest -> {
+            is TapPhase.RestingBetweenRounds -> {
                 Text(
-                    "Take a short break. The next round starts soon.",
+                    p.secondsRemaining.toString(),
+                    style = MaterialTheme.typography.displayMedium,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    stringResource(R.string.tap_test_rest_copy),
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center
                 )
             }
             is TapPhase.Done -> {
                 Text(
-                    "Tap test recorded. Returning to the session.",
+                    "Tap test recorded.",
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center
                 )
+                Button(onClick = { onComplete(p.result) }) {
+                    Text(stringResource(R.string.tap_test_continue))
+                }
             }
         }
     }
@@ -246,7 +257,7 @@ internal fun TwoTargets(onInTargetTap: (TapSide) -> Unit, onOffTargetTap: () -> 
         verticalAlignment = Alignment.CenterVertically
     ) {
         Target(side = TapSide.LEFT, onTap = onInTargetTap)
-        Spacer(Modifier.size(16.dp))
+        Spacer(Modifier.size(32.dp))
         Target(side = TapSide.RIGHT, onTap = onInTargetTap)
     }
 }

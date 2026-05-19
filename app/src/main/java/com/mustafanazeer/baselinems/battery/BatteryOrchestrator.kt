@@ -88,6 +88,23 @@ class BatteryOrchestrator(
         }
     }
 
+    fun cancelSession() {
+        if (_state.value !is State.Running) return
+        val sessionId = _activeSessionId ?: return
+        _state.value = State.Idle
+        _activeSessionId = null
+        viewModelScope.launch {
+            val session = sessionDao.getById(sessionId) ?: return@launch
+            if (session.completedAtEpochMs != null) return@launch
+            sessionDao.update(
+                session.copy(
+                    completedAtEpochMs = System.currentTimeMillis(),
+                    wasCancelled = true
+                )
+            )
+        }
+    }
+
     fun reset() {
         _activeSessionId = null
         _state.value = State.Idle

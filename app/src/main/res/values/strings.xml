@@ -1,6 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">BaselineMS</string>
 
+    <string name="gait_test_instructions_mobility_aid_body">If you use a cane, walker, rollator, or crutches, use it as you normally do. The pipeline measures the rhythm of your walking, and trends within your own device, using the same aid each time, are what matter. Absolute stride length values are calibrated for unaided walking and may read low when an aid is used.</string>
+
+    <string name="tap_test_instructions">Hold your phone with both hands. Tap the left and right circles, alternating, as fast as you can manage. Tap with the hand you usually write or text with first, then the other hand. Each round lasts 30 seconds.</string>
+    <string name="tap_test_pre_instructions_body">You will do two 30 second rounds. Tap with the hand you usually write or text with first, then the other hand.</string>
+    <string name="tap_test_rest_copy">Rest for a moment, then we will start the other hand.</string>
+    <string name="tap_test_continue">Continue</string>
+
     <string name="voice_test_display_name">Voice Test</string>
     <string name="voice_test_instructions_title">Voice Test</string>
     <string name="voice_test_instructions_body">You will read a short familiar passage aloud for 30 seconds. Hold the phone at a comfortable distance and read in your natural speaking voice. If you stumble on a word, keep going. The test ends automatically after 30 seconds.</string>
