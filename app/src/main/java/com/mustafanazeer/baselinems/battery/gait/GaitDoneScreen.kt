@@ -16,15 +16,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mustafanazeer.baselinems.R
+import com.mustafanazeer.baselinems.data.deriveQualityBand
+import com.mustafanazeer.baselinems.ui.reports.QualityBand
 
 /**
  * Post test confirmation screen. Renders a thank you and a quality aware status line that uses
  * the Phase 9 ratified Reports chip vocabulary verbatim so the same recording reads the same
- * across the Done screen and the Reports screen:
+ * across the Done screen and the Reports screen. The band is derived through
+ * `data.deriveQualityBand` so the threshold mapping is identical to the Reports chip on
+ * `ui/reports/QualityBandChip.kt` and the trend rows on `data/TrendsRepository.kt`:
  *
- * - "Reliable" when the quality score exceeds 0.8.
- * - "Mostly reliable" when the score sits between 0.5 and 0.8 (inclusive).
- * - "Less reliable" when the score is below 0.5.
+ * - "Reliable" when qualityScore is at or above the HIGH threshold.
+ * - "Mostly reliable" when qualityScore is at or above the MEDIUM threshold.
+ * - "Less reliable" otherwise.
  *
  * The plain language framing intentionally hides the raw 0.78 number.
  */
@@ -34,10 +38,10 @@ fun GaitDoneScreen(
     onContinue: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val confidenceLine = when {
-        state.features.qualityScore > 0.8 -> stringResource(R.string.phase9_quality_chip_reliable)
-        state.features.qualityScore >= 0.5 -> stringResource(R.string.phase9_quality_chip_mostly_reliable)
-        else -> stringResource(R.string.phase9_quality_chip_less_reliable)
+    val confidenceLine = when (deriveQualityBand(state.features.qualityScore)) {
+        QualityBand.HIGH -> stringResource(R.string.phase9_quality_chip_reliable)
+        QualityBand.MEDIUM -> stringResource(R.string.phase9_quality_chip_mostly_reliable)
+        QualityBand.LOW -> stringResource(R.string.phase9_quality_chip_less_reliable)
     }
     Column(
         modifier = modifier
