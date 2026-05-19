@@ -14,6 +14,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -114,19 +117,6 @@ fun RootScreen() {
         )
     }
 
-    val reportsExportViewModel = remember(app, trendsRepository) {
-        ReportsExportViewModel(
-            exporter = ReportExporter(
-                context = context.applicationContext,
-                source = PdfReportDataSource(
-                    sessionDao = app.database.sessionDao(),
-                    testResultDao = app.database.testResultDao(),
-                    trendsRepository = trendsRepository
-                )
-            )
-        )
-    }
-
     NavHost(navController = nav, startDestination = startDestination) {
         composable(Routes.Disclaimer) {
             DisclaimerScreen(onAcknowledge = {
@@ -201,6 +191,22 @@ fun RootScreen() {
             )
         }
         composable(Routes.Reports) {
+            val reportsExportViewModel: ReportsExportViewModel = viewModel(
+                factory = viewModelFactory {
+                    initializer {
+                        ReportsExportViewModel(
+                            exporter = ReportExporter(
+                                context = context.applicationContext,
+                                source = PdfReportDataSource(
+                                    sessionDao = app.database.sessionDao(),
+                                    testResultDao = app.database.testResultDao(),
+                                    trendsRepository = trendsRepository
+                                )
+                            )
+                        )
+                    }
+                }
+            )
             ReportsRoute(
                 repository = trendsRepository,
                 exportViewModel = reportsExportViewModel,
