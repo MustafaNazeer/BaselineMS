@@ -217,7 +217,7 @@ export default function PrivacyPolicyPage() {
         application&rsquo;s Room database file lives at{" "}
         <code>/data/data/com.mustafanazeer.baselinems/databases/</code>. The
         optional retained voice audio files live under{" "}
-        <code>/data/data/com.mustafanazeer.baselinems/files/voice-audio/</code>
+        <code>/data/data/com.mustafanazeer.baselinems/files/audio_traces/</code>
         . Exported PDF and CSV files live temporarily under{" "}
         <code>/data/data/com.mustafanazeer.baselinems/cache/exports/</code>{" "}
         before you send them through the Android Share Intent; the cache
