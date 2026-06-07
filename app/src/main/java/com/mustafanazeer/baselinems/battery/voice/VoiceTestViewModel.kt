@@ -21,6 +21,7 @@ class VoiceTestViewModel(
     private val passageWordCount: Int = PASSAGE_WORD_COUNT_DEFAULT,
     private val recordingDurationSec: Int = RECORDING_DURATION_SEC,
     private val sampleRateHz: Int = SAMPLE_RATE_HZ,
+    private val retention: VoiceAudioRetention = NoOpVoiceAudioRetention,
     private val clockMs: () -> Long = { System.currentTimeMillis() }
 ) {
 
@@ -102,6 +103,7 @@ class VoiceTestViewModel(
         try {
             val captured = audioCapture.record(durationSec = recordingDurationSec)
             buffer = captured
+            retention.persist(captured)
             val pitchResult = PraatPitch.analyze(captured, sampleRateHz = sampleRateHz)
             val features = VoiceFeatures.compute(
                 pitchResult = pitchResult,

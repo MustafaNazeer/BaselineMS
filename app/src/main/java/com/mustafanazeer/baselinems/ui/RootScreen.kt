@@ -1,5 +1,6 @@
 package com.mustafanazeer.baselinems.ui
 
+import android.app.KeyguardManager
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,12 +31,17 @@ import com.mustafanazeer.baselinems.battery.gait.GaitTestViewModel
 import com.mustafanazeer.baselinems.battery.sdmt.SdmtTest
 import com.mustafanazeer.baselinems.battery.tap.BilateralTapTest
 import com.mustafanazeer.baselinems.battery.vision.VisionTest
+import com.mustafanazeer.baselinems.battery.voice.FileVoiceAudioRetention
+import com.mustafanazeer.baselinems.battery.voice.NoOpVoiceAudioRetention
+import com.mustafanazeer.baselinems.battery.voice.VoiceAudioRetention
+import com.mustafanazeer.baselinems.battery.voice.VoiceSettings
 import com.mustafanazeer.baselinems.battery.voice.VoiceTestModule
 import com.mustafanazeer.baselinems.data.PdfReportDataSource
 import com.mustafanazeer.baselinems.data.TestType
 import com.mustafanazeer.baselinems.data.TrendsRepository
 import com.mustafanazeer.baselinems.dsp.GaitPipeline
 import com.mustafanazeer.baselinems.report.ReportExporter
+import com.mustafanazeer.baselinems.signals.AndroidAudioCapture
 import com.mustafanazeer.baselinems.signals.RawSensorWriter
 import com.mustafanazeer.baselinems.ui.home.HomeScreen
 import com.mustafanazeer.baselinems.ui.home.SessionRunnerScreen
@@ -171,7 +177,16 @@ fun RootScreen() {
                         gaitTest,
                         VisionTest(),
                         SdmtTest(),
-                        VoiceTestModule()
+                        VoiceTestModule(
+                            retentionProvider = {
+                                val sessionId = built.activeSessionId
+                                buildVoiceAudioRetention(
+                                    context = context,
+                                    filesDir = app.filesDir,
+                                    sessionId = sessionId
+                                )
+                            }
+                        )
                     ),
                     sessionDao = app.database.sessionDao(),
                     testResultDao = app.database.testResultDao(),
@@ -242,4 +257,28 @@ fun RootScreen() {
             AboutCitationsScreen(onBack = { nav.popBackStack() })
         }
     }
+}
+
+/**
+ * Resolves the ADR 0006 Section 7 opt in retention decision at voice session start: the
+ * "Save audio of your voice tests for personal review" toggle must be on AND the device must have
+ * a lock screen credential (`KeyguardManager.isDeviceSecure()`). If the toggle was on but the
+ * credential has since been removed, this returns the discard path so the session falls back to
+ * not persisting, per the secure lock screen gate.
+ */
+private fun buildVoiceAudioRetention(
+    context: Context,
+    filesDir: File,
+    sessionId: String?
+): VoiceAudioRetention {
+    if (sessionId == null || !VoiceSettings.saveAudio(context)) return NoOpVoiceAudioRetention
+    val keyguard = context.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+    val deviceSecure = keyguard?.isDeviceSecure ?: false
+    return FileVoiceAudioRetention(
+        enabled = true,
+        deviceSecureAtStart = deviceSecure,
+        sessionId = sessionId,
+        filesDir = filesDir,
+        sampleRateHz = AndroidAudioCapture.SAMPLE_RATE_HZ
+    )
 }
