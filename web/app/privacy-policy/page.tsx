@@ -132,8 +132,9 @@ export default function PrivacyPolicyPage() {
           shimmer, harmonics to noise ratio, fundamental frequency standard
           deviation, speaking rate, pause fraction). The raw audio is
           discarded after feature extraction by default. If you opt in to
-          retain the raw audio under Settings, the WAV file is stored in the
-          application&rsquo;s private internal storage; you can turn the
+          retain the raw audio under Settings, the audio is saved as a
+          compressed audio file in the application&rsquo;s private internal
+          storage; you can turn the
           toggle off at any time and the saved recordings are deleted from
           your device immediately. Saved recordings are kept only on this
           phone and are never used to identify you.
