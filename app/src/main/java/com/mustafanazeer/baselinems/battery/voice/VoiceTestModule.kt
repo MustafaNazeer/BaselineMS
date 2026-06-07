@@ -26,7 +26,8 @@ import kotlin.math.max
 import kotlin.math.sqrt
 
 class VoiceTestModule(
-    private val audioCaptureFactory: () -> AudioCapture = { AndroidAudioCapture() }
+    private val audioCaptureFactory: () -> AudioCapture = { AndroidAudioCapture() },
+    private val retentionProvider: () -> VoiceAudioRetention = { NoOpVoiceAudioRetention }
 ) : TestModule {
 
     override val testType: TestType = TestType.VOICE
@@ -41,7 +42,11 @@ class VoiceTestModule(
             colorScheme = HighContrastVoiceScheme,
             typography = MaterialTheme.typography
         ) {
-            VoiceTestBody(audioCaptureFactory = audioCaptureFactory, onComplete = onComplete)
+            VoiceTestBody(
+                audioCaptureFactory = audioCaptureFactory,
+                retentionProvider = retentionProvider,
+                onComplete = onComplete
+            )
         }
     }
 }
@@ -49,12 +54,17 @@ class VoiceTestModule(
 @Composable
 private fun VoiceTestBody(
     audioCaptureFactory: () -> AudioCapture,
+    retentionProvider: () -> VoiceAudioRetention,
     onComplete: (TestResultPayload) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val audioCapture = remember { audioCaptureFactory() }
     val viewModel = remember {
-        VoiceTestViewModel(audioCapture = audioCapture, scope = scope)
+        VoiceTestViewModel(
+            audioCapture = audioCapture,
+            scope = scope,
+            retention = retentionProvider()
+        )
     }
     val state by viewModel.state.collectAsState()
 

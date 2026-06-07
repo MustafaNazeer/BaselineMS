@@ -53,12 +53,26 @@ class VoiceTestViewModelTest {
         }
     }
 
+    private class RecordingRetention : VoiceAudioRetention {
+        var persistCallCount: Int = 0
+            private set
+        var sawNonZeroSamples: Boolean = false
+            private set
+
+        override fun persist(pcm: ShortArray) {
+            persistCallCount += 1
+            if (pcm.any { it != 0.toShort() }) sawNonZeroSamples = true
+        }
+    }
+
     private fun TestScope.newViewModel(
-        capture: AudioCapture = FakeAudioCapture()
+        capture: AudioCapture = FakeAudioCapture(),
+        retention: VoiceAudioRetention = NoOpVoiceAudioRetention
     ): VoiceTestViewModel {
         return VoiceTestViewModel(
             audioCapture = capture,
             scope = this,
+            retention = retention,
             clockMs = { currentTime }
         )
     }
@@ -212,6 +226,42 @@ class VoiceTestViewModelTest {
                     shared.indexOfFirst { it != 0.toShort() },
                 shared.all { it == 0.toShort() }
             )
+        }
+
+    @Test
+    fun `retention persists captured audio before the SE2 buffer zeroing on Done`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val shared = ShortArray(44_100 * 30) { (it % 100 + 1).toShort() }
+            val capture = FakeAudioCapture(fixture = shared)
+            val retention = RecordingRetention()
+            val vm = newViewModel(capture, retention)
+            vm.onStart(); vm.onPermissionResult(granted = true)
+            vm.onNoiseFloorMeasured(-60.0)
+            vm.onQualityCheckPassed()
+            advanceUntilIdle()
+
+            assertTrue(vm.state.value is VoiceTestState.Done)
+            assertEquals(1, retention.persistCallCount)
+            assertTrue(
+                "retention must see the captured samples before the buffer is zeroed",
+                retention.sawNonZeroSamples
+            )
+            assertTrue("buffer should be zeroed after Done", shared.all { it == 0.toShort() })
+        }
+
+    @Test
+    fun `retention is not invoked when the test is cancelled mid recording`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val retention = RecordingRetention()
+            val vm = newViewModel(FakeAudioCapture(suspendForever = true), retention)
+            vm.onStart(); vm.onPermissionResult(granted = true)
+            vm.onNoiseFloorMeasured(-60.0)
+            vm.onQualityCheckPassed()
+            vm.onCancel()
+            advanceUntilIdle()
+
+            assertTrue(vm.state.value is VoiceTestState.Cancelled)
+            assertEquals(0, retention.persistCallCount)
         }
 
     @Test
