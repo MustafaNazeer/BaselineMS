@@ -6,6 +6,7 @@ export function Footer() {
         <div className="flex gap-5">
           <a href="https://github.com/MustafaNazeer/BaselineMS">GitHub</a>
           <a href="/methodology">Methodology</a>
+          <a href="/privacy-policy">Privacy policy</a>
         </div>
       </div>
     </footer>
