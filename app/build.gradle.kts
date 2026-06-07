@@ -41,6 +41,9 @@ android {
                 storePassword = storePasswordProp
                 keyAlias = keyAliasProp
                 keyPassword = keyPasswordProp
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
             }
         }
     }
