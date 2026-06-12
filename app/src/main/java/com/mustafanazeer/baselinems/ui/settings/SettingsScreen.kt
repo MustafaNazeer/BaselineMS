@@ -16,6 +16,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,8 +54,12 @@ fun SettingsScreen(
     val deviceSecure = remember { deviceSecureProvider(context) }
     var showOnDialog by remember { mutableStateOf(false) }
     var showOffDialog by remember { mutableStateOf(false) }
+    val retentionLapsedNotice = remember { VoiceSettings.retentionLapsedNoticePending(context) }
 
     LaunchedEffect(Unit) { profile = userProfileDao.getFirst() }
+    LaunchedEffect(Unit) {
+        if (retentionLapsedNotice) VoiceSettings.clearRetentionLapsedNotice(context)
+    }
 
     Scaffold(topBar = { TopAppBar(title = { Text("Settings") }) }) { padding ->
         Column(
@@ -65,6 +70,22 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            if (retentionLapsedNotice) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text(
+                        stringResource(R.string.settings_voice_retention_lapsed_notice),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+            }
+
             Text("Profile", style = MaterialTheme.typography.titleMedium)
             val p = profile
             if (p == null) {

@@ -28,6 +28,36 @@ object NoOpVoiceAudioRetention : VoiceAudioRetention {
     override fun persist(pcm: ShortArray) = Unit
 }
 
+/** Resolved at voice session start by [resolveVoiceRetentionDecision]. */
+enum class VoiceRetentionDecision {
+    /** Toggle off: nothing is written. */
+    DISCARD,
+
+    /** Toggle on and the device has a lock screen credential: the recording is persisted. */
+    PERSIST,
+
+    /**
+     * Toggle on but the lock screen credential has since been removed (ADR 0006 Section 7
+     * behavior (b)): the recording is discarded AND the one time Settings advisory is armed.
+     */
+    DISCARD_LAPSED,
+}
+
+/**
+ * Pure gating decision for the ADR 0006 Section 7 opt in retention path. The protective guarantee
+ * is that no audio is written to a device without a lock screen credential; when the user opted in
+ * earlier but has since removed that credential, the decision is [VoiceRetentionDecision.DISCARD_LAPSED]
+ * so the caller can both fall back to discard and surface the one time advisory.
+ */
+fun resolveVoiceRetentionDecision(
+    saveAudioEnabled: Boolean,
+    deviceSecure: Boolean,
+): VoiceRetentionDecision = when {
+    !saveAudioEnabled -> VoiceRetentionDecision.DISCARD
+    deviceSecure -> VoiceRetentionDecision.PERSIST
+    else -> VoiceRetentionDecision.DISCARD_LAPSED
+}
+
 /**
  * Writes the gzipped WAV to `${filesDir}/audio_traces/<sessionId>/VOICE.wav.gz` when [enabled]
  * and [deviceSecureAtStart] both hold. The [deviceSecureAtStart] flag is the

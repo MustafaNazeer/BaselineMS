@@ -184,6 +184,7 @@ private fun emptyPayload(): TestResultPayload {
 object VoiceSettings {
     private const val PREFS = "baselinems_prefs"
     const val KEY_VOICE_SAVE_AUDIO = "voice_save_audio"
+    const val KEY_VOICE_RETENTION_LAPSED_NOTICE_PENDING = "voice_retention_lapsed_notice_pending"
     const val AUDIO_TRACES_DIR = "audio_traces"
 
     fun saveAudio(context: Context): Boolean {
@@ -195,6 +196,32 @@ object VoiceSettings {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putBoolean(KEY_VOICE_SAVE_AUDIO, value)
+            .apply()
+    }
+
+    /**
+     * Records that retention was silently dropped because the lock screen credential was removed
+     * after opt in (ADR 0006 Section 7 behavior (b)). Reconciles the persisted toggle to off in the
+     * same write so the Settings switch no longer reads as on when nothing is being saved, and arms
+     * the one time advisory surfaced the next time Settings opens.
+     */
+    fun markRetentionLapsed(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_VOICE_SAVE_AUDIO, false)
+            .putBoolean(KEY_VOICE_RETENTION_LAPSED_NOTICE_PENDING, true)
+            .apply()
+    }
+
+    fun retentionLapsedNoticePending(context: Context): Boolean {
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_VOICE_RETENTION_LAPSED_NOTICE_PENDING, false)
+    }
+
+    fun clearRetentionLapsedNotice(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_VOICE_RETENTION_LAPSED_NOTICE_PENDING, false)
             .apply()
     }
 
