@@ -34,6 +34,8 @@ import com.mustafanazeer.baselinems.battery.vision.VisionTest
 import com.mustafanazeer.baselinems.battery.voice.FileVoiceAudioRetention
 import com.mustafanazeer.baselinems.battery.voice.NoOpVoiceAudioRetention
 import com.mustafanazeer.baselinems.battery.voice.VoiceAudioRetention
+import com.mustafanazeer.baselinems.battery.voice.VoiceRetentionDecision
+import com.mustafanazeer.baselinems.battery.voice.resolveVoiceRetentionDecision
 import com.mustafanazeer.baselinems.battery.voice.VoiceSettings
 import com.mustafanazeer.baselinems.battery.voice.VoiceTestModule
 import com.mustafanazeer.baselinems.data.PdfReportDataSource
@@ -271,14 +273,26 @@ private fun buildVoiceAudioRetention(
     filesDir: File,
     sessionId: String?
 ): VoiceAudioRetention {
-    if (sessionId == null || !VoiceSettings.saveAudio(context)) return NoOpVoiceAudioRetention
+    if (sessionId == null) return NoOpVoiceAudioRetention
     val keyguard = context.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
     val deviceSecure = keyguard?.isDeviceSecure ?: false
-    return FileVoiceAudioRetention(
-        enabled = true,
-        deviceSecureAtStart = deviceSecure,
-        sessionId = sessionId,
-        filesDir = filesDir,
-        sampleRateHz = AndroidAudioCapture.SAMPLE_RATE_HZ
-    )
+    return when (
+        resolveVoiceRetentionDecision(
+            saveAudioEnabled = VoiceSettings.saveAudio(context),
+            deviceSecure = deviceSecure
+        )
+    ) {
+        VoiceRetentionDecision.DISCARD -> NoOpVoiceAudioRetention
+        VoiceRetentionDecision.DISCARD_LAPSED -> {
+            VoiceSettings.markRetentionLapsed(context)
+            NoOpVoiceAudioRetention
+        }
+        VoiceRetentionDecision.PERSIST -> FileVoiceAudioRetention(
+            enabled = true,
+            deviceSecureAtStart = true,
+            sessionId = sessionId,
+            filesDir = filesDir,
+            sampleRateHz = AndroidAudioCapture.SAMPLE_RATE_HZ
+        )
+    }
 }

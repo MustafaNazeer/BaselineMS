@@ -55,6 +55,7 @@
     <string name="settings_voice_save_audio_dialog_off_title">Turn off recording retention? Existing recordings will be deleted from this phone immediately.</string>
     <string name="settings_voice_save_audio_dialog_off_confirm">Turn off and delete</string>
     <string name="settings_voice_save_audio_dialog_cancel">Cancel</string>
+    <string name="settings_voice_retention_lapsed_notice">Audio saving was turned off because this phone no longer has a lock screen. Your voice tests are no longer being saved. To save them again, set a lock screen, then turn this setting back on.</string>
 
     <!-- Phase 9 Reports -->
     <string name="phase9_reports_title">Trends</string>
