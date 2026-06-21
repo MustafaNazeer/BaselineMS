@@ -10,13 +10,13 @@ plugins {
 
 android {
     namespace = "com.mustafanazeer.baselinems"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.mustafanazeer.baselinems"
         minSdk = 31
-        targetSdk = 34
-        versionCode = 1
+        targetSdk = 35
+        versionCode = 2
         versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
