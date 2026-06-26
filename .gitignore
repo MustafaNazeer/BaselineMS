@@ -30,6 +30,7 @@ captures/
 *.jks
 *.keystore
 keystore.properties
+baselinems-keystores/
 
 # OS
 .DS_Store
